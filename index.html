@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+    <head lang="en">
+        <title>GyorsFutar</title>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <!-- JQuery -->
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+        <!-- Bootstrap -->
+        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+
+        <!-- AngularJS -->
+        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+
+        <!-- Google Maps JavaScript API Geometry Library -->
+        <script src="https://maps.googleapis.com/maps/api/js?libraries=geometry"></script>
+
+        <!-- javascript-mobile-desktop-geolocation -->
+        <script src="lib/geoPosition.js"></script>
+
+        <link rel="stylesheet" href="custom.css">
+    </head>
+    <body>
+        <div class="container-fluid" data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
+
+            <div id="idAlertSuccess" class="alert alert-success" data-ng-cloak data-ng-show="successMessage != undefined">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>Success!</strong> {{successMessage}}
+            </div>
+
+            <div id="idAlertError" class="alert alert-danger" data-ng-cloak data-ng-show="errorMessage != undefined">
+                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+                <strong>Failed!</strong> {{errorMessage}}
+            </div>
+
+            <div class="panel-group" data-ng-cloak data-ng-show="timetablePresentation != undefined">
+                <div class="panel panel-default" data-ng-repeat="parentStation in timetablePresentation.parentStations">
+
+                    <div class="panel-heading">
+                        <h1 class="text-center">{{parentStation.name}}</h1>
+                    </div>
+
+                    <div class="panel-body">
+                        <table class="table table-condensed">
+                            <tbody>
+
+                                <tr class="table-row" data-ng-repeat="route in parentStation.routes">
+                                    <td width="25%">
+                                        <div data-ng-if="route.tripLeft != undefined">
+                                            <h3 class="text-center">{{route.tripLeft.name}}</h3>
+                                            <h4 class="text-center">{{route.tripLeft.stopTimeString}}</h4>
+                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{route.tripLeft.stopTime.getTime()}}"></h5>
+                                        </div>
+                                    </td>
+                                    <td width="50%">
+                                        <h2 class="text-center">{{route.name}}</h2>
+                                        <h3 class="text-center">{{route.description}}</h3>
+                                    </td>
+                                    <td width="25%">
+                                        <div data-ng-if="route.tripRight != undefined">
+                                            <h3 class="text-center">{{route.tripRight.name}}</h3>
+                                            <h4 class="text-center">{{route.tripRight.stopTimeString}}</h4>
+                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{route.tripRight.stopTime.getTime()}}"></h5>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+        <script src="module.js"></script>
+        <script src="controller.js"></script>
+    </body>
+</html>

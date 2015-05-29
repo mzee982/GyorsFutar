@@ -1,0 +1,21 @@
+
+/*
+Bootstrap CSS customization
+*/
+
+.panel-body {
+    padding: 0;
+}
+
+.panel-default>.panel-heading {
+    background-color: dodgerblue;
+    color: white;
+}
+
+/*
+Customization
+*/
+
+.table-row {
+    background-color: lightblue;
+}
