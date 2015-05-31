@@ -66,7 +66,7 @@ app.controller('ngControllerGyorsFutar', function($scope) {
     }
 
     // Build timetable
-    var promiseBuildTimetable = _buildTimetable();
+    var promiseBuildTimetable = buildTimetable();
 
     // Show timetable
     promiseBuildTimetable.then(

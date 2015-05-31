@@ -35,359 +35,7 @@ function getStopsForLocation(position) {
     return deferredObject.promise();
 }
 
-function getArrivalsAndDeparturesForStop(stopIds, parentStationIndex) {
-    var deferredObject = $.Deferred();
-
-    var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json';
-
-    if (stopIds.length > 0) {
-        url = url + '?stopId=' + stopIds[0];
-
-        for (var i = 1; i < stopIds.length; i++) {
-            url = url + '&stopId=' + stopIds[i];
-        }
-    }
-
-    console.info('getArrivalsAndDeparturesForStop URL: ' + url);
-
-    $.ajax({
-        url: url,
-        jsonp: 'callback',
-        dataType: 'jsonp',
-        success: function(data) {
-            deferredObject.resolve(data, parentStationIndex);
-        },
-        error: function(xhr, status, errorThrown) {
-            deferredObject.reject(status + ' ' + errorThrown);
-        }
-    });
-
-    return deferredObject.promise();
-}
-
-function organizeStopsToParentStations(data, position) {
-    var stops = data.data.list;
-    var parentStationArray = [];
-
-    // Sort by parentStationId
-    stops.sort(function(a, b){return a.parentStationId.localeCompare(b.parentStationId)});
-
-    // Build parentStationArray
-    var actualParentStationId = '';
-    for (var i = 0; i < stops.length; i++) {
-        var actualStop = stops[i];
-
-        // Create new parentStation
-        if (actualParentStationId != actualStop.parentStationId) {
-            actualParentStationId = actualStop.parentStationId;
-            var actualParentStation = {name: actualStop.name, stopIds: [], routeIds: [], minDistance: 0, stops: [], routes: []};
-            parentStationArray.push(actualParentStation);
-        }
-
-        // Calculate stop distance
-        var fromLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-        var toLatLng = new google.maps.LatLng(actualStop.lat, actualStop.lon);
-
-        actualStop.distance = google.maps.geometry.spherical.computeDistanceBetween(fromLatLng, toLatLng);
-
-        // Add stop to parentStation
-        parentStationArray[parentStationArray.length - 1].stops.push(actualStop);
-
-    }
-
-    // Sort parentStation stops by ascending distance
-    for (var parentStationIndex = 0; parentStationIndex < parentStationArray.length; parentStationIndex++) {
-        var actualParentStation = parentStationArray[parentStationIndex];
-
-        // Sort by ascending distance
-        actualParentStation.stops.sort(function(a, b){return a.distance - b.distance});
-
-        // Calculate parentStation min distance
-        actualParentStation.minDistance = actualParentStation.stops[0].distance;
-
-        // Collect stopIds and routeIds
-        for (var stopIndex = 0; stopIndex < actualParentStation.stops.length; stopIndex++) {
-            var actualStop = actualParentStation.stops[stopIndex];
-
-            // stopId
-            actualParentStation.stopIds.push(actualStop.id);
-
-            // routeId
-            for (var routeIdIndex = 0; routeIdIndex < actualStop.routeIds.length; routeIdIndex++) {
-                if (actualParentStation.routeIds.indexOf(actualStop.routeIds[routeIdIndex]) < 0) {
-                    actualParentStation.routeIds.push(actualStop.routeIds[routeIdIndex]);
-                }
-            }
-        }
-
-    }
-
-    // Sort parentStationArray by ascending minDistance
-    parentStationArray.sort(function(a, b){return a.minDistance - b.minDistance});
-
-    return parentStationArray;
-
-}
-
-function organizeStopTimesToRoutesAndDirections(data, routeIds) {
-    var stopTimes = data.data.entry.stopTimes;
-    var trips = data.data.references.trips;
-    var routes = data.data.references.routes;
-    var routeArray = [];
-
-    // Sort by route, direction and departureTime
-    stopTimes.sort(
-        function(a, b) {
-            var tripA = trips[a.tripId];
-            var tripB = trips[b.tripId];
-
-            // route
-            var routeComparison = tripA.routeId.localeCompare(tripB.routeId);
-
-            // direction
-            if (routeComparison == 0) {
-                var directionComparison = tripA.directionId - tripB.directionId;
-
-                // departureTime
-                if (directionComparison == 0) {
-                    var departureTimeA = a.departureTime;
-                    var departureTimeB = b.departureTime;
-
-                    if (angular.isDefined(a.predictedDepartureTime)) departureTimeA = a.predictedDepartureTime;
-                    if (angular.isDefined(b.predictedDepartureTime)) departureTimeB = b.predictedDepartureTime;
-
-                    var departureTimeComparison = departureTimeA - departureTimeB;
-
-                    return departureTimeComparison;
-                }
-                else {
-                    return directionComparison;
-                }
-            }
-            else {
-                return routeComparison;
-            }
-        });
-
-    // Build routesArray
-    var actualRouteId = '';
-    var actualDirectionId = '';
-
-    for (var i = 0; i < stopTimes.length; i++) {
-        var actualStopTime = stopTimes[i];
-        var actualTrip = trips[actualStopTime.tripId];
-
-        // Create new route
-        if (actualRouteId != actualTrip.routeId) {
-            actualRouteId = actualTrip.routeId;
-            actualDirectionId = '';
-            var actualRoute = {id: actualRouteId, route: routes[actualRouteId], directions: []};
-            routeArray.push(actualRoute);
-        }
-
-        // Create new direction
-        if (actualDirectionId != actualTrip.directionId) {
-            actualDirectionId = actualTrip.directionId;
-            var actualDirection = {id: actualDirectionId, stopTimes: []};
-            routeArray[routeArray.length - 1].directions.push(actualDirection);
-        }
-
-        // Add stopTime to routesArray
-        actualStopTime.trip = actualTrip;
-        routeArray[routeArray.length - 1].directions[routeArray[routeArray.length - 1].directions.length - 1].stopTimes.push(actualStopTime);
-
-    }
-
-    // Sort routeArray by ascending stop distance of routes
-    routeArray.sort(
-        function(a, b) {
-            return routeIds.indexOf(a.id) - routeIds.indexOf(b.id);
-        });
-
-    return routeArray;
-
-}
-
-function buildParentStationModel(parentStationArray, parentStationIndex) {
-    /*
-     {
-     name: '',
-     routes: [
-     {
-     name: '',
-     description:'',
-     tripLeft: {
-     name: '',
-     stopTime: 0
-     },
-     tripRight: {
-     name: '',
-     stopTime: 0
-     }
-     }
-     ]
-     }
-     */
-    var actualDate = new Date();
-    var parentStation = parentStationArray[parentStationIndex];
-    var parentStationModel = {name: '', routes: []};
-
-    parentStationModel.name = parentStation.name;
-
-    // routes
-    for (var routeIndex = 0; routeIndex < parentStation.routes.length; routeIndex++) {
-        var route = parentStation.routes[routeIndex];
-        var routeModel = {name: '', description:'', tripLeft: undefined, tripRight: undefined};
-
-        routeModel.name = route.route.shortName
-        routeModel.description = route.route.description;
-
-        // trips
-        for (var directionIndex = 0; directionIndex < route.directions.length; directionIndex++) {
-            var trip = route.directions[directionIndex];
-            var tripModel = {name: '', stopTime: 0, stopTimeString: ''};
-
-            // stopTimes
-            for (var stopTimeIndex = 0; stopTimeIndex < trip.stopTimes.length; stopTimeIndex++) {
-                var stopTime = trip.stopTimes[stopTimeIndex];
-                var departureTime = stopTime.departureTime;
-
-                if (angular.isDefined(stopTime.predictedDepartureTime)) departureTime = stopTime.predictedDepartureTime;
-
-                var departureDate = new Date(departureTime * 1000);
-
-                if (departureDate > actualDate) {
-                    tripModel.name = stopTime.trip.tripHeadsign;
-                    tripModel.stopTime = departureDate;
-                    tripModel.stopTimeString = departureDate.toLocaleTimeString();
-
-                    break;
-                }
-
-            }
-
-            // tripLeft
-            if (trip.id == 0) {
-                routeModel.tripLeft = tripModel;
-            }
-            // tripRight
-            else if (trip.id == 1) {
-                routeModel.tripRight = tripModel;
-            }
-            // tripLeft
-            else if (routeModel.tripLeft == undefined) {
-                routeModel.tripLeft = tripModel;
-            }
-            // tripRight
-            else if (routeModel.tripRight == undefined) {
-                routeModel.tripRight = tripModel;
-            }
-
-        }
-
-        parentStationModel.routes.push(routeModel);
-    }
-
-    return parentStationModel;
-
-}
-
-function buildTimetable() {
-    var deferredObject = $.Deferred();
-
-    var geoPosition = undefined;
-    var parentStationArray = undefined;
-    var timetableModel = undefined;
-
-    /*
-     * Geolocation
-     */
-
-    var promiseGetLocation = getLocation();
-    var promiseGetStopsForLocation = promiseGetLocation.then(
-
-        // Done
-        function(position) {
-
-            //TODO Mock location: Orbánhegyi
-            position = {coords: {latitude: 47.497418, longitude: 19.013673}};
-
-            geoPosition = position;
-
-            // StopsForLocation
-            return getStopsForLocation(geoPosition);
-
-        },
-
-        // Fail
-        function(error) {
-            deferredObject.reject('getLocation: ' + error.message);
-        }
-
-    );
-
-    /*
-     * Stops for location
-     */
-
-    var promiseArrivalsAndDeparturesForStop = promiseGetStopsForLocation.then(
-
-        // Done
-        function(data) {
-            parentStationArray = organizeStopsToParentStations(data, geoPosition);
-            var promiseArrayArrivalsAndDeparturesForStop = [];
-
-            for (var i = 0; i < parentStationArray.length; i++) {
-
-                // ArrivalsAndDeparturesForStop
-                promiseArrayArrivalsAndDeparturesForStop.push(getArrivalsAndDeparturesForStop(
-                    parentStationArray[i].stopIds,
-                    i));
-
-            }
-
-            return $.when.apply($, promiseArrayArrivalsAndDeparturesForStop);
-        },
-
-        // Fail
-        function(status) {
-            deferredObject.reject('getStopsForLocation: ' + status);
-        }
-
-    );
-
-    /*
-     * Arrivals and departures for stop
-     */
-
-    promiseArrivalsAndDeparturesForStop.then(
-
-        // Done
-        function() {
-            for (var argIndex = 0; argIndex < arguments.length; argIndex++) {
-                var data = arguments[argIndex][0];
-                var parentStationIndex = arguments[argIndex][1];
-
-                var routeArray = organizeStopTimesToRoutesAndDirections(data, parentStationArray[parentStationIndex].routeIds);
-
-                parentStationArray[parentStationIndex].routes = routeArray;
-                timetableModel[parentStationIndex] = buildParentStationModel(parentStationArray, parentStationIndex);
-            }
-
-            deferredObject.resolve(timetableModel);
-        },
-
-        // Fail
-        function(status) {
-            deferredObject.reject('getArrivalsAndDeparturesForStop: ' + status);
-        }
-
-    );
-
-    return deferredObject.promise();
-}
-
-function _getArrivalsAndDeparturesForStop(stopIdArray) {
+function getArrivalsAndDeparturesForStop(stopIdArray) {
     var deferredObject = $.Deferred();
 
     var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json';
@@ -417,7 +65,7 @@ function _getArrivalsAndDeparturesForStop(stopIdArray) {
     return deferredObject.promise();
 }
 
-function _processStopsForLocationResponse(timetableModel, data) {
+function processStopsForLocationResponse(timetableModel, data) {
     var stopArray = data.data.list;
     var routeReferences = data.data.references.routes;
 
@@ -457,7 +105,7 @@ function _processStopsForLocationResponse(timetableModel, data) {
     return timetableModel;
 }
 
-function _processArrivalsAndDeparturesForStopResponse(timetableModel, data) {
+function processArrivalsAndDeparturesForStopResponse(timetableModel, data) {
     var stopTimeArray = data.data.entry.stopTimes;
     var tripReferences = data.data.references.trips;
 
@@ -488,7 +136,7 @@ function _processArrivalsAndDeparturesForStopResponse(timetableModel, data) {
     return timetableModel;
 }
 
-function _transformTimetableModelToPresentation(timetableModel, position) {
+function transformTimetableModelToPresentation(timetableModel, position) {
     var actualDate = new Date();
     var timetablePresentation = {
         parentStations: []
@@ -526,7 +174,7 @@ function _transformTimetableModelToPresentation(timetableModel, position) {
             parentStations[actualStop.parentStationId] = {
                 name: actualStop.name,
                 minDistance: actualStop.distance,
-                routes: {}
+                routeGroups: {}
             };
 
         }
@@ -541,8 +189,9 @@ function _transformTimetableModelToPresentation(timetableModel, position) {
         for (routeId in actualStopRoutes) {
             var actualStopRoute = actualStopRoutes[routeId];
 
-            if (parentStation.routes[routeId] == undefined) {
-                parentStation.routes[routeId] = {
+            if (parentStation.routeGroups[routeId] == undefined) {
+                parentStation.routeGroups[routeId] = {
+                    id: actualStopRoute.id,
                     name: actualStopRoute.shortName,
                     description: actualStopRoute.description,
                     minDistance: actualStopRoute.minDistance,
@@ -551,7 +200,7 @@ function _transformTimetableModelToPresentation(timetableModel, position) {
                 };
             }
 
-            var parentStationRoute = parentStation.routes[routeId];
+            var parentStationRoute = parentStation.routeGroups[routeId];
 
             // Recalculate min distance for Route
             if (actualStopRoute.minDistance < parentStationRoute.minDistance) parentStationRoute.minDistance = actualStopRoute.minDistance;
@@ -597,61 +246,132 @@ function _transformTimetableModelToPresentation(timetableModel, position) {
 
     for (parentStationId in parentStations) {
         var parentStation = parentStations[parentStationId];
-        var parentStationRouteArray = [];
 
         // Routes to Array
-        for (routeId in parentStation.routes) {
+        for (routeId in parentStation.routeGroups) {
 
             // Sort StopTimes by ascending StopTimes
 
-            parentStation.routes[routeId].tripLeft.sort(function(a, b) {
+            parentStation.routeGroups[routeId].tripLeft.sort(function(a, b) {
                 return a.stopTime - b.stopTime;
             });
 
-            parentStation.routes[routeId].tripRight.sort(function(a, b) {
+            parentStation.routeGroups[routeId].tripRight.sort(function(a, b) {
                 return a.stopTime - b.stopTime;
             });
 
             // Select actual StopTimes
             var selectedRouteStopTimeTripLeft = undefined;
 
-            for (var i = 0; i < parentStation.routes[routeId].tripLeft.length; i++) {
-                var routeStopTime = parentStation.routes[routeId].tripLeft[i];
-                var routeStopTimeMillis = new Date(routeStopTime.stopTime * 1000);
+            for (var i = 0; i < parentStation.routeGroups[routeId].tripLeft.length; i++) {
+                var routeStopTime = parentStation.routeGroups[routeId].tripLeft[i];
 
-                if (routeStopTimeMillis > actualDate) {
+                if (routeStopTime.stopTime > actualDate) {
                     selectedRouteStopTimeTripLeft = routeStopTime;
                     break;
                 }
             }
 
-            parentStation.routes[routeId].tripLeft = selectedRouteStopTimeTripLeft;
+            parentStation.routeGroups[routeId].tripLeft = selectedRouteStopTimeTripLeft;
 
             // Select actual StopTimes
             var selectedRouteStopTimeTripRight = undefined;
 
-            for (var i = 0; i < parentStation.routes[routeId].tripRight.length; i++) {
-                var routeStopTime = parentStation.routes[routeId].tripRight[i];
-                var routeStopTimeMillis = new Date(routeStopTime.stopTime * 1000);
+            for (var i = 0; i < parentStation.routeGroups[routeId].tripRight.length; i++) {
+                var routeStopTime = parentStation.routeGroups[routeId].tripRight[i];
 
-                if (routeStopTimeMillis > actualDate) {
+                if (routeStopTime.stopTime > actualDate) {
                     selectedRouteStopTimeTripRight = routeStopTime;
                     break;
                 }
             }
 
-            parentStation.routes[routeId].tripRight = selectedRouteStopTimeTripRight;
-
-            //
-            parentStationRouteArray.push(parentStation.routes[routeId]);
+            parentStation.routeGroups[routeId].tripRight = selectedRouteStopTimeTripRight;
         }
 
-        // Sort Routes by ascending min distance
-        parentStationRouteArray.sort(function(a, b) {
+        // Group related Routes into RouteGroups
+
+        var parentStationRouteGroups = {};
+
+        for (routeId in parentStation.routeGroups) {
+            var routeGroupId = parentStation.routeGroups[routeId].id.substr(0, 7);
+
+            if (parentStationRouteGroups[routeGroupId] == undefined) {
+                parentStationRouteGroups[routeGroupId] = {
+                    id: routeGroupId,
+                    name: '',
+                    descriptions: [],
+                    minDistance: 0,
+                    tripLeft: undefined,
+                    tripRight: undefined,
+                    routes: []
+                };
+            }
+
+            parentStationRouteGroups[routeGroupId].routes.push(parentStation.routeGroups[routeId]);
+        }
+
+        // Merge Routes into RouteGroups
+        // RouteGroups to Array
+
+        var parentStationRouteGroupArray = [];
+
+        for (routeGroupId in parentStationRouteGroups) {
+            var actualRouteGroup = parentStationRouteGroups[routeGroupId];
+
+            // Sort RouteGroup Routes by ascending id
+            actualRouteGroup.routes.sort(function(a, b) {return a.id.localeCompare(b.id)});
+
+            var actualRouteGroupRoute = actualRouteGroup.routes[0];
+
+            actualRouteGroup.name = actualRouteGroupRoute.name;
+            actualRouteGroup.descriptions.push(actualRouteGroupRoute.description);
+            actualRouteGroup.minDistance = actualRouteGroupRoute.minDistance;
+            actualRouteGroup.tripLeft = actualRouteGroupRoute.tripLeft;
+            actualRouteGroup.tripRight = actualRouteGroupRoute.tripRight;
+
+            if (actualRouteGroup.routes.length > 1) {
+                actualRouteGroup.descriptions[0] = '(' + actualRouteGroupRoute.name + ') ' + actualRouteGroup.descriptions[0];
+                actualRouteGroup.tripLeft.name = '(' + actualRouteGroupRoute.name + ') ' + actualRouteGroup.tripLeft.name;
+                actualRouteGroup.tripRight.name = '(' + actualRouteGroupRoute.name + ') ' + actualRouteGroup.tripRight.name;
+            }
+
+            for (var routeIndex = 1; routeIndex < actualRouteGroup.routes.length; routeIndex++) {
+                actualRouteGroupRoute = actualRouteGroup.routes[routeIndex];
+
+                actualRouteGroup.name += ' + ' + actualRouteGroupRoute.name;
+                actualRouteGroup.descriptions.push('(' + actualRouteGroupRoute.name + ') '  + actualRouteGroupRoute.description);
+
+                if (actualRouteGroupRoute.minDistance < actualRouteGroup.minDistance) {
+                    actualRouteGroup.minDistance = actualRouteGroupRoute.minDistance;
+                }
+
+                if ((actualRouteGroup.tripLeft == undefined)
+                    || ((actualRouteGroupRoute.tripLeft != undefined)
+                        && (actualRouteGroup.tripLeft.stopTime > actualRouteGroupRoute.tripLeft.stopTime))) {
+                    actualRouteGroup.tripLeft = actualRouteGroupRoute.tripLeft;
+                    actualRouteGroup.tripLeft.name = '(' + actualRouteGroupRoute.name + ') ' + actualRouteGroup.tripLeft.name;
+                }
+
+                if ((actualRouteGroup.tripRight == undefined)
+                    || ((actualRouteGroupRoute.tripRight != undefined)
+                    && (actualRouteGroup.tripRight.stopTime > actualRouteGroupRoute.tripRight.stopTime))) {
+                    actualRouteGroup.tripRight = actualRouteGroupRoute.tripRight;
+                    actualRouteGroup.tripRight.name = '(' + actualRouteGroupRoute.name + ') ' + actualRouteGroup.tripRight.name;
+                }
+
+            }
+
+
+            parentStationRouteGroupArray.push(actualRouteGroup);
+        }
+
+        // Sort RouteGroups by ascending min distance
+        parentStationRouteGroupArray.sort(function(a, b) {
             return a.minDistance - b.minDistance;
         });
 
-        parentStation.routes = parentStationRouteArray;
+        parentStation.routeGroups = parentStationRouteGroupArray;
 
         // ParentStations to Array
         timetablePresentation.parentStations.push(parentStation);
@@ -665,12 +385,12 @@ function _transformTimetableModelToPresentation(timetableModel, position) {
     return timetablePresentation;
 }
 
-function _buildTimetable() {
+function buildTimetable() {
     var deferredObject = $.Deferred();
 
     var geoPosition = undefined;
     var timetableModel = {
-        getStopIds: function() {
+        getStopIds: function () {
             var stopIdArray = [];
 
             for (stopId in this.stops) {
@@ -690,9 +410,8 @@ function _buildTimetable() {
 
     var promiseGetLocation = getLocation();
     var promiseGetStopsForLocation = promiseGetLocation.then(
-
         // Done
-        function(position) {
+        function (position) {
 
             //TODO Mock location: Orbánhegyi
             position = {coords: {latitude: 47.497418, longitude: 19.013673}};
@@ -705,10 +424,9 @@ function _buildTimetable() {
         },
 
         // Fail
-        function(error) {
+        function (error) {
             deferredObject.reject('getLocation: ' + error.message);
         }
-
     );
 
     /*
@@ -716,19 +434,18 @@ function _buildTimetable() {
      */
 
     var promiseArrivalsAndDeparturesForStop = promiseGetStopsForLocation.then(
-
         // Done
-        function(data) {
-            timetableModel = _processStopsForLocationResponse(timetableModel, data);
+        function (data) {
+            //TODO Discover all stops of ParentStations
+            timetableModel = processStopsForLocationResponse(timetableModel, data);
 
-            return _getArrivalsAndDeparturesForStop(timetableModel.getStopIds());
+            return getArrivalsAndDeparturesForStop(timetableModel.getStopIds());
         },
 
         // Fail
-        function(status) {
+        function (status) {
             deferredObject.reject('getStopsForLocation: ' + status);
         }
-
     );
 
     /*
@@ -736,22 +453,20 @@ function _buildTimetable() {
      */
 
     promiseArrivalsAndDeparturesForStop.then(
-
         // Done
-        function(data) {
+        function (data) {
 
-            timetableModel = _processArrivalsAndDeparturesForStopResponse(timetableModel, data);
+            timetableModel = processArrivalsAndDeparturesForStopResponse(timetableModel, data);
 
-            timetablePresentation = _transformTimetableModelToPresentation(timetableModel, geoPosition);
+            timetablePresentation = transformTimetableModelToPresentation(timetableModel, geoPosition);
 
             deferredObject.resolve(timetablePresentation);
         },
 
         // Fail
-        function(status) {
+        function (status) {
             deferredObject.reject('getArrivalsAndDeparturesForStop: ' + status);
         }
-
     );
 
     return deferredObject.promise();

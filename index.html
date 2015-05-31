@@ -48,23 +48,23 @@
                         <table class="table table-condensed">
                             <tbody>
 
-                                <tr class="table-row" data-ng-repeat="route in parentStation.routes">
+                                <tr class="table-row" data-ng-repeat="routeGroup in parentStation.routeGroups">
                                     <td width="25%">
-                                        <div data-ng-if="route.tripLeft != undefined">
-                                            <h3 class="text-center">{{route.tripLeft.name}}</h3>
-                                            <h4 class="text-center">{{route.tripLeft.stopTimeString}}</h4>
-                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{route.tripLeft.stopTime.getTime()}}"></h5>
+                                        <div data-ng-if="routeGroup.tripLeft != undefined">
+                                            <h3 class="text-center">{{routeGroup.tripLeft.name}}</h3>
+                                            <h4 class="text-center">{{routeGroup.tripLeft.stopTimeString}}</h4>
+                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{routeGroup.tripLeft.stopTime.getTime()}}"></h5>
                                         </div>
                                     </td>
                                     <td width="50%">
-                                        <h2 class="text-center">{{route.name}}</h2>
-                                        <h3 class="text-center">{{route.description}}</h3>
+                                        <h2 class="text-center">{{routeGroup.name}}</h2>
+                                        <h3 class="text-center" data-ng-repeat="description in routeGroup.descriptions">{{description}}</h3>
                                     </td>
                                     <td width="25%">
-                                        <div data-ng-if="route.tripRight != undefined">
-                                            <h3 class="text-center">{{route.tripRight.name}}</h3>
-                                            <h4 class="text-center">{{route.tripRight.stopTimeString}}</h4>
-                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{route.tripRight.stopTime.getTime()}}"></h5>
+                                        <div data-ng-if="routeGroup.tripRight != undefined">
+                                            <h3 class="text-center">{{routeGroup.tripRight.name}}</h3>
+                                            <h4 class="text-center">{{routeGroup.tripRight.stopTimeString}}</h4>
+                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{routeGroup.tripRight.stopTime.getTime()}}"></h5>
                                         </div>
                                     </td>
                                 </tr>
