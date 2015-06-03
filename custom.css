@@ -19,3 +19,11 @@ Customization
 .table-row {
     background-color: lightblue;
 }
+
+.table-row-group {
+    background-color: lavender;
+}
+
+.table-row-group-item {
+    background-color: lightcyan;
+}

@@ -48,25 +48,75 @@
                         <table class="table table-condensed">
                             <tbody>
 
-                                <tr class="table-row" data-ng-repeat="routeGroup in parentStation.routeGroups">
-                                    <td width="25%">
+                                <tr data-ng-repeat="routeGroup in parentStation.routeGroups" data-ng-class="routeGroup.isGroup ? 'table-row-group' : 'table-row'">
+
+                                    <td width="25%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && routeGroup.isCollapsed)">
                                         <div data-ng-if="routeGroup.tripLeft != undefined">
-                                            <h3 class="text-center">{{routeGroup.tripLeft.name}}</h3>
+                                            <h3 class="text-center">
+                                                <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.tripLeft.routeName}}</span>&nbsp;</span>
+                                                <span>{{routeGroup.tripLeft.name}}</span>
+                                            </h3>
                                             <h4 class="text-center">{{routeGroup.tripLeft.stopTimeString}}</h4>
                                             <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{routeGroup.tripLeft.stopTime.getTime()}}"></h5>
                                         </div>
                                     </td>
-                                    <td width="50%">
+                                    <td width="50%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && routeGroup.isCollapsed)">
                                         <h2 class="text-center">{{routeGroup.name}}</h2>
-                                        <h3 class="text-center" data-ng-repeat="description in routeGroup.descriptions">{{description}}</h3>
+                                        <h2 class="text-center">
+                                            <span data-ng-repeat="name in routeGroup.names"><span class="label label-default">{{name}}</span>&nbsp;</span>
+                                        </h2>
+                                        <h3 class="text-center" data-ng-repeat="description in routeGroup.descriptions">
+                                            <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.names[$index]}}</span>&nbsp;</span>
+                                            <span>{{description}}</span>
+                                        </h3>
+                                        <button type="button" class="btn btn-default btn-block" data-ng-if="routeGroup.isGroup && routeGroup.isCollapsed" data-ng-click="routeGroup.isCollapsed=false">&lt;&lt; EXPAND &gt;&gt;</button>
                                     </td>
-                                    <td width="25%">
+                                    <td width="25%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && routeGroup.isCollapsed)">
                                         <div data-ng-if="routeGroup.tripRight != undefined">
-                                            <h3 class="text-center">{{routeGroup.tripRight.name}}</h3>
+                                            <h3 class="text-center">
+                                                <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.tripRight.routeName}}</span>&nbsp;</span>
+                                                <span>{{routeGroup.tripRight.name}}</span>
+                                            </h3>
                                             <h4 class="text-center">{{routeGroup.tripRight.stopTimeString}}</h4>
                                             <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{routeGroup.tripRight.stopTime.getTime()}}"></h5>
                                         </div>
                                     </td>
+
+                                    <td colspan="3" width="100%" data-ng-if="routeGroup.isGroup && !routeGroup.isCollapsed">
+                                        <table class="table table-condensed">
+                                            <tbody>
+
+                                                <tr class="table-row-group-item" data-ng-repeat="route in routeGroup.routes">
+                                                    <td width="25%">
+                                                        <div data-ng-if="route.tripLeft != undefined">
+                                                            <h3 class="text-center">{{route.tripLeft.name}}</h3>
+                                                            <h4 class="text-center">{{route.tripLeft.stopTimeString}}</h4>
+                                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{route.tripLeft.stopTime.getTime()}}"></h5>
+                                                        </div>
+                                                    </td>
+                                                    <td width="50%">
+                                                        <h2 class="text-center"><span class="label label-default">{{route.name}}</span></h2>
+                                                        <h3 class="text-center">{{route.description}}</h3>
+                                                    </td>
+                                                    <td width="25%">
+                                                        <div data-ng-if="route.tripRight != undefined">
+                                                            <h3 class="text-center">{{route.tripRight.name}}</h3>
+                                                            <h4 class="text-center">{{route.tripRight.stopTimeString}}</h4>
+                                                            <h5 class="text-center stop-time-countdown" data-route-trip-stopTime="{{route.tripRight.stopTime.getTime()}}"></h5>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+
+                                                <tr class="table-row-group-item">
+                                                    <td colspan="3" width="100%">
+                                                        <button type="button" class="btn btn-default btn-block" data-ng-click="routeGroup.isCollapsed=true">&gt;&gt; COLLAPSE &lt;&lt;</button>
+                                                    </td>
+                                                </tr>
+
+                                            </tbody>
+                                        </table>
+                                    </td>
+
                                 </tr>
 
                             </tbody>
