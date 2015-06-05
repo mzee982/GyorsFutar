@@ -2,14 +2,14 @@
 function getLocation() {
     var deferredObject = $.Deferred();
 
-    if(geoPosition.init()) {
-        geoPosition.getCurrentPosition(
-            function(position) {deferredObject.resolve(position);},
-            function(error) {deferredObject.reject(error);},
-            {enableHighAccuracy:true});
-    } else {
-        deferredObject.reject({message: 'You cannot use Geolocation in this device', code: 0});
-    }
+    geolocator.locate(
+        // Success
+        function(position) {deferredObject.resolve(position);},
+        // Error
+        function(error) {deferredObject.reject(error);},
+        true,
+        {enableHighAccuracy: true, timeout: 6000, maximumAge: 0},
+        null);
 
     return deferredObject.promise();
 }
@@ -39,7 +39,7 @@ function getStopsForLocation(position) {
     var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=$LATITIUDE&lon=$LONGITUDE&radius=$RADIUS';
     url = url.replace('$LATITIUDE', position.coords.latitude);
     url = url.replace('$LONGITUDE', position.coords.longitude);
-    url = url.replace('$RADIUS', 500);
+    url = url.replace('$RADIUS', position.coords.accuracy);
 
     console.info('getStopsForLocation URL: ' + url);
 
@@ -111,27 +111,35 @@ function collectStopsForParentStations(data) {
         promisesSearchStops.push(searchStops(actualParentStationName));
     }
 
-    // Process responses
-    $.when.apply($, promisesSearchStops).then(
-        // Done
-        function() {
+    if (promisesSearchStops.length > 0) {
 
-            var stopsAndRoutes = processStopsForParentStations(arguments);
+        // Process responses
+        $.when.apply($, promisesSearchStops).then(
+            // Done
+            function() {
 
-            //for (var argIndex = 0; argIndex < arguments.length; argIndex++) {
-            //    var argData = arguments[argIndex];
-            //
-            //    data = processStopsForParentStations(data, argData);
-            //}
+                var stopsAndRoutes = processStopsForParentStations(arguments);
 
-            deferredObject.resolve(stopsAndRoutes[0], stopsAndRoutes[1]);
-        },
+                //for (var argIndex = 0; argIndex < arguments.length; argIndex++) {
+                //    var argData = arguments[argIndex];
+                //
+                //    data = processStopsForParentStations(data, argData);
+                //}
 
-        // Fail
-        function(status) {
-            deferredObject.reject('searchStops: ' + status);
-        }
-    );
+                deferredObject.resolve(stopsAndRoutes[0], stopsAndRoutes[1]);
+            },
+
+            // Fail
+            function(status) {
+                deferredObject.reject('searchStops: ' + status);
+            }
+        );
+
+    }
+
+    else {
+        deferredObject.reject('No stops found');
+    }
 
     return deferredObject.promise();
 }
@@ -231,7 +239,9 @@ function processArrivalsAndDeparturesForStopResponse(timetableModel, data) {
 
         var tripStopTime = {
             stopId: stopTime.stopId,
+            arrivalTime: stopTime.arrivalTime,
             departureTime: stopTime.departureTime,
+            predictedArrivalTime:stopTime.predictedArrivalTime,
             predictedDepartureTime: stopTime.predictedDepartureTime
         };
 
@@ -475,10 +485,13 @@ function mergeTripsIntoRoute(route) {
         }
 
         var actualStopTimeGroup = stopTimeGroups[actualDirection];
+        var stopTimeValue = undefined;
 
-        //TODO Use arrival times
-        var stopTimeValue = (actualStopTime.predictedDepartureTime == undefined) ?
-            actualStopTime.departureTime : actualStopTime.predictedDepartureTime;
+        if (actualStopTime.predictedArrivalTime != undefined) stopTimeValue = actualStopTime.predictedArrivalTime
+        else if (actualStopTime.arrivalTime != undefined) stopTimeValue = actualStopTime.arrivalTime
+        else if (actualStopTime.predictedDepartureTime != undefined) stopTimeValue = actualStopTime.predictedDepartureTime
+        else if (actualStopTime.departureTime != undefined) stopTimeValue = actualStopTime.departureTime;
+
         var stopTimeDate = new Date(stopTimeValue * 1000);
 
         var targetStopTime = {
@@ -526,11 +539,11 @@ function mergeTripsIntoRoute(route) {
     return targetRoute;
 }
 
-function buildTimetable() {
+function buildTimetable(position) {
     //TODO Use Angular JS $q service
     var deferredObject = $.Deferred();
 
-    var geoPosition = undefined;
+    var geoPosition = position;
     var timetableModel = {
         getStopIds: function () {
             var stopIdArray = [];
@@ -547,37 +560,12 @@ function buildTimetable() {
 
 
     /*
-     * Geolocation
-     */
-
-    var promiseGetLocation = getLocation();
-    var promiseGetStopsForLocation = promiseGetLocation.then(
-        // Done
-        function (position) {
-
-            //TODO Mock location: Orbánhegyi
-            position = {coords: {latitude: 47.497418, longitude: 19.013673}};
-
-            geoPosition = position;
-
-            // StopsForLocation
-            return getStopsForLocation(geoPosition);
-
-        },
-
-        // Fail
-        function (error) {
-            //TODO Manual location selection option
-
-            deferredObject.reject('getLocation: ' + error.message);
-        }
-    );
-
-    /*
      * Stops for location
      */
 
-    var promiseExtendStopsForParentStations = promiseGetStopsForLocation.then(
+    var promiseGetStopsForLocation = getStopsForLocation(geoPosition);
+
+    var promiseCollectStopsForParentStations = promiseGetStopsForLocation.then(
         // Done
         function (data) {
             return collectStopsForParentStations(data);
@@ -593,7 +581,7 @@ function buildTimetable() {
      * Extend stops for parent stations
      */
 
-    var promiseArrivalsAndDeparturesForStop = promiseExtendStopsForParentStations.then(
+    var promiseArrivalsAndDeparturesForStop = promiseCollectStopsForParentStations.then(
         // Done
         function(stops, routes) {
             timetableModel = processStopsForLocationResponse(timetableModel, stops, routes);
@@ -603,7 +591,7 @@ function buildTimetable() {
 
         // Fail
         function(status) {
-            deferredObject.reject('extendStopsForParentStations: ' + status);
+            deferredObject.reject('collectStopsForParentStations: ' + status);
         }
     );
 
