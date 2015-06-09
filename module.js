@@ -326,7 +326,8 @@ function groupStopsIntoParentStations(stops) {
             name: sourceStopGroup.name,
             minDistance: sourceStopGroup.minDistance,
             // Merge: Stop -> RouteGroup
-            routeGroups: mergeStopsIntoRouteGroup(sourceStopGroup.stops)
+            routeGroups: mergeStopsIntoRouteGroup(sourceStopGroup.stops),
+            isExpanded: false
         };
 
         parentStationArray.push(targetParentStation);
@@ -384,7 +385,7 @@ function mergeStopsIntoRouteGroup(stops) {
             tripRight: undefined,
             routes: [],
             isGroup: false,
-            isCollapsed: false
+            isExpanded: false
         };
 
 
@@ -403,7 +404,7 @@ function mergeStopsIntoRouteGroup(stops) {
             targetRouteGroup.descriptions.push(actualRoute.description);
             if (targetRouteGroup.minDistance > actualRoute.minDistance) targetRouteGroup.minDistance = actualRoute.minDistance;
             targetRouteGroup.isGroup = sourceRouteGroupRouteArray.length > 1;
-            targetRouteGroup.isCollapsed = targetRouteGroup.isGroup;
+            targetRouteGroup.isExpanded = false;
 
             // Merge: Trip -> Route
             var targetRoute = mergeTripsIntoRoute(actualRoute);
@@ -539,7 +540,80 @@ function mergeTripsIntoRoute(route) {
     return targetRoute;
 }
 
-function buildTimetable(position) {
+function applyPreviousPresentationState(timetablePresentation, previousTimetablePresentation) {
+    var expandedParentStationName = undefined;
+    var expandedRouteGroups = {};
+
+    // Find the only expanded ParentStation
+    if (previousTimetablePresentation != undefined) {
+        var parentStationArray = previousTimetablePresentation.parentStations;
+
+        for (var parentStationIndex = 0; parentStationIndex < parentStationArray.length; parentStationIndex++) {
+            var parentStation = parentStationArray[parentStationIndex];
+
+            if (parentStation.isExpanded) {
+                //TODO Match by id
+                expandedParentStationName = parentStation.name;
+
+                // Find the expanded RouteGroups
+
+                var routeGroupArray = parentStation.routeGroups;
+
+                for (var routeGroupIndex = 0; routeGroupIndex < routeGroupArray.length; routeGroupIndex++) {
+                    var routeGroup = routeGroupArray[routeGroupIndex];
+
+                    if (routeGroup.isGroup && routeGroup.isExpanded) {
+                        expandedRouteGroups[routeGroup.id] = {};
+                    }
+                }
+
+                break;
+            }
+        }
+
+    }
+
+    // Expand the selected ParentStation
+
+    var parentStationArray = timetablePresentation.parentStations;
+
+    if (expandedParentStationName != undefined) {
+
+        for (var parentStationIndex = 0; parentStationIndex < parentStationArray.length; parentStationIndex++) {
+            var parentStation = parentStationArray[parentStationIndex];
+
+            if (parentStation.name == expandedParentStationName) {
+                parentStation.isExpanded = true;
+
+                // Expand the selected RouteGroups
+
+                var routeGroupArray = parentStation.routeGroups;
+
+                for (var routeGroupIndex = 0; routeGroupIndex < routeGroupArray.length; routeGroupIndex++) {
+                    var routeGroup = routeGroupArray[routeGroupIndex];
+
+                    if (routeGroup.isGroup && (expandedRouteGroups[routeGroup.id] != undefined)) {
+                        routeGroup.isExpanded = true;
+                    }
+                }
+
+                break;
+            }
+        }
+
+    }
+
+    else if (parentStationArray.length > 0) {
+
+        // Default
+        parentStationArray[0].isExpanded = true;
+
+    }
+
+    return timetablePresentation;
+}
+
+function buildTimetable(position, previousTimetablePresentation) {
     //TODO Use Angular JS $q service
     var deferredObject = $.Deferred();
 
@@ -608,6 +682,8 @@ function buildTimetable(position) {
             timetableModel = postProcessTimetableModel(timetableModel, geoPosition);
 
             timetablePresentation = transformTimetableModelToPresentation(timetableModel);
+
+            timetablePresentation = applyPreviousPresentationState(timetablePresentation, previousTimetablePresentation);
 
             deferredObject.resolve(timetablePresentation);
         },

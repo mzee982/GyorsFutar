@@ -16,6 +16,12 @@
         <!-- AngularJS -->
         <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
 
+        <!-- Angular UI Bootstrap -->
+        <script src="lib/ui-bootstrap-tpls-0.13.0.min.js"></script>
+
+        <!-- ngStorage -->
+        <script src="lib/ngStorage.min.js"></script>
+
         <!-- Google Maps JavaScript API Geometry Library -->
         <script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry,places"></script>
 
@@ -43,12 +49,22 @@
             </div>
 
             <!-- Toolbar -->
-            <div class="panel panel-default layout-row header" data-ng-cloak data-ng-if="isLocationPicker || (timetablePresentation != undefined)">
+            <div class="panel panel-default layout-row header" data-ng-cloak data-ng-if="uiMode != undefined">
+
+                <!-- For Location Get -->
+                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_GET">
+                    Determine location...
+                </div>
+
+                <!-- For Location List -->
+                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_LIST">
+                    Location list
+                </div>
+
                 <!-- For Location Picker -->
-                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="isLocationPicker">
+                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_PICKER">
                     <button id="locationPickerButtonOk" type="button" class="btn btn-default">OK</button>
                     &nbsp;&nbsp;
-                    <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(100)">100m</button>
                     <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(250)">250m</button>
                     <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(500)">500m</button>
                     <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(750)">750m</button>
@@ -58,8 +74,14 @@
                         <input type="text" id="locationPicker-address" class="form-control" size="50" readonly>
                     </span>
                 </div>
-                <!-- For Timetable -->
-                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="timetablePresentation != undefined">
+
+                <!-- For Timetable Build -->
+                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="uiMode == UI_MODE_TIMETABLE_BUILD">
+                    Build timetable...
+                </div>
+
+                <!-- For Timetable Show -->
+                <div class="panel-body panel-body-toolbar" data-ng-cloak data-ng-if="uiMode == UI_MODE_TIMETABLE_SHOW">
                     <table width="100%">
                         <tbody>
                             <tr>
@@ -68,8 +90,16 @@
                                         <input type="text" class="form-control" size="50" readonly value="{{geoPosition.formattedAddress}}">
                                     </span>
                                     &nbsp;&nbsp;
-                                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick()">
-                                        <span class="glyphicon glyphicon-refresh"></span>
+                                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE_AUTO)">
+                                        <span class="glyphicon glyphicon-screenshot"></span>
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE_LIST)">
+                                        <span class="glyphicon glyphicon-th-list"></span>
+                                    </button>
+                                    &nbsp;&nbsp;
+                                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE_MAP)">
+                                        <span class="glyphicon glyphicon-picture"></span>
                                     </button>
                                 </td>
                                 <td width="30%">
@@ -85,10 +115,25 @@
                         </tbody>
                     </table>
                 </div>
+
+            </div>
+
+            <!-- Location List -->
+            <div class="panel panel-default layout-row body" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_LIST">
+                <div class="panel-body">
+                    <div class="btn-group-vertical btn-block">
+                        <button type="button" class="btn btn-default" data-ng-repeat="location in storedLocations" data-ng-if="!$last" data-ng-click="location.callback()">
+                            <span>{{location.formattedAddress}}</span>
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-default btn-block" data-ng-click="storedLocations[storedLocations.length - 1].callback()">
+                        <span>Location Picker</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Location Picker -->
-            <div id="locationPickerPanel" class="panel panel-default layout-row body" data-ng-cloak data-ng-if="isLocationPicker">
+            <div id="locationPickerPanel" class="panel panel-default layout-row body" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_PICKER">
                 <input type="hidden" id="locationPicker-latitude">
                 <input type="hidden" id="locationPicker-longitude">
                 <input type="hidden" id="locationPicker-radius">
@@ -97,94 +142,89 @@
             </div>
 
             <!-- Timetable -->
-            <div class="panel-group layout-row body scroll-y" data-ng-cloak data-ng-if="timetablePresentation != undefined">
-                <div class="panel panel-default" data-ng-repeat="parentStation in timetablePresentation.parentStations">
+            <accordion close-others="true" class="layout-row body scroll-y" data-ng-cloak data-ng-if="uiMode == UI_MODE_TIMETABLE_SHOW">
+                <accordion-group is-open="parentStation.isExpanded" data-ng-repeat="parentStation in timetablePresentation.parentStations">
+                    <accordion-heading>
+                        <h1 class="panel-title text-center">{{parentStation.name}}</h1>
+                    </accordion-heading>
+                    <table class="table table-condensed">
+                        <tbody>
 
-                    <div class="panel-heading">
-                        <h1 class="text-center">{{parentStation.name}}</h1>
-                    </div>
+                        <tr data-ng-repeat="routeGroup in parentStation.routeGroups" data-ng-class="routeGroup.isGroup ? 'table-row-group' : 'table-row'">
 
-                    <div class="panel-body panel-body-nopadding">
-                        <table class="table table-condensed">
-                            <tbody>
+                            <td width="25%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
+                                <div data-ng-if="routeGroup.tripLeft != undefined">
+                                    <h3 class="text-center">
+                                        <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.tripLeft.routeName}}</span>&nbsp;</span>
+                                        <span>{{routeGroup.tripLeft.name}}</span>
+                                    </h3>
+                                    <h4 class="text-center">{{routeGroup.tripLeft.stopTimeString}}</h4>
+                                    <h5 class="text-center time-countdown" data-target-time="{{routeGroup.tripLeft.stopTime.getTime()}}"></h5>
+                                </div>
+                            </td>
+                            <td width="50%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
+                                <h2 class="text-center">{{routeGroup.name}}</h2>
+                                <h2 class="text-center">
+                                    <span data-ng-repeat="name in routeGroup.names"><span class="label label-default">{{name}}</span>&nbsp;</span>
+                                </h2>
+                                <h3 class="text-center" data-ng-repeat="description in routeGroup.descriptions">
+                                    <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.names[$index]}}</span>&nbsp;</span>
+                                    <span>{{description}}</span>
+                                </h3>
+                                <button type="button" class="btn btn-default btn-block" data-ng-if="routeGroup.isGroup && !routeGroup.isExpanded" data-ng-click="routeGroup.isExpanded=true">&lt;&lt; EXPAND &gt;&gt;</button>
+                            </td>
+                            <td width="25%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
+                                <div data-ng-if="routeGroup.tripRight != undefined">
+                                    <h3 class="text-center">
+                                        <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.tripRight.routeName}}</span>&nbsp;</span>
+                                        <span>{{routeGroup.tripRight.name}}</span>
+                                    </h3>
+                                    <h4 class="text-center">{{routeGroup.tripRight.stopTimeString}}</h4>
+                                    <h5 class="text-center time-countdown" data-target-time="{{routeGroup.tripRight.stopTime.getTime()}}"></h5>
+                                </div>
+                            </td>
 
-                                <tr data-ng-repeat="routeGroup in parentStation.routeGroups" data-ng-class="routeGroup.isGroup ? 'table-row-group' : 'table-row'">
+                            <td colspan="3" width="100%" data-ng-if="routeGroup.isGroup && routeGroup.isExpanded">
+                                <table class="table table-condensed">
+                                    <tbody>
 
-                                    <td width="25%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && routeGroup.isCollapsed)">
-                                        <div data-ng-if="routeGroup.tripLeft != undefined">
-                                            <h3 class="text-center">
-                                                <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.tripLeft.routeName}}</span>&nbsp;</span>
-                                                <span>{{routeGroup.tripLeft.name}}</span>
-                                            </h3>
-                                            <h4 class="text-center">{{routeGroup.tripLeft.stopTimeString}}</h4>
-                                            <h5 class="text-center time-countdown" data-target-time="{{routeGroup.tripLeft.stopTime.getTime()}}"></h5>
-                                        </div>
-                                    </td>
-                                    <td width="50%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && routeGroup.isCollapsed)">
-                                        <h2 class="text-center">{{routeGroup.name}}</h2>
-                                        <h2 class="text-center">
-                                            <span data-ng-repeat="name in routeGroup.names"><span class="label label-default">{{name}}</span>&nbsp;</span>
-                                        </h2>
-                                        <h3 class="text-center" data-ng-repeat="description in routeGroup.descriptions">
-                                            <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.names[$index]}}</span>&nbsp;</span>
-                                            <span>{{description}}</span>
-                                        </h3>
-                                        <button type="button" class="btn btn-default btn-block" data-ng-if="routeGroup.isGroup && routeGroup.isCollapsed" data-ng-click="routeGroup.isCollapsed=false">&lt;&lt; EXPAND &gt;&gt;</button>
-                                    </td>
-                                    <td width="25%" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && routeGroup.isCollapsed)">
-                                        <div data-ng-if="routeGroup.tripRight != undefined">
-                                            <h3 class="text-center">
-                                                <span data-ng-if="routeGroup.isGroup"><span class="label label-default">{{routeGroup.tripRight.routeName}}</span>&nbsp;</span>
-                                                <span>{{routeGroup.tripRight.name}}</span>
-                                            </h3>
-                                            <h4 class="text-center">{{routeGroup.tripRight.stopTimeString}}</h4>
-                                            <h5 class="text-center time-countdown" data-target-time="{{routeGroup.tripRight.stopTime.getTime()}}"></h5>
-                                        </div>
-                                    </td>
+                                    <tr class="table-row-group-item" data-ng-repeat="route in routeGroup.routes">
+                                        <td width="25%">
+                                            <div data-ng-if="route.tripLeft != undefined">
+                                                <h3 class="text-center">{{route.tripLeft.name}}</h3>
+                                                <h4 class="text-center">{{route.tripLeft.stopTimeString}}</h4>
+                                                <h5 class="text-center time-countdown" data-target-time="{{route.tripLeft.stopTime.getTime()}}"></h5>
+                                            </div>
+                                        </td>
+                                        <td width="50%">
+                                            <h2 class="text-center"><span class="label label-default">{{route.name}}</span></h2>
+                                            <h3 class="text-center">{{route.description}}</h3>
+                                        </td>
+                                        <td width="25%">
+                                            <div data-ng-if="route.tripRight != undefined">
+                                                <h3 class="text-center">{{route.tripRight.name}}</h3>
+                                                <h4 class="text-center">{{route.tripRight.stopTimeString}}</h4>
+                                                <h5 class="text-center time-countdown" data-target-time="{{route.tripRight.stopTime.getTime()}}"></h5>
+                                            </div>
+                                        </td>
+                                    </tr>
 
-                                    <td colspan="3" width="100%" data-ng-if="routeGroup.isGroup && !routeGroup.isCollapsed">
-                                        <table class="table table-condensed">
-                                            <tbody>
+                                    <tr class="table-row-group-item">
+                                        <td colspan="3" width="100%">
+                                            <button type="button" class="btn btn-default btn-block" data-ng-click="routeGroup.isExpanded=false">&gt;&gt; COLLAPSE &lt;&lt;</button>
+                                        </td>
+                                    </tr>
 
-                                                <tr class="table-row-group-item" data-ng-repeat="route in routeGroup.routes">
-                                                    <td width="25%">
-                                                        <div data-ng-if="route.tripLeft != undefined">
-                                                            <h3 class="text-center">{{route.tripLeft.name}}</h3>
-                                                            <h4 class="text-center">{{route.tripLeft.stopTimeString}}</h4>
-                                                            <h5 class="text-center time-countdown" data-target-time="{{route.tripLeft.stopTime.getTime()}}"></h5>
-                                                        </div>
-                                                    </td>
-                                                    <td width="50%">
-                                                        <h2 class="text-center"><span class="label label-default">{{route.name}}</span></h2>
-                                                        <h3 class="text-center">{{route.description}}</h3>
-                                                    </td>
-                                                    <td width="25%">
-                                                        <div data-ng-if="route.tripRight != undefined">
-                                                            <h3 class="text-center">{{route.tripRight.name}}</h3>
-                                                            <h4 class="text-center">{{route.tripRight.stopTimeString}}</h4>
-                                                            <h5 class="text-center time-countdown" data-target-time="{{route.tripRight.stopTime.getTime()}}"></h5>
-                                                        </div>
-                                                    </td>
-                                                </tr>
+                                    </tbody>
+                                </table>
+                            </td>
 
-                                                <tr class="table-row-group-item">
-                                                    <td colspan="3" width="100%">
-                                                        <button type="button" class="btn btn-default btn-block" data-ng-click="routeGroup.isCollapsed=true">&gt;&gt; COLLAPSE &lt;&lt;</button>
-                                                    </td>
-                                                </tr>
+                        </tr>
 
-                                            </tbody>
-                                        </table>
-                                    </td>
-
-                                </tr>
-
-                            </tbody>
-                        </table>
-                    </div>
-
-                </div>
-            </div>
+                        </tbody>
+                    </table>
+                </accordion-group>
+            </accordion>
 
         </div>
 
