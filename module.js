@@ -85,6 +85,7 @@ function getArrivalsAndDeparturesForStop(stopIdArray) {
 }
 
 function collectStopsForParentStations(data) {
+    //TODO Fix: parent station can have more than one name
     var deferredObject = $.Deferred();
 
     var stopArray = data.data.list;
@@ -327,8 +328,16 @@ function groupStopsIntoParentStations(stops) {
             minDistance: sourceStopGroup.minDistance,
             // Merge: Stop -> RouteGroup
             routeGroups: mergeStopsIntoRouteGroup(sourceStopGroup.stops),
+            routeNames: [],
             isExpanded: false
         };
+
+        for (var routeGroupIndex = 0; routeGroupIndex < targetParentStation.routeGroups.length; routeGroupIndex++) {
+            var actualRouteGroup = targetParentStation.routeGroups[routeGroupIndex];
+            targetParentStation.routeNames = targetParentStation.routeNames.concat(actualRouteGroup.names);
+        }
+
+        targetParentStation.routeNames.sort(function(a, b) {return a - b;});
 
         parentStationArray.push(targetParentStation);
     }
@@ -429,6 +438,7 @@ function mergeStopsIntoRouteGroup(stops) {
         routeGroupArray.push(targetRouteGroup);
     }
 
+    //TODO Rank back RouteGroups without trips
     // Sort: RouteGroup (minDistance)
     routeGroupArray.sort(function(a, b) {return a.minDistance - b.minDistance});
 
@@ -552,7 +562,7 @@ function applyPreviousPresentationState(timetablePresentation, previousTimetable
             var parentStation = parentStationArray[parentStationIndex];
 
             if (parentStation.isExpanded) {
-                //TODO Match by id
+                //TODO Fix: Match by id
                 expandedParentStationName = parentStation.name;
 
                 // Find the expanded RouteGroups

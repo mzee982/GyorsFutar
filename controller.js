@@ -1,5 +1,5 @@
 var app = angular.module('ngAppGyorsFutar', ['ui.bootstrap', 'ngStorage']);
-app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
+app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage) {
 
     // Constants
     $scope.UI_MODE_LOCATION_GET='UI_MODE_LOCATION_GET';
@@ -104,6 +104,13 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
             }
         };
 
+        //
+        $scope.adjustLocationPickerHeight();
+
+        //
+        $('#locationPicker').locationpicker(options);
+
+        //
         $('#locationPickerButtonOk').click(function() {
             var latitude = parseFloat($('#locationPicker-latitude').val()).toFixed(6);
             var longitude = parseFloat($('#locationPicker-longitude').val()).toFixed(6);
@@ -117,7 +124,20 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
             callback(position);
         });
 
-        $('#locationPicker').locationpicker(options);
+    }
+
+    $scope.adjustLocationPickerHeight = function() {
+
+        if ($scope.uiMode == $scope.UI_MODE_LOCATION_PICKER) {
+            var windowHeight = $window.innerHeight;
+            var top = $('#locationPickerPanel').offset().top;
+            var innerHeight = $('#locationPickerPanel').height();
+            var outerHeight = $('#locationPickerPanel').outerHeight(true);
+
+            $('#locationPickerPanel').height(windowHeight - top - (outerHeight - innerHeight));
+
+            $('#locationPicker').locationpicker('autosize');
+        }
 
     }
 
@@ -131,6 +151,7 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
     }
 
     $scope.storeLocation = function(position) {
+        //TODO Limit the number of stored locations
         var positionKey = position.formattedAddress;
 
         // Read
@@ -165,8 +186,19 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
 
             $(".time-countdown").each(
                 function() {
-                    var stopTime = new Date(parseInt($(this).attr("data-target-time")));
-                    var countdownString = formatTimeDiff(now, stopTime);
+                    var countdownString = undefined;
+                    var targetTimeAttr = $(this).attr("data-target-time");
+                    var sourceTimeAttr = $(this).attr("data-source-time");
+
+                    if (targetTimeAttr != undefined) {
+                        var targetTime = new Date(parseInt(targetTimeAttr));
+                        countdownString = formatTimeDiff(targetTime, now);
+                    }
+
+                    else if (sourceTimeAttr != undefined) {
+                        var sourceTime = new Date(parseInt(sourceTimeAttr));
+                        countdownString = formatTimeDiff(now, sourceTime);
+                    }
 
                     $(this).text(countdownString);
                 }
@@ -200,7 +232,7 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
             function() {
                 $scope.buildTimetable($scope.geoPosition);
             },
-            30000
+            60000
         );
     }
 
@@ -285,9 +317,6 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
 
             // Done
             function(position) {
-
-                //TODO Mock location: Orb�nhegyi
-                //position = {coords: {latitude: 47.497418, longitude: 19.013673, accuracy: 10}, formattedAddress: 'Mock location Orb�nhegyi'};
 
                 console.info(
                     'Position ' +
@@ -486,6 +515,8 @@ app.controller('ngControllerGyorsFutar', function($scope, $localStorage) {
 
 
     // Startup
+    //$window.addEventListener("resize", $scope.adjustLocationPickerHeight());
+    //$(window).resize($scope.adjustLocationPickerHeight());
     $scope.initialize($scope.LOCATION_MODE_AUTO);
 
 });

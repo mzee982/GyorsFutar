@@ -3,84 +3,90 @@
 Bootstrap CSS customization
 */
 
-.panel-default>.panel-heading {
-    background-color: dodgerblue;
-    color: white;
-}
-
-.panel-body {
-    background-color: lightblue;
-}
-
 .panel-group {
     margin-bottom: 0px;
 }
 
+.panel-group .panel-heading+.panel-collapse>.panel-body {
+    border-top: 0px;
+}
+
 .panel {
+    margin-bottom: 5px;
+}
+
+.panel-heading {
+    padding: 5px;
+}
+
+.panel-body {
+    padding: 5px;
+    background-color: #C1D1DD;
+}
+
+.table {
     margin-bottom: 0px;
 }
 
-.panel-title {
-    font-size: 22px;
-    text-align: center;
+.table .table {
+    background-color: inherit;
 }
 
-.table.table-condensed {
-    margin-bottom: 0px;
+.table>tbody>tr>td {
+    border-top: 0px;
+}
+
+.table-condensed>tbody>tr>td {
+    padding: 0px;
+}
+
+/*
+.panel-default {
+    border-color: #7695AD;
+}
+*/
+
+.panel-default>.panel-heading {
+    color: #ffffff;
+    background-color: #577C98;
+    border-color: #577C98;
+}
+
+.label-default {
+    display: inline-block;
 }
 
 /*
 Customization
 */
 
+html, body {
+    height: 100%;
+}
+
+#container {
+    height: 100%;
+}
+
 #locationPicker {
     width: 100%;
     height: 100%;
 }
 
-.layout-row {
-    overflow: hidden;
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    z-index: 0;
+.no-margin {
+    margin: 0px;
 }
 
-.layout-row.scroll-y {
-    overflow-y: auto;
+.row-header {
+    color: #ffffff;
+    background-color: #7695AD;
+    padding: 5px;
 }
 
-.layout-row.header {
-    height: 64px;
-    top: 10px;
+.row-header a {
+    color: inherit;
 }
 
-.layout-row.body {
-    top: 80px;
-    bottom: 10px;
-}
-
-.float-right {
-    float: right;
-}
-
-.panel-default>.panel-body-toolbar {
-    background-color: steelblue;
-    color: white;
-}
-
-.panel-body-nopadding {
-    padding: 0;
-}
-
-.table-row {
-    background-color: lightblue;
-}
-
-.table-row-group {
-    background-color: lavender;
-}
-
-.table-row-group-item {
-    background-color: lightcyan;
+.row-body {
+    padding: 5px;
 }
