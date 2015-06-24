@@ -65,7 +65,7 @@
                 <div class="panel-heading" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_PICKER">
                     <div class="row">
                         <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                            <input id="locationPicker-address" type="text" class="form-control" size="40" readonly>
+                            <input id="locationPicker-address" type="text" class="form-control" size="40" onclick="this.select();">
                         </div>
                         <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
                             <button id="locationPickerButtonOk" type="submit" class="btn btn-default">Ok</button>
@@ -146,7 +146,9 @@
                         <div class="row">
                             <div class="col-xs-10 text-center">
                                 <span>{{parentStation.name}}</span>
-                                <span data-ng-if="!parentStation.isExpanded" data-ng-repeat="routeName in parentStation.routeNames"><span class="label label-default">{{routeName}}</span>&nbsp;</span>
+                                <span data-ng-if="!parentStation.isExpanded" data-ng-repeat="routeName in parentStation.routeNames">
+                                    <span class="label label-default" data-ng-style="{'color': parentStation.routeTextColors[$index], 'background-color': parentStation.routeColors[$index]}">{{routeName}}</span>&nbsp;
+                                </span>
                             </div>
                             <div class="col-xs-2">
                                 <div class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': parentStation.isExpanded, 'glyphicon-chevron-right': !parentStation.isExpanded}"></div>
@@ -163,17 +165,19 @@
                                         <div class="row">
                                             <div class="col-xs-12">
                                                 <div class="row">
-                                                    <div class="col-sm-1 col-xs-6">
+                                                    <div class="col-sm-2 col-xs-6">
                                                         <h3 class="no-margin text-left">
-                                                            <span data-ng-repeat="name in routeGroup.names"><span class="label label-default">{{name}}</span>&nbsp;</span>
+                                                            <span data-ng-repeat="name in routeGroup.names track by $index">
+                                                                <span class="label label-default" data-ng-style="{'color': routeGroup.textColors[$index], 'background-color': routeGroup.colors[$index]}">{{name}}</span>&nbsp;
+                                                            </span>
                                                         </h3>
                                                     </div>
-                                                    <div class="col-sm-1 col-sm-push-10 col-xs-6">
+                                                    <div class="col-sm-2 col-sm-push-8 col-xs-6">
                                                         <a href="javascript:void(0)" data-ng-if="routeGroup.isGroup && !routeGroup.isExpanded" data-ng-click="routeGroup.isExpanded=!routeGroup.isExpanded">
                                                             <div class="pull-right glyphicon glyphicon-chevron-right"></div>
                                                         </a>
                                                     </div>
-                                                    <div class="col-sm-10 col-sm-pull-1 col-xs-12">
+                                                    <div class="col-sm-8 col-sm-pull-2 col-xs-12">
                                                         <h5 class="no-margin text-center">
                                                             <div data-ng-repeat="description in routeGroup.descriptions">{{description}}</div>
                                                         </h5>
@@ -190,6 +194,9 @@
                                                     <h5 class="no-margin text-center">
                                                         <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripLeft.routeName}}</span>
                                                         <span><strong>{{routeGroup.tripLeft.name}}</strong></span>
+                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
+                                                            <span class="glyphicon glyphicon-flag"></span>
+                                                        </button>
                                                     </h5>
                                                 </div>
                                             </div>
@@ -198,6 +205,9 @@
                                                     <h5 class="no-margin text-center">
                                                         <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripRight.routeName}}</span>
                                                         <span><strong>{{routeGroup.tripRight.name}}</strong></span>
+                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
+                                                            <span class="glyphicon glyphicon-flag"></span>
+                                                        </button>
                                                     </h5>
                                                 </div>
                                             </div>
@@ -248,7 +258,7 @@
                                                                 <div class="row">
                                                                     <div class="col-sm-1 col-xs-6">
                                                                         <h3 class="no-margin text-left">
-                                                                            <span class="label label-default">{{route.name}}</span>
+                                                                            <span class="label label-default" data-ng-style="{'color': route.textColor, 'background-color': route.color}">{{route.name}}</span>
                                                                         </h3>
                                                                     </div>
                                                                     <div class="col-sm-1 col-sm-push-10 col-xs-6">
@@ -270,12 +280,22 @@
                                                         <div class="row">
                                                             <div class="col-xs-6">
                                                                 <div data-ng-if="route.tripLeft != undefined">
-                                                                    <h5 class="no-margin text-center"><strong>{{route.tripLeft.name}}</strong></h5>
+                                                                    <h5 class="no-margin text-center">
+                                                                        <strong>{{route.tripLeft.name}}</strong>
+                                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
+                                                                            <span class="glyphicon glyphicon-flag"></span>
+                                                                        </button>
+                                                                    </h5>
                                                                 </div>
                                                             </div>
                                                             <div class="col-xs-6">
                                                                 <div data-ng-if="route.tripRight != undefined">
-                                                                    <h5 class="no-margin text-center"><strong>{{route.tripRight.name}}</strong></h5>
+                                                                    <h5 class="no-margin text-center">
+                                                                        <strong>{{route.tripRight.name}}</strong>
+                                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
+                                                                            <span class="glyphicon glyphicon-flag"></span>
+                                                                        </button>
+                                                                    </h5>
                                                                 </div>
                                                             </div>
                                                         </div>

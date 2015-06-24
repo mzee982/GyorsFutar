@@ -87,11 +87,11 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
         $scope.$apply();
     };
 
-    $scope.showLocationPicker = function(position, callback) {
+    $scope.showLocationPicker = function(position, markedPosition, callback) {
         $scope.uiMode = $scope.UI_MODE_LOCATION_PICKER;
         $scope.$apply();
 
-        var options = {
+        var circleOptions = {
             location: {
                 latitude: position.coords.latitude,
                 longitude: position.coords.longitude},
@@ -101,14 +101,57 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
                 longitudeInput: $('#locationPicker-longitude'),
                 radiusInput: $('#locationPicker-radius'),
                 locationNameInput: $('#locationPicker-address')
-            }
+            },
+            enableAutocomplete: true
         };
 
         //
         $scope.adjustLocationPickerHeight();
 
         //
-        $('#locationPicker').locationpicker(options);
+        $('#locationPicker').locationpicker(circleOptions);
+
+        // Show marked position
+        if (markedPosition != undefined) {
+            var mapContext = $('#locationPicker').locationpicker('map');
+            var markedLatlng = new google.maps.LatLng(markedPosition.stopLat, markedPosition.stopLon);
+
+            // Marker
+            var marker = new google.maps.Marker({
+                position: markedLatlng,
+                icon: {
+                    path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
+                    scale: 3
+                },
+                map: mapContext.map,
+                title: markedPosition.routeName
+            });
+
+            // Info Window
+            var markedContentString =
+                '<div>' +
+                '<div>' + markedPosition.name + '</div>' +
+                '<div>' + markedPosition.routeName + '</div>' +
+                '<div>' + markedPosition.stopTimeString + '</div>' +
+                '</div>';
+            var infoWindow = new google.maps.InfoWindow({
+                content: markedContentString
+            });
+
+            infoWindow.open(mapContext.map, marker);
+
+            // Fit bounds
+            circleOptions = {
+                radius: mapContext.map.radius * 1,
+                center: new google.maps.LatLng(mapContext.location.latitude, mapContext.location.longitude)
+            };
+
+            var circle = new google.maps.Circle(circleOptions);
+            var circleBounds = circle.getBounds();
+
+            mapContext.map.fitBounds(circleBounds);
+
+        }
 
         //
         $('#locationPickerButtonOk').click(function() {
@@ -151,21 +194,44 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
     }
 
     $scope.storeLocation = function(position) {
-        //TODO Limit the number of stored locations
         var positionKey = position.formattedAddress;
 
-        // Read
+        // Read storage
         var locations = $localStorage.locations;
 
-        // Initialize
+        // Initialize if not exists yet
         if (locations == undefined) {
             locations = {};
         }
 
         // Add / Overwrite
+        position.timestamp = new Date();
         locations[positionKey] = position;
 
-        // Store
+        // To array
+        var locationArray = [];
+        for (key in locations) locationArray.push(locations[key]);
+
+        // Sort by descending timestamp
+        locationArray.sort(
+            function(a, b) {
+                if (a.timestamp == undefined) a.timestamp = new Date(0);
+                if (b.timestamp == undefined) b.timestamp = new Date(0);
+
+                return b.timestamp - a.timestamp;
+            }
+        );
+
+        // Store only the 5 most recent locations
+        locationArray = locationArray.slice(0, 5);
+
+        // To object
+        locations = {};
+        for (var index = 0; index < locationArray.length; index++) {
+            locations[locationArray[index].formattedAddress] = locationArray[index];
+        }
+
+        // Write storage
         $localStorage.locations = locations;
 
     }
@@ -176,6 +242,10 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
 
     $scope.onTimetableRefreshClick = function() {
         $scope.buildTimetable($scope.geoPosition);
+    }
+
+    $scope.onStopLocationClick = function(stopTime) {
+        $scope.initialize($scope.LOCATION_MODE_MAP, $scope.geoPosition, stopTime);
     }
 
     $scope.updateTimeCountdowns = function() {
@@ -268,7 +338,7 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
         );
     }
 
-    $scope.selectLocation = function(locationMode, initialPosition) {
+    $scope.selectLocation = function(locationMode, initialPosition, markedPosition) {
         var deferredObject = $.Deferred();
 
         $scope.uiMode = $scope.UI_MODE_LOCATION_GET;
@@ -283,7 +353,7 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
                 var promiseSelectLocation = $scope.selectLocationFromList(initialPosition);
                 break;
             case $scope.LOCATION_MODE_MAP:
-                var promiseSelectLocation = $scope.selectLocationByPicker(initialPosition);
+                var promiseSelectLocation = $scope.selectLocationByPicker(initialPosition, markedPosition);
                 break;
             default:
                 var promiseSelectLocation = $scope.selectLocationByGeoLocator();
@@ -443,11 +513,12 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
         return deferredObject.promise();
     };
 
-    $scope.selectLocationByPicker = function(initialPosition) {
+    $scope.selectLocationByPicker = function(initialPosition, markedPosition) {
         var deferredObject = $.Deferred();
 
         $scope.showLocationPicker(
             initialPosition,
+            markedPosition,
             function(pickedPosition) {
                 deferredObject.resolve(pickedPosition);
             }
@@ -456,7 +527,7 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
         return deferredObject.promise();
     }
 
-    $scope.initialize = function(locationMode, initialPosition) {
+    $scope.initialize = function(locationMode, initialPosition, markedPosition) {
 
         $scope.reset();
         $scope.initializeScope();
@@ -465,7 +536,7 @@ app.controller('ngControllerGyorsFutar', function($scope, $window, $localStorage
          * Determine geo-location
          */
 
-        var promiseSelectLocation = $scope.selectLocation(locationMode, initialPosition);
+        var promiseSelectLocation = $scope.selectLocation(locationMode, initialPosition, markedPosition);
 
         var promiseLocationReady = promiseSelectLocation.then(
 
