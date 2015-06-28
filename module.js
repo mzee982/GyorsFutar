@@ -1,21 +1,21 @@
 
-function getLocation() {
-    var deferredObject = $.Deferred();
+function getLocation($q) {
+    var deferred = $q.defer();
 
     geolocator.locate(
         // Success
-        function(position) {deferredObject.resolve(position);},
+        function(position) {deferred.resolve(position);},
         // Error
-        function(error) {deferredObject.reject(error);},
+        function(error) {deferred.reject(error);},
         true,
         {enableHighAccuracy: true, timeout: 6000, maximumAge: 0},
         null);
 
-    return deferredObject.promise();
+    return deferred.promise;
 }
 
-function searchStops(id, name) {
-    var deferredObject = $.Deferred();
+function searchStops($q, id, name) {
+    var deferred = $q.defer();
 
     var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/search.json?query=$QUERY';
     url = url.replace('$QUERY', name);
@@ -26,15 +26,15 @@ function searchStops(id, name) {
         url: url,
         jsonp: 'callback',
         dataType: 'jsonp',
-        success: function(data) {deferredObject.resolve(id, data);},
-        error: function(xhr, status, errorThrown) {deferredObject.reject(status + ' ' + errorThrown);}
+        success: function(data) {deferred.resolve({id: id, data: data});},
+        error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
     });
 
-    return deferredObject.promise();
+    return deferred.promise;
 }
 
-function getStopsForLocation(position) {
-    var deferredObject = $.Deferred();
+function getStopsForLocation($q, position) {
+    var deferred = $q.defer();
 
     var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=$LATITIUDE&lon=$LONGITUDE&radius=$RADIUS';
     url = url.replace('$LATITIUDE', position.coords.latitude);
@@ -47,15 +47,15 @@ function getStopsForLocation(position) {
         url: url,
         jsonp: 'callback',
         dataType: 'jsonp',
-        success: function(data) {deferredObject.resolve(data);},
-        error: function(xhr, status, errorThrown) {deferredObject.reject(status + ' ' + errorThrown);}
+        success: function(data) {deferred.resolve(data);},
+        error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
     });
 
-    return deferredObject.promise();
+    return deferred.promise;
 }
 
-function getArrivalsAndDeparturesForStop(stopIdArray) {
-    var deferredObject = $.Deferred();
+function getArrivalsAndDeparturesForStop($q, stopIdArray) {
+    var deferred = $q.defer();
 
     var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json';
 
@@ -74,18 +74,18 @@ function getArrivalsAndDeparturesForStop(stopIdArray) {
         jsonp: 'callback',
         dataType: 'jsonp',
         success: function(data) {
-            deferredObject.resolve(data);
+            deferred.resolve(data);
         },
         error: function(xhr, status, errorThrown) {
-            deferredObject.reject(status + ' ' + errorThrown);
+            deferred.reject(status + ' ' + errorThrown);
         }
     });
 
-    return deferredObject.promise();
+    return deferred.promise;
 }
 
-function collectStopsForParentStations(data) {
-    var deferredObject = $.Deferred();
+function collectStopsForParentStations($q, data) {
+    var deferred = $q.defer();
 
     var stopArray = data.data.list;
     var parentStations = {};
@@ -152,49 +152,46 @@ function collectStopsForParentStations(data) {
 
         for (var nameIndex = 0; nameIndex < actualParentStationNames.length; nameIndex++) {
             var actualParentStationName = actualParentStationNames[nameIndex];
-            promisesSearchStops.push(searchStops(parentStationId, actualParentStationName));
+            promisesSearchStops.push(searchStops($q, parentStationId, actualParentStationName));
         }
     }
 
     if (promisesSearchStops.length > 0) {
 
         // Process responses
-        $.when.apply($, promisesSearchStops).then(
-            // Done
-            function() {
-                var stopsAndRoutes = processStopsForParentStations(arguments, promisesSearchStops.length);
+        $q.all(promisesSearchStops).then(
 
-                deferredObject.resolve(stopsAndRoutes[0], stopsAndRoutes[1]);
+            // Success
+            function(dataArray) {
+                var stopsAndRoutes = processStopsForParentStations(dataArray, promisesSearchStops.length);
+
+                deferred.resolve(stopsAndRoutes);
             },
 
-            // Fail
+            // Error
             function(status) {
-                deferredObject.reject('searchStops: ' + status);
+                deferred.reject('searchStops: ' + status);
             }
+
         );
 
     }
 
     else {
-        deferredObject.reject('No stops found');
+        deferred.reject('No stops found');
     }
 
-    return deferredObject.promise();
+    return deferred.promise;
 }
 
 function processStopsForParentStations(dataArray, dataCount) {
     var targetStops = {};
     var targetRoutes = {};
 
-    // Correction
-    if (dataCount == 1) {
-        dataArray = [dataArray];
-    }
-
     // Datas
     for (var dataIndex = 0; dataIndex < dataArray.length; dataIndex++) {
-        var parentStationId = dataArray[dataIndex][0]
-        var data = dataArray[dataIndex][1];
+        var parentStationId = dataArray[dataIndex].id;
+        var data = dataArray[dataIndex].data;
         var stopIdArray = data.data.entry.stopIds;
         var stopReferences = data.data.references.stops;
         var routeReferences = data.data.references.routes;
@@ -228,7 +225,7 @@ function processStopsForParentStations(dataArray, dataCount) {
 
     }
 
-    return [targetStops, targetRoutes];
+    return {stops: targetStops, routes: targetRoutes};
 }
 
 function processStopsForLocationResponse(timetableModel, stops, routes) {
@@ -724,9 +721,8 @@ function applyPreviousPresentationState(timetablePresentation, previousTimetable
     return timetablePresentation;
 }
 
-function buildTimetable(position, previousTimetablePresentation) {
-    //TODO Use Angular JS $q service
-    var deferredObject = $.Deferred();
+function buildTimetable($q, position, previousTimetablePresentation) {
+    var deferred = $q.defer();
 
     var geoPosition = position;
     var timetableModel = {
@@ -748,18 +744,20 @@ function buildTimetable(position, previousTimetablePresentation) {
      * Stops for location
      */
 
-    var promiseGetStopsForLocation = getStopsForLocation(geoPosition);
+    var promiseGetStopsForLocation = getStopsForLocation($q, geoPosition);
 
     var promiseCollectStopsForParentStations = promiseGetStopsForLocation.then(
-        // Done
+
+        // Success
         function (data) {
-            return collectStopsForParentStations(data);
+            return collectStopsForParentStations($q, data);
         },
 
-        // Fail
+        // Error
         function (status) {
-            deferredObject.reject('getStopsForLocation: ' + status);
+            deferred.reject('getStopsForLocation: ' + status);
         }
+
     );
 
     /*
@@ -767,17 +765,19 @@ function buildTimetable(position, previousTimetablePresentation) {
      */
 
     var promiseArrivalsAndDeparturesForStop = promiseCollectStopsForParentStations.then(
-        // Done
-        function(stops, routes) {
-            timetableModel = processStopsForLocationResponse(timetableModel, stops, routes);
 
-            return getArrivalsAndDeparturesForStop(timetableModel.getStopIds());
+        // Success
+        function(stopsAndRoutes) {
+            timetableModel = processStopsForLocationResponse(timetableModel, stopsAndRoutes.stops, stopsAndRoutes.routes);
+
+            return getArrivalsAndDeparturesForStop($q, timetableModel.getStopIds());
         },
 
-        // Fail
+        // Error
         function(status) {
-            deferredObject.reject('collectStopsForParentStations: ' + status);
+            deferred.reject('collectStopsForParentStations: ' + status);
         }
+
     );
 
     /*
@@ -785,7 +785,8 @@ function buildTimetable(position, previousTimetablePresentation) {
      */
 
     promiseArrivalsAndDeparturesForStop.then(
-        // Done
+
+        // Success
         function (data) {
 
             timetableModel = processArrivalsAndDeparturesForStopResponse(timetableModel, data);
@@ -796,14 +797,15 @@ function buildTimetable(position, previousTimetablePresentation) {
 
             timetablePresentation = applyPreviousPresentationState(timetablePresentation, previousTimetablePresentation);
 
-            deferredObject.resolve(timetablePresentation);
+            deferred.resolve(timetablePresentation);
         },
 
-        // Fail
+        // Error
         function (status) {
-            deferredObject.reject('getArrivalsAndDeparturesForStop: ' + status);
+            deferred.reject('getArrivalsAndDeparturesForStop: ' + status);
         }
+
     );
 
-    return deferredObject.promise();
+    return deferred.promise;
 }

@@ -105,7 +105,7 @@
                                 </button>
                             </span>
                             <span class="pull-right">
-                                <span class="time-countdown" data-source-time="{{timetableBuildTime.getTime()}}"></span>
+                                <span data-gyf-countdown data-source-time='timetableBuildTime'></span>
                                 <button type="button" class="btn btn-default" data-ng-click="onTimetableRefreshClick()">
                                     <span class="glyphicon glyphicon-refresh"></span>
                                 </button>
@@ -120,11 +120,11 @@
             <div class="panel panel-default" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_LIST">
                 <div class="panel-body">
                     <div class="btn-group-vertical btn-block">
-                        <button type="button" class="btn btn-default" data-ng-repeat="location in storedLocations" data-ng-if="!$last" data-ng-click="location.callback()">
+                        <button type="button" class="btn btn-default" data-ng-repeat="location in recentLocations" data-ng-if="!$last" data-ng-click="location.callback()">
                             <span>{{location.formattedAddress}}</span>
                         </button>
                     </div>
-                    <button type="button" class="btn btn-default btn-block" data-ng-click="storedLocations[storedLocations.length - 1].callback()">
+                    <button type="button" class="btn btn-default btn-block" data-ng-click="recentLocations[recentLocations.length - 1].callback()">
                         <span>Location Picker</span>
                     </button>
                 </div>
@@ -230,14 +230,14 @@
                                             <div class="col-xs-6">
                                                 <div data-ng-if="routeGroup.tripLeft != undefined">
                                                     <h5 class="no-margin text-center">
-                                                        <strong class="time-countdown" data-target-time="{{routeGroup.tripLeft.stopTime.getTime()}}"></strong>
+                                                        <strong data-gyf-countdown data-target-time='routeGroup.tripLeft.stopTime'></strong>
                                                     </h5>
                                                 </div>
                                             </div>
                                             <div class="col-xs-6">
                                                 <div data-ng-if="routeGroup.tripRight != undefined">
                                                     <h5 class="no-margin text-center">
-                                                        <strong class="time-countdown" data-target-time="{{routeGroup.tripRight.stopTime.getTime()}}"></strong>
+                                                        <strong data-gyf-countdown data-target-time='routeGroup.tripRight.stopTime'></strong>
                                                     </h5>
                                                 </div>
                                             </div>
@@ -317,14 +317,14 @@
                                                             <div class="col-xs-6">
                                                                 <div data-ng-if="route.tripLeft != undefined">
                                                                     <h5 class="no-margin text-center">
-                                                                        <strong class="time-countdown" data-target-time="{{route.tripLeft.stopTime.getTime()}}"></strong>
+                                                                        <strong data-gyf-countdown data-target-time='route.tripLeft.stopTime'></strong>
                                                                     </h5>
                                                                 </div>
                                                             </div>
                                                             <div class="col-xs-6">
                                                                 <div data-ng-if="route.tripRight != undefined">
                                                                     <h5 class="no-margin text-center">
-                                                                        <strong class="time-countdown" data-target-time="{{route.tripRight.stopTime.getTime()}}"></strong>
+                                                                        <strong data-gyf-countdown data-target-time='route.tripRight.stopTime'></strong>
                                                                     </h5>
                                                                 </div>
                                                             </div>
