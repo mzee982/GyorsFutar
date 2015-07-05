@@ -16,6 +16,9 @@
         <!-- AngularJS -->
         <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
 
+        <!-- Angular UI Router -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
+
         <!-- Angular UI Bootstrap -->
         <script src="lib/ui-bootstrap-tpls-0.13.0.min.js"></script>
 
@@ -31,322 +34,45 @@
         <!-- JQuery Location Picker plugin -->
         <script src="lib/locationpicker.jquery.min.js"></script>
 
-        <link rel="stylesheet" href="custom.css">
+        <link rel="stylesheet" href="app.css">
     </head>
     <body>
         <div id="container" class="container-fluid" data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
 
             <!-- Alert Success -->
-            <div id="idAlertSuccess" class="alert alert-success" data-ng-cloak data-ng-show="successMessage != undefined">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <div id="idAlertSuccess" class="alert alert-success" data-ng-show="successMessage != undefined">
+                <button type="button" class="close" aria-label="Close" data-ng-click="successMessage = undefined"><span aria-hidden="true">&times;</span></button>
                 <strong>Success!</strong> {{successMessage}}
             </div>
 
             <!-- Alert Error -->
-            <div id="idAlertError" class="alert alert-danger" data-ng-cloak data-ng-show="errorMessage != undefined">
-                <a href="#" class="close" data-dismiss="alert" aria-label="close">&times;</a>
+            <div id="idAlertError" class="alert alert-danger" data-ng-show="errorMessage != undefined">
+                <button type="button" class="close" aria-label="Close" data-ng-click="errorMessage = undefined"><span aria-hidden="true">&times;</span></button>
                 <strong>Failed!</strong> {{errorMessage}}
             </div>
 
-            <!-- Toolbar -->
-            <div class="panel panel-default" data-ng-cloak data-ng-if="uiMode != undefined">
-
-                <!-- For Location Get -->
-                <div class="panel-heading" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_GET">
-                    <h4 class="panel-title">Detecting location...</h4>
-                </div>
-
-                <!-- For Location List -->
-                <div class="panel-heading" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_LIST">
-                    <h4 class="panel-title">Recent location list</h4>
-                </div>
-
-                <!-- For Location Picker -->
-                <div class="panel-heading" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_PICKER">
-                    <div class="row">
-                        <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                            <input id="locationPicker-address" type="text" class="form-control" size="40" onclick="this.select();">
-                        </div>
-                        <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                            <button id="locationPickerButtonOk" type="submit" class="btn btn-default">Ok</button>
-                            <span class="pull-right">
-                                <span class="btn-group">
-                                    <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(250)">250m</button>
-                                    <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(500)">500m</button>
-                                    <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(750)">750m</button>
-                                    <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(1000)">1000m</button>
-                                </span>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- For Timetable Build -->
-                <div class="panel-heading" data-ng-cloak data-ng-if="uiMode == UI_MODE_TIMETABLE_BUILD">
-                    <h4 class="panel-title">Building timetable...</h4>
-                </div>
-
-                <!-- For Timetable Show -->
-                <div class="panel-heading" data-ng-cloak data-ng-if="uiMode == UI_MODE_TIMETABLE_SHOW">
-                    <div class="row">
-                        <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                            <input type="text" class="form-control" size="40" readonly value="{{geoPosition.formattedAddress}}">
-                        </div>
-                        <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                            <span class="btn-group">
-                                <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE_AUTO)">
-                                    <span class="glyphicon glyphicon-screenshot"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE_LIST)">
-                                    <span class="glyphicon glyphicon-th-list"></span>
-                                </button>
-                                <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE_MAP)">
-                                    <span class="glyphicon glyphicon-picture"></span>
-                                </button>
-                            </span>
-                            <span class="pull-right">
-                                <span data-gyf-countdown data-source-time='timetableBuildTime'></span>
-                                <button type="button" class="btn btn-default" data-ng-click="onTimetableRefreshClick()">
-                                    <span class="glyphicon glyphicon-refresh"></span>
-                                </button>
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Location List -->
-            <div class="panel panel-default" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_LIST">
-                <div class="panel-body">
-                    <div class="btn-group-vertical btn-block">
-                        <button type="button" class="btn btn-default" data-ng-repeat="location in recentLocations" data-ng-if="!$last" data-ng-click="location.callback()">
-                            <span>{{location.formattedAddress}}</span>
-                        </button>
-                    </div>
-                    <button type="button" class="btn btn-default btn-block" data-ng-click="recentLocations[recentLocations.length - 1].callback()">
-                        <span>Location Picker</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Location Picker -->
-            <div id="locationPickerPanel" class="panel panel-default" data-ng-cloak data-ng-if="uiMode == UI_MODE_LOCATION_PICKER">
-                <input type="hidden" id="locationPicker-latitude">
-                <input type="hidden" id="locationPicker-longitude">
-                <input type="hidden" id="locationPicker-radius">
-
-                <div id="locationPicker" class="panel-body"></div>
-            </div>
-
-            <!-- Timetable -->
-            <accordion close-others="true" class="" data-ng-cloak data-ng-if="uiMode == UI_MODE_TIMETABLE_SHOW">
-                <accordion-group is-open="parentStation.isExpanded" data-ng-repeat="parentStation in timetablePresentation.parentStations">
-                    <accordion-heading>
-                        <div class="row">
-                            <div class="col-xs-10 text-center">
-                                <span>{{parentStation.name}}</span>
-                                <span data-ng-if="!parentStation.isExpanded" data-ng-repeat="routeName in parentStation.routeNames">
-                                    <span class="label label-default" data-ng-style="{'color': parentStation.routeTextColors[$index], 'background-color': parentStation.routeColors[$index]}">{{routeName}}</span>&nbsp;
-                                </span>
-                            </div>
-                            <div class="col-xs-2">
-                                <div class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': parentStation.isExpanded, 'glyphicon-chevron-right': !parentStation.isExpanded}"></div>
-                            </div>
-                        </div>
-                    </accordion-heading>
-                    <table class="table table-condensed">
-                        <tbody>
-                            <tr data-ng-repeat="routeGroup in parentStation.routeGroups">
-
-                                <!-- Collapsed -->
-                                <td class="row" data-ng-if="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
-                                    <div class="row-header">
-                                        <div class="row">
-                                            <div class="col-xs-12">
-                                                <div class="row">
-                                                    <div class="col-sm-2 col-xs-6">
-                                                        <h3 class="no-margin text-left">
-                                                            <span data-ng-repeat="name in routeGroup.names track by $index">
-                                                                <span class="label label-default" data-ng-style="{'color': routeGroup.textColors[$index], 'background-color': routeGroup.colors[$index]}">{{name}}</span>&nbsp;
-                                                            </span>
-                                                        </h3>
-                                                    </div>
-                                                    <div class="col-sm-2 col-sm-push-8 col-xs-6">
-                                                        <a href="javascript:void(0)" data-ng-if="routeGroup.isGroup && !routeGroup.isExpanded" data-ng-click="routeGroup.isExpanded=!routeGroup.isExpanded">
-                                                            <div class="pull-right glyphicon glyphicon-chevron-right"></div>
-                                                        </a>
-                                                    </div>
-                                                    <div class="col-sm-8 col-sm-pull-2 col-xs-12">
-                                                        <h5 class="no-margin text-center">
-                                                            <div data-ng-repeat="description in routeGroup.descriptions">{{description}}</div>
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="row-body">
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                <div data-ng-if="routeGroup.tripLeft != undefined">
-                                                    <h5 class="no-margin text-center">
-                                                        <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripLeft.routeName}}</span>
-                                                        <span><strong>{{routeGroup.tripLeft.name}}</strong></span>
-                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
-                                                            <span class="glyphicon glyphicon-flag"></span>
-                                                        </button>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <div data-ng-if="routeGroup.tripRight != undefined">
-                                                    <h5 class="no-margin text-center">
-                                                        <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripRight.routeName}}</span>
-                                                        <span><strong>{{routeGroup.tripRight.name}}</strong></span>
-                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
-                                                            <span class="glyphicon glyphicon-flag"></span>
-                                                        </button>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                <div data-ng-if="routeGroup.tripLeft != undefined">
-                                                    <h6 class="no-margin text-center">{{routeGroup.tripLeft.stopTimeString}}</h6>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <div data-ng-if="routeGroup.tripRight != undefined">
-                                                    <h6 class="no-margin text-center">{{routeGroup.tripRight.stopTimeString}}</h6>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                <div data-ng-if="routeGroup.tripLeft != undefined">
-                                                    <h5 class="no-margin text-center">
-                                                        <strong data-gyf-countdown data-target-time='routeGroup.tripLeft.stopTime'></strong>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <div data-ng-if="routeGroup.tripRight != undefined">
-                                                    <h5 class="no-margin text-center">
-                                                        <strong data-gyf-countdown data-target-time='routeGroup.tripRight.stopTime'></strong>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                </td>
-
-                                <!-- Expanded -->
-                                <td data-ng-if="routeGroup.isGroup && routeGroup.isExpanded">
-                                    <table class="table table-condensed">
-                                        <tbody>
-                                            <tr data-ng-repeat="route in routeGroup.routes">
-                                                <td class="row">
-                                                    <div class="row-header">
-                                                        <div class="row">
-                                                            <div class="col-xs-12">
-                                                                <div class="row">
-                                                                    <div class="col-sm-1 col-xs-6">
-                                                                        <h3 class="no-margin text-left">
-                                                                            <span class="label label-default" data-ng-style="{'color': route.textColor, 'background-color': route.color}">{{route.name}}</span>
-                                                                        </h3>
-                                                                    </div>
-                                                                    <div class="col-sm-1 col-sm-push-10 col-xs-6">
-                                                                        <a href="javascript:void(0)" data-ng-click="routeGroup.isExpanded=!routeGroup.isExpanded">
-                                                                            <div class="pull-right glyphicon glyphicon-chevron-down"></div>
-                                                                        </a>
-                                                                    </div>
-                                                                    <div class="col-sm-10 col-sm-pull-1 col-xs-12">
-                                                                        <h5 class="no-margin text-center">
-                                                                            <div>{{route.description}}</div>
-                                                                        </h5>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="row-body">
-                                                        <div class="row">
-                                                            <div class="col-xs-6">
-                                                                <div data-ng-if="route.tripLeft != undefined">
-                                                                    <h5 class="no-margin text-center">
-                                                                        <strong>{{route.tripLeft.name}}</strong>
-                                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
-                                                                            <span class="glyphicon glyphicon-flag"></span>
-                                                                        </button>
-                                                                    </h5>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-xs-6">
-                                                                <div data-ng-if="route.tripRight != undefined">
-                                                                    <h5 class="no-margin text-center">
-                                                                        <strong>{{route.tripRight.name}}</strong>
-                                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
-                                                                            <span class="glyphicon glyphicon-flag"></span>
-                                                                        </button>
-                                                                    </h5>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row">
-                                                            <div class="col-xs-6">
-                                                                <div data-ng-if="route.tripLeft != undefined">
-                                                                    <h6 class="no-margin text-center">{{route.tripLeft.stopTimeString}}</h6>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-xs-6">
-                                                                <div data-ng-if="route.tripRight != undefined">
-                                                                    <h6 class="no-margin text-center">{{route.tripRight.stopTimeString}}</h6>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-
-                                                        <div class="row">
-                                                            <div class="col-xs-6">
-                                                                <div data-ng-if="route.tripLeft != undefined">
-                                                                    <h5 class="no-margin text-center">
-                                                                        <strong data-gyf-countdown data-target-time='route.tripLeft.stopTime'></strong>
-                                                                    </h5>
-                                                                </div>
-                                                            </div>
-                                                            <div class="col-xs-6">
-                                                                <div data-ng-if="route.tripRight != undefined">
-                                                                    <h5 class="no-margin text-center">
-                                                                        <strong data-gyf-countdown data-target-time='route.tripRight.stopTime'></strong>
-                                                                    </h5>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-
-                            </tr>
-                        </tbody>
-                    </table>
-                </accordion-group>
-            </accordion>
+            <!-- Root UI view -->
+            <div ui-view></div>
 
         </div>
 
-        <script src="utils.js"></script>
-        <script src="module.js"></script>
-        <script src="controller.js"></script>
+        <script src="components/location-detection/location-detection.js"></script>
+        <script src="components/location-detection/location-detection-controller.js"></script>
+
+        <script src="components/recent-location-list/recent-location-list.js"></script>
+        <script src="components/recent-location-list/recent-location-list-controller.js"></script>
+
+        <script src="components/location-picker/location-picker.js"></script>
+        <script src="components/location-picker/location-picker-controller.js"></script>
+
+        <script src="components/timetable/timetable.js"></script>
+        <script src="components/timetable/timetable-service.js"></script>
+        <script src="components/timetable/timetable-controller.js"></script>
+
+        <script src="app.js"></script>
+        <script src="app-config.js"></script>
+        <script src="app-directive.js"></script>
+        <script src="app-controller.js"></script>
+
     </body>
 </html>

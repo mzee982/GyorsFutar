@@ -1,0 +1,24 @@
+
+<!-- Toolbar -->
+<div class="panel panel-default">
+
+    <!-- For Recent Location List -->
+    <div class="panel-heading">
+        <h4 class="panel-title">Recent location list</h4>
+    </div>
+
+</div>
+
+<!-- Location List -->
+<div class="panel panel-default">
+    <div class="panel-body">
+        <div class="btn-group-vertical btn-block">
+            <button type="button" class="btn btn-default" data-ng-repeat="location in recentLocations" data-ng-if="!$last" data-ng-click="location.callback()">
+                <span>{{location.formattedAddress}}</span>
+            </button>
+        </div>
+        <button type="button" class="btn btn-default btn-block" data-ng-click="recentLocations[recentLocations.length - 1].callback()">
+            <span>Location Picker</span>
+        </button>
+    </div>
+</div>
