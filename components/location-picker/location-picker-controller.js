@@ -5,116 +5,21 @@ angular.module('ngModuleLocationPicker')
         '$stateParams',
         '$q',
         '$localStorage',
-        '$window',
         'STATE',
         'EVENT',
         'LOCATION_PICKER',
-        function($scope, $state, $stateParams, $q, $localStorage, $window, STATE, EVENT, LOCATION_PICKER) {
+        function($scope, $state, $stateParams, $q, $localStorage, STATE, EVENT, LOCATION_PICKER) {
 
             //
             $scope.deferredLocationPicker = $q.defer();
             $scope.promiseLocationPicker = $scope.deferredLocationPicker.promise;
 
+            $scope.initialPosition = undefined;
+            $scope.markedPosition = undefined;
 
-            $scope.showLocationPicker = function(position, markedPosition, callback) {
 
-                var circleOptions = {
-                    location: {
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude},
-                    radius: position.coords.accuracy,
-                    inputBinding: {
-                        latitudeInput: $('#locationPicker-latitude'),
-                        longitudeInput: $('#locationPicker-longitude'),
-                        radiusInput: $('#locationPicker-radius'),
-                        locationNameInput: $('#locationPicker-address')
-                    },
-                    enableAutocomplete: true
-                };
-
-                //
-                $scope.adjustLocationPickerHeight();
-
-                //TODO Elminiate JQuery
-                $('#locationPicker').locationpicker(circleOptions);
-
-                // Show marked position
-                if (markedPosition != undefined) {
-                    var mapContext = $('#locationPicker').locationpicker('map');
-                    var markedLatlng = new google.maps.LatLng(markedPosition.stopLat, markedPosition.stopLon);
-
-                    // Marker
-                    var marker = new google.maps.Marker({
-                        position: markedLatlng,
-                        icon: {
-                            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                            scale: 3
-                        },
-                        map: mapContext.map,
-                        title: markedPosition.routeName
-                    });
-
-                    // Info Window
-                    var markedContentString =
-                        '<div>' +
-                        '<div>' + markedPosition.name + '</div>' +
-                        '<div>' + markedPosition.routeName + '</div>' +
-                        '<div>' + markedPosition.stopTimeString + '</div>' +
-                        '</div>';
-                    var infoWindow = new google.maps.InfoWindow({
-                        content: markedContentString
-                    });
-
-                    infoWindow.open(mapContext.map, marker);
-
-                    // Fit bounds
-                    circleOptions = {
-                        radius: mapContext.map.radius * 1,
-                        center: new google.maps.LatLng(mapContext.location.latitude, mapContext.location.longitude)
-                    };
-
-                    var circle = new google.maps.Circle(circleOptions);
-                    var circleBounds = circle.getBounds();
-
-                    mapContext.map.fitBounds(circleBounds);
-
-                }
-
-                //
-                $('#locationPickerButtonOk').click(function() {
-                    var latitude = parseFloat($('#locationPicker-latitude').val()).toFixed(6);
-                    var longitude = parseFloat($('#locationPicker-longitude').val()).toFixed(6);
-                    var radius = $('#locationPicker-radius').val();
-                    var locationName = $('#locationPicker-address').val();
-
-                    var position = {coords: {latitude: latitude, longitude: longitude, accuracy: radius}, formattedAddress: locationName};
-
-                    $scope.storeLocation(position);
-
-                    callback(position);
-                });
-
-            }
-
-            $scope.adjustLocationPickerHeight = function() {
-                //TODO Eliminate JQuery
-                var windowHeight = $window.innerHeight;
-                var top = $('#locationPickerPanel').offset().top;
-                var innerHeight = $('#locationPickerPanel').height();
-                var outerHeight = $('#locationPickerPanel').outerHeight(true);
-
-                $('#locationPickerPanel').height(windowHeight - top - (outerHeight - innerHeight));
-
-                $('#locationPicker').locationpicker('autosize');
-            }
-
-            $scope.onLocationPickerRadiusChange = function(radius) {
-                var latitude = parseFloat($('#locationPicker-latitude').val()).toFixed(6);
-                var longitude = parseFloat($('#locationPicker-longitude').val()).toFixed(6);
-
-                $('#locationPicker-radius').val(radius);
-
-                $('#locationPicker').locationpicker('location', {latitude: latitude, longitude: longitude, radius: radius});
+            $scope.pickPosition = function(pickedPosition) {
+                $scope.deferredLocationPicker.resolve({targetState: STATE.TIMETABLE, position: pickedPosition});
             }
 
             $scope.storeLocation = function(location) {
@@ -165,15 +70,8 @@ angular.module('ngModuleLocationPicker')
              */
 
             if (angular.isDefined($stateParams.initialPosition)) {
-
-                $scope.showLocationPicker(
-                    $stateParams.initialPosition,
-                    $stateParams.markedPosition,
-                    function(pickedPosition) {
-                        $scope.deferredLocationPicker.resolve({targetState: STATE.TIMETABLE, position: pickedPosition});
-                    }
-                );
-
+                $scope.initialPosition = $stateParams.initialPosition;
+                $scope.markedPosition = $stateParams.markedPosition;
             }
 
             else {

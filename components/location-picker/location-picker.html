@@ -1,34 +1,41 @@
+<gyf-location-picker-container
+        initial-position="initialPosition"
+        marked-position="markedPosition"
+        pick-position="pickPosition(pickedPosition)"
+        store-location="storeLocation(location)">
 
-<!-- Toolbar -->
-<div class="panel panel-default">
+    <!-- Toolbar -->
+    <div class="panel panel-default">
 
-    <!-- For Location Picker -->
-    <div class="panel-heading">
-        <div class="row">
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                <input id="locationPicker-address" type="text" class="form-control" size="40" onclick="this.select();">
-            </div>
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                <button id="locationPickerButtonOk" type="submit" class="btn btn-default">Ok</button>
+        <!-- For Location Picker -->
+        <div class="panel-heading">
+            <div class="row">
+                <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                    <input data-gyf-location-picker-input="address" type="text" class="form-control" size="40">
+                </div>
+                <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                    <button data-gyf-location-picker-action="submit" type="submit" class="btn btn-default">Ok</button>
                 <span class="pull-right">
                     <span class="btn-group">
-                        <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(250)">250m</button>
-                        <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(500)">500m</button>
-                        <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(750)">750m</button>
-                        <button type="button" class="btn btn-default" data-ng-click="onLocationPickerRadiusChange(1000)">1000m</button>
+                        <button data-gyf-location-picker-action="radius-change" radius-value="250" type="button" class="btn btn-default">250m</button>
+                        <button data-gyf-location-picker-action="radius-change" radius-value="500" type="button" class="btn btn-default">500m</button>
+                        <button data-gyf-location-picker-action="radius-change" radius-value="750" type="button" class="btn btn-default">750m</button>
+                        <button data-gyf-location-picker-action="radius-change" radius-value="1000" type="button" class="btn btn-default">1000m</button>
                     </span>
                 </span>
+                </div>
             </div>
         </div>
+
     </div>
 
-</div>
+    <!-- Location Picker -->
+    <div data-gyf-location-picker-panel class="panel panel-default">
+        <input data-gyf-location-picker-input="latitude" type="hidden" id="locationPicker-latitude">
+        <input data-gyf-location-picker-input="longitude" type="hidden" id="locationPicker-longitude">
+        <input data-gyf-location-picker-input="radius" type="hidden" id="locationPicker-radius">
 
-<!-- Location Picker -->
-<div id="locationPickerPanel" class="panel panel-default">
-    <input type="hidden" id="locationPicker-latitude">
-    <input type="hidden" id="locationPicker-longitude">
-    <input type="hidden" id="locationPicker-radius">
+        <div data-gyf-location-picker id="locationPicker" class="panel-body"></div>
+    </div>
 
-    <div id="locationPicker" class="panel-body"></div>
-</div>
+</gyf-location-picker-container>
