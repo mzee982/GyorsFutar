@@ -90,3 +90,7 @@ html, body {
 .row-body {
     padding: 5px;
 }
+
+.link {
+    cursor: pointer;
+}

@@ -34,8 +34,9 @@ angular.module('ngModuleTimetable')
             function searchStops(id, name) {
                 var deferred = $q.defer();
 
-                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/search.json?query=$QUERY';
+                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/search.json?query=$QUERY&includeReferences=$INCLUDE_REFERENCES';
                 url = url.replace('$QUERY', name);
+                url = url.replace('$INCLUDE_REFERENCES', 'routes,stops');
 
                 console.info('searchStops URL: ' + url);
 
@@ -53,10 +54,11 @@ angular.module('ngModuleTimetable')
             function getStopsForLocation(position) {
                 var deferred = $q.defer();
 
-                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=$LATITIUDE&lon=$LONGITUDE&radius=$RADIUS';
+                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=$LATITIUDE&lon=$LONGITUDE&radius=$RADIUS&includeReferences=$INCLUDE_REFERENCES';
                 url = url.replace('$LATITIUDE', position.coords.latitude);
                 url = url.replace('$LONGITUDE', position.coords.longitude);
                 url = url.replace('$RADIUS', position.coords.accuracy);
+                url = url.replace('$INCLUDE_REFERENCES', 'false');
 
                 console.info('getStopsForLocation URL: ' + url);
 
@@ -74,15 +76,27 @@ angular.module('ngModuleTimetable')
             function getArrivalsAndDeparturesForStop(stopIdArray) {
                 var deferred = $q.defer();
 
-                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json';
+                // Collect stop ids
+
+                var stopIdsString = '';
 
                 if (stopIdArray.length > 0) {
-                    url = url + '?stopId=' + stopIdArray[0];
+                    stopIdsString = stopIdsString + 'stopId=' + stopIdArray[0];
 
                     for (var i = 1; i < stopIdArray.length; i++) {
-                        url = url + '&stopId=' + stopIdArray[i];
+                        stopIdsString = stopIdsString + '&stopId=' + stopIdArray[i];
                     }
                 }
+
+                // URL build
+
+                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json?$STOP_IDS&onlyDepartures=$ONLY_DEPARTURES&minutesBefore=$MINUTES_BEFORE&minutesAfter=$MINUTES_AFTER&includeReferences=$INCLUDE_REFERENCES';
+
+                url = url.replace('$STOP_IDS', stopIdsString);
+                url = url.replace('$ONLY_DEPARTURES', false);
+                url = url.replace('$MINUTES_BEFORE', '0');
+                url = url.replace('$MINUTES_AFTER', '30');
+                url = url.replace('$INCLUDE_REFERENCES', 'trips');
 
                 console.info('getArrivalsAndDeparturesForStop URL: ' + url);
 
@@ -292,7 +306,7 @@ angular.module('ngModuleTimetable')
                 // StopTimes
                 for (stopTimeIndex = 0; stopTimeIndex < stopTimeArray.length; stopTimeIndex++) {
                     var stopTime = stopTimeArray[stopTimeIndex];
-                    var stopId = stopTime.stopId;
+                    var stopId = angular.isDefined(stopTime.stopId) ? stopTime.stopId : data.data.entry.stopId;
                     var tripId = stopTime.tripId
                     var trip = tripReferences[tripId];
                     var routeId = trip.routeId;
@@ -354,7 +368,8 @@ angular.module('ngModuleTimetable')
 
             function transformTimetableModelToPresentation(timetableModel) {
                 var timetablePresentation = {
-                    parentStations: undefined
+                    parentStations: undefined,
+                    buildTime: new Date()
                 };
 
                 // Group: Stop -> ParentStation
@@ -397,6 +412,7 @@ angular.module('ngModuleTimetable')
                     var sourceStopGroup = stopGroups[parentStationId];
 
                     var targetParentStation = {
+                        id: parentStationId,
                         name: sourceStopGroup.name,
                         minDistance: sourceStopGroup.minDistance,
                         // Merge: Stop -> RouteGroup
@@ -666,10 +682,11 @@ angular.module('ngModuleTimetable')
             }
 
             function applyPreviousPresentationState(timetablePresentation, previousTimetablePresentation) {
-                var expandedParentStationName = undefined;
+                var expandedParentStationId = undefined;
                 var expandedRouteGroups = {};
 
                 // Find the only expanded ParentStation
+
                 if (previousTimetablePresentation != undefined) {
                     var parentStationArray = previousTimetablePresentation.parentStations;
 
@@ -677,8 +694,7 @@ angular.module('ngModuleTimetable')
                         var parentStation = parentStationArray[parentStationIndex];
 
                         if (parentStation.isExpanded) {
-                            //TODO Fix: Match by id
-                            expandedParentStationName = parentStation.name;
+                            expandedParentStationId = parentStation.id;
 
                             // Find the expanded RouteGroups
 
@@ -702,12 +718,12 @@ angular.module('ngModuleTimetable')
 
                 var parentStationArray = timetablePresentation.parentStations;
 
-                if (expandedParentStationName != undefined) {
+                if (expandedParentStationId != undefined) {
 
                     for (var parentStationIndex = 0; parentStationIndex < parentStationArray.length; parentStationIndex++) {
                         var parentStation = parentStationArray[parentStationIndex];
 
-                        if (parentStation.name == expandedParentStationName) {
+                        if (parentStation.id == expandedParentStationId) {
                             parentStation.isExpanded = true;
 
                             // Expand the selected RouteGroups
@@ -728,7 +744,7 @@ angular.module('ngModuleTimetable')
 
                 }
 
-                else if (parentStationArray.length > 0) {
+                else if ((angular.isUndefined(previousTimetablePresentation)) && (parentStationArray.length > 0)) {
 
                     // Default
                     parentStationArray[0].isExpanded = true;
@@ -893,10 +909,18 @@ angular.module('ngModuleTimetable')
                 // RouteGroups with Trips first
                 ret = Number(!aHasTrips) - Number(!bHasTrips);
 
+                // Order by route name
+
+                if (ret == 0) {
+                    ret = compareRouteNames(a.names[0], b.names[0]);
+                }
+
+/*
                 // Order by minDistance
                 if (ret == 0) {
                     ret = a.minDistance - b.minDistance;
                 }
+*/
 
                 return ret;
             }

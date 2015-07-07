@@ -21,7 +21,6 @@ angular.module('ngModuleTimetable')
             $scope.geoPosition = undefined;
             $scope.timetableUpdateTimeout = undefined;
             $scope.isBuilding = undefined;
-            $scope.timetableBuildTime = undefined;
             $scope.timetablePresentation = undefined;
 
 
@@ -67,6 +66,18 @@ angular.module('ngModuleTimetable')
                 });
             }
 
+            $scope.onRouteGroupHeaderClick = function(event, routeGroup) {
+
+                if (routeGroup.isGroup) {
+                    routeGroup.isExpanded=!routeGroup.isExpanded
+                }
+
+                else {
+                    event.preventDefault();
+                }
+
+            }
+
             $scope.buildTimetable = function(location) {
                 $scope.isBuilding = true;
 
@@ -77,7 +88,6 @@ angular.module('ngModuleTimetable')
 
                     // Done
                     function(timetablePresentation) {
-                        $scope.timetableBuildTime = new Date();
                         $scope.timetablePresentation = timetablePresentation;
                         $scope.isBuilding = false;
 
@@ -87,7 +97,6 @@ angular.module('ngModuleTimetable')
 
                     // Fail
                     function(message) {
-                        $scope.timetableBuildTime = undefined;
                         $scope.timetablePresentation = undefined;
                         $scope.isBuilding = false;
 
