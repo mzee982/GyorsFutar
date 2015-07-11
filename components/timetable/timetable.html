@@ -10,10 +10,10 @@
     <!-- For Timetable Show -->
     <div class="panel-heading" data-ng-if="timetablePresentation != undefined">
         <div class="row">
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+            <div class="col-sm-6 col-xs-12" style="margin-top: 5px; margin-bottom: 5px;">
                 <input type="text" class="form-control" size="40" readonly value="{{geoPosition.formattedAddress}}">
             </div>
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+            <div class="col-sm-3 col-xs-6" style="margin-top: 5px; margin-bottom: 5px;">
                 <span class="btn-group">
                     <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE.AUTO)">
                         <span class="glyphicon glyphicon-screenshot"></span>
@@ -25,6 +25,12 @@
                         <span class="glyphicon glyphicon-picture"></span>
                     </button>
                 </span>
+            </div>
+            <div class="col-sm-1 col-xs-2" style="margin-top: 5px; margin-bottom: 5px;">
+                <h4 class="no-margin" data-gyf-countdown data-ng-if="timetablePresentation.baseTime == undefined"></h4>
+                <h4 class="no-margin" data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'H:mm'}}</h4>
+            </div>
+            <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
                 <span class="pull-right">
                     <span data-gyf-countdown data-source-time='timetablePresentation.buildTime'></span>
                     <button type="button" class="btn btn-default" data-ng-click="onTimetableRefreshClick()">
@@ -49,7 +55,7 @@
                     </span>
                 </div>
                 <div class="col-xs-2">
-                    <div class="pull-right glyphicon" ng-class="{'glyphicon-chevron-down': parentStation.isExpanded, 'glyphicon-chevron-right': !parentStation.isExpanded}"></div>
+                    <div class="pull-right glyphicon" data-ng-class="{'glyphicon-chevron-down': parentStation.isExpanded, 'glyphicon-chevron-right': !parentStation.isExpanded}"></div>
                 </div>
             </div>
         </accordion-heading>
@@ -62,7 +68,7 @@
                     <div collapse="routeGroup.isGroup && routeGroup.isExpanded">
 
                         <!-- Header -->
-                        <div class="row-header" ng-class="{'link': routeGroup.isGroup}" data-ng-click="onRouteGroupHeaderClick($event, routeGroup)">
+                        <div class="row-header" data-ng-class="{'link': routeGroup.isGroup}" data-ng-click="onRouteGroupHeaderClick($event, routeGroup)">
                             <div class="row">
                                 <div class="col-xs-12">
                                     <div class="row">
@@ -78,7 +84,7 @@
                                         </div>
                                         <div class="col-sm-8 col-sm-pull-2 col-xs-12">
                                             <h5 class="no-margin text-center">
-                                                <div data-ng-repeat="description in routeGroup.descriptions">{{description}}</div>
+                                                <div data-ng-repeat="description in routeGroup.descriptions track by $index">{{description}}</div>
                                             </h5>
                                         </div>
                                     </div>
@@ -90,7 +96,7 @@
                         <div class="row-body">
                             <div class="row">
                                 <div class="col-xs-6">
-                                    <div data-ng-if="routeGroup.tripLeft != undefined">
+                                    <div class="link" data-ng-if="routeGroup.tripLeft != undefined" data-ng-click="onStopTimeClick(routeGroup.tripLeft)">
                                         <h5 class="no-margin text-center">
                                             <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripLeft.routeName}}</span>
                                             <span><strong>{{routeGroup.tripLeft.name}}</strong></span>
@@ -101,7 +107,7 @@
                                     </div>
                                 </div>
                                 <div class="col-xs-6">
-                                    <div data-ng-if="routeGroup.tripRight != undefined">
+                                    <div class="link" data-ng-if="routeGroup.tripRight != undefined" data-ng-click="onStopTimeClick(routeGroup.tripRight)">
                                         <h5 class="no-margin text-center">
                                             <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripRight.routeName}}</span>
                                             <span><strong>{{routeGroup.tripRight.name}}</strong></span>
@@ -130,14 +136,14 @@
                                 <div class="col-xs-6">
                                     <div data-ng-if="routeGroup.tripLeft != undefined">
                                         <h5 class="no-margin text-center">
-                                            <strong data-gyf-countdown data-target-time='routeGroup.tripLeft.stopTime'></strong>
+                                            <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripLeft.stopTime'></strong>
                                         </h5>
                                     </div>
                                 </div>
                                 <div class="col-xs-6">
                                     <div data-ng-if="routeGroup.tripRight != undefined">
                                         <h5 class="no-margin text-center">
-                                            <strong data-gyf-countdown data-target-time='routeGroup.tripRight.stopTime'></strong>
+                                            <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripRight.stopTime'></strong>
                                         </h5>
                                     </div>
                                 </div>
@@ -180,7 +186,7 @@
                                     <div class="row-body">
                                         <div class="row">
                                             <div class="col-xs-6">
-                                                <div data-ng-if="route.tripLeft != undefined">
+                                                <div class="link" data-ng-if="route.tripLeft != undefined" data-ng-click="onStopTimeClick(route.tripLeft)">
                                                     <h5 class="no-margin text-center">
                                                         <strong>{{route.tripLeft.name}}</strong>
                                                         <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
@@ -190,7 +196,7 @@
                                                 </div>
                                             </div>
                                             <div class="col-xs-6">
-                                                <div data-ng-if="route.tripRight != undefined">
+                                                <div class="link" data-ng-if="route.tripRight != undefined" data-ng-click="onStopTimeClick(route.tripRight)">
                                                     <h5 class="no-margin text-center">
                                                         <strong>{{route.tripRight.name}}</strong>
                                                         <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
@@ -218,14 +224,14 @@
                                             <div class="col-xs-6">
                                                 <div data-ng-if="route.tripLeft != undefined">
                                                     <h5 class="no-margin text-center">
-                                                        <strong data-gyf-countdown data-target-time='route.tripLeft.stopTime'></strong>
+                                                        <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripLeft.stopTime'></strong>
                                                     </h5>
                                                 </div>
                                             </div>
                                             <div class="col-xs-6">
                                                 <div data-ng-if="route.tripRight != undefined">
                                                     <h5 class="no-margin text-center">
-                                                        <strong data-gyf-countdown data-target-time='route.tripRight.stopTime'></strong>
+                                                        <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripRight.stopTime'></strong>
                                                     </h5>
                                                 </div>
                                             </div>

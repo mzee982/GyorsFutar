@@ -2,7 +2,10 @@ angular.module('ngAppGyorsFutar',
     [   'ui.router',
         'ui.bootstrap',
         'ngStorage',
+        'ngModuleLocation',
+        'ngModuleBkkFutar',
         'ngModuleLocationDetection',
         'ngModuleRecentLocationList',
         'ngModuleLocationPicker',
-        'ngModuleTimetable']);
+        'ngModuleTimetable',
+        'ngModuleTrip']);

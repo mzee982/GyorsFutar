@@ -1,0 +1,72 @@
+
+<!-- Toolbar -->
+<div class="panel panel-default">
+
+    <!-- For Trip Build -->
+    <div class="panel-heading" data-ng-if="isBuilding && (tripPresentation == undefined)">
+        <h4 class="panel-title">Building trip...</h4>
+    </div>
+
+    <!-- For Trip Show -->
+    <div class="panel-heading" data-ng-if="tripPresentation != undefined">
+        <div class="row">
+            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+
+            </div>
+            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                <span class="pull-right">
+                    <span data-gyf-countdown data-source-time='tripPresentation.buildTime'></span>
+                    <button type="button" class="btn btn-default" data-ng-click="onTripRefreshClick()">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Trip -->
+<div class="panel panel-default" data-ng-if="tripPresentation != undefined">
+
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-xs-1">
+                <h3 class="no-margin text-left">
+                    <span class="label label-default" data-ng-style="{'color': tripPresentation.routeTextColor, 'background-color': tripPresentation.routeColor}">{{tripPresentation.routeName}}</span>
+                </h3>
+            </div>
+            <div class="col-xs-11">
+                <h5 class="no-margin text-center">
+                    <div>{{tripPresentation.tripHeadsign}}</div>
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <table class="table table-bordered table-hover table-condensed">
+            <tbody>
+            <tr class="row" data-ng-repeat="stopTime in tripPresentation.stopTimes">
+                <td class="col-xs-1">
+                    <h5 data-ng-if="!stopTime.isCurrent">{{stopTime.stopTimeDiff}}</h5>
+                    <h5 data-ng-if="stopTime.isCurrent"><strong>{{stopTime.stopTimeDiff}}</strong></h5>
+                </td>
+                <td class="link col-xs-9" data-ng-click="onStopClick(stopTime)">
+                    <h5 data-ng-if="!stopTime.isCurrent">{{stopTime.stopName}}</h5>
+                    <h5 data-ng-if="stopTime.isCurrent"><strong>{{stopTime.stopName}}</strong></h5>
+                </td>
+                <td class="col-xs-1">
+                    <h5 data-ng-if="!stopTime.isCurrent">{{stopTime.stopTimeString}}</h5>
+                    <h5 data-ng-if="stopTime.isCurrent"><strong>{{stopTime.stopTimeString}}</strong></h5>
+                </td>
+                <td class="col-xs-1">
+                    <h5 data-ng-if="stopTime.isCurrent"><strong data-gyf-countdown data-target-time='stopTime.stopTime'></strong></h5>
+                    <h5 data-ng-if="stopTime.isSubsequent"><span data-gyf-countdown data-target-time='stopTime.stopTime'></span></h5>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

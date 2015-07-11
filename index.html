@@ -38,6 +38,7 @@
     </head>
     <body>
         <div id="container" class="container-fluid" data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
+            <!--TODO Use Angular UI Alert directives-->
 
             <!-- Alert Success -->
             <div id="idAlertSuccess" class="alert alert-success" data-ng-show="successMessage != undefined">
@@ -56,6 +57,12 @@
 
         </div>
 
+        <script src="components/location/location.js"></script>
+        <script src="components/location/location-service.js"></script>
+
+        <script src="components/bkk-futar/bkk-futar.js"></script>
+        <script src="components/bkk-futar/bkk-futar-service.js"></script>
+
         <script src="components/location-detection/location-detection.js"></script>
         <script src="components/location-detection/location-detection-controller.js"></script>
 
@@ -69,6 +76,10 @@
         <script src="components/timetable/timetable.js"></script>
         <script src="components/timetable/timetable-service.js"></script>
         <script src="components/timetable/timetable-controller.js"></script>
+
+        <script src="components/trip/trip.js"></script>
+        <script src="components/trip/trip-controller.js"></script>
+        <script src="components/trip/trip-service.js"></script>
 
         <script src="app.js"></script>
         <script src="app-config.js"></script>

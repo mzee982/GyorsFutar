@@ -4,7 +4,8 @@ angular.module('ngAppGyorsFutar')
         'LOCATION_DETECTION': 'location-detection',
         'RECENT_LOCATION_LIST': 'recent-location-list',
         'LOCATION_PICKER': 'location-picker',
-        'TIMETABLE': 'timetable'
+        'TIMETABLE': 'timetable',
+        'TRIP': 'trip'
     })
     .constant('EVENT', {
         'SUCCESS_MESSAGE': 'successMessage',
@@ -53,7 +54,17 @@ angular.module('ngAppGyorsFutar')
                 templateUrl: 'components/timetable/timetable.html',
                 controller: 'ngControllerTimetable',
                 params: {
-                    location: undefined
+                    location: undefined,
+                    baseTime: undefined
+                }
+            })
+            .state(STATE.TRIP, {
+                //url: '/trip',
+                templateUrl: 'components/trip/trip.html',
+                controller: 'ngControllerTrip',
+                params: {
+                    tripId: undefined,
+                    stopId: undefined
                 }
             });
     }]);

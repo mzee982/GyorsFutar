@@ -19,6 +19,8 @@ angular.module('ngModuleTimetable')
             $scope.promiseTimetable = $scope.deferredTimetable.promise;
 
             $scope.geoPosition = undefined;
+            $scope.baseTime = undefined;
+
             $scope.timetableUpdateTimeout = undefined;
             $scope.isBuilding = undefined;
             $scope.timetablePresentation = undefined;
@@ -31,7 +33,7 @@ angular.module('ngModuleTimetable')
 
                 // Update Timetable
                 $scope.timetableUpdateTimeout = $timeout(function() {
-                        $scope.buildTimetable($scope.geoPosition);
+                        $scope.buildTimetable($scope.geoPosition, $scope.baseTime);
                     },
                     TIMETABLE.AUTO_UPDATE_DELAY);
 
@@ -54,7 +56,7 @@ angular.module('ngModuleTimetable')
             }
 
             $scope.onTimetableRefreshClick = function() {
-                $scope.buildTimetable($scope.geoPosition);
+                $scope.buildTimetable($scope.geoPosition, $scope.baseTime);
             }
 
             $scope.onStopLocationClick = function(stopTime) {
@@ -63,6 +65,14 @@ angular.module('ngModuleTimetable')
                     locationMode: LOCATION_MODE.MAP,
                     initialPosition: $scope.geoPosition,
                     markedPosition: stopTime
+                });
+            }
+
+            $scope.onStopTimeClick = function(stopTime) {
+                $scope.deferredTimetable.resolve({
+                    targetState: STATE.TRIP,
+                    tripId: stopTime.tripId,
+                    stopId: stopTime.stopId
                 });
             }
 
@@ -78,10 +88,10 @@ angular.module('ngModuleTimetable')
 
             }
 
-            $scope.buildTimetable = function(location) {
+            $scope.buildTimetable = function(location, baseTime) {
                 $scope.isBuilding = true;
 
-                var promiseBuildTimetable = ngServiceTimetable.buildTimetable(location, $scope.timetablePresentation);
+                var promiseBuildTimetable = ngServiceTimetable.buildTimetable(location, baseTime, $scope.timetablePresentation);
 
                 // Show timetable
                 promiseBuildTimetable.then(
@@ -114,7 +124,8 @@ angular.module('ngModuleTimetable')
 
             if (angular.isDefined($stateParams.location)) {
                 $scope.geoPosition = $stateParams.location;
-                $scope.buildTimetable($scope.geoPosition);
+                $scope.baseTime = $stateParams.baseTime;
+                $scope.buildTimetable($scope.geoPosition, $scope.baseTime);
             }
 
             else {
@@ -141,7 +152,18 @@ angular.module('ngModuleTimetable')
                                 markedPosition: data.markedPosition
                             };
 
-                            $state.go(STATE.LOCATION_DETECTION, locationDetectionParams);
+                            $state.go(data.targetState, locationDetectionParams);
+
+                            break;
+
+                        case STATE.TRIP:
+
+                            var tripParams = {
+                                tripId: data.tripId,
+                                stopId: data.stopId
+                            };
+
+                            $state.go(data.targetState, tripParams);
 
                             break;
 

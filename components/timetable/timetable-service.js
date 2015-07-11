@@ -1,14 +1,15 @@
 angular.module('ngModuleTimetable')
     .factory('ngServiceTimetable',
     [   '$q',
-        function($q) {
+        'ngServiceBkkFutar',
+        function($q, ngServiceBkkFutar) {
 
             /*
              * Interface
              */
 
             var serviceInstance = {
-                buildTimetable: function(position, previousTimetablePresentation) {return buildTimetable(position, previousTimetablePresentation);}
+                buildTimetable: function(position, baseTime, previousTimetablePresentation) {return buildTimetable(position, baseTime, previousTimetablePresentation);}
             };
 
 
@@ -27,90 +28,6 @@ angular.module('ngModuleTimetable')
                     true,
                     {enableHighAccuracy: true, timeout: 6000, maximumAge: 0},
                     null);
-
-                return deferred.promise;
-            }
-
-            function searchStops(id, name) {
-                var deferred = $q.defer();
-
-                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/search.json?query=$QUERY&includeReferences=$INCLUDE_REFERENCES';
-                url = url.replace('$QUERY', name);
-                url = url.replace('$INCLUDE_REFERENCES', 'routes,stops');
-
-                console.info('searchStops URL: ' + url);
-
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {deferred.resolve({id: id, data: data});},
-                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
-                });
-
-                return deferred.promise;
-            }
-
-            function getStopsForLocation(position) {
-                var deferred = $q.defer();
-
-                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/stops-for-location.json?lat=$LATITIUDE&lon=$LONGITUDE&radius=$RADIUS&includeReferences=$INCLUDE_REFERENCES';
-                url = url.replace('$LATITIUDE', position.coords.latitude);
-                url = url.replace('$LONGITUDE', position.coords.longitude);
-                url = url.replace('$RADIUS', position.coords.accuracy);
-                url = url.replace('$INCLUDE_REFERENCES', 'false');
-
-                console.info('getStopsForLocation URL: ' + url);
-
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {deferred.resolve(data);},
-                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
-                });
-
-                return deferred.promise;
-            }
-
-            function getArrivalsAndDeparturesForStop(stopIdArray) {
-                var deferred = $q.defer();
-
-                // Collect stop ids
-
-                var stopIdsString = '';
-
-                if (stopIdArray.length > 0) {
-                    stopIdsString = stopIdsString + 'stopId=' + stopIdArray[0];
-
-                    for (var i = 1; i < stopIdArray.length; i++) {
-                        stopIdsString = stopIdsString + '&stopId=' + stopIdArray[i];
-                    }
-                }
-
-                // URL build
-
-                var url = 'http://futar.bkk.hu/bkk-utvonaltervezo-api/ws/otp/api/where/arrivals-and-departures-for-stop.json?$STOP_IDS&onlyDepartures=$ONLY_DEPARTURES&minutesBefore=$MINUTES_BEFORE&minutesAfter=$MINUTES_AFTER&includeReferences=$INCLUDE_REFERENCES';
-
-                url = url.replace('$STOP_IDS', stopIdsString);
-                url = url.replace('$ONLY_DEPARTURES', false);
-                url = url.replace('$MINUTES_BEFORE', '0');
-                url = url.replace('$MINUTES_AFTER', '30');
-                url = url.replace('$INCLUDE_REFERENCES', 'trips');
-
-                console.info('getArrivalsAndDeparturesForStop URL: ' + url);
-
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {
-                        deferred.resolve(data);
-                    },
-                    error: function(xhr, status, errorThrown) {
-                        deferred.reject(status + ' ' + errorThrown);
-                    }
-                });
 
                 return deferred.promise;
             }
@@ -183,7 +100,7 @@ angular.module('ngModuleTimetable')
 
                     for (var nameIndex = 0; nameIndex < actualParentStationNames.length; nameIndex++) {
                         var actualParentStationName = actualParentStationNames[nameIndex];
-                        promisesSearchStops.push(searchStops(parentStationId, actualParentStationName));
+                        promisesSearchStops.push(ngServiceBkkFutar.searchStops(parentStationId, actualParentStationName));
                     }
                 }
 
@@ -278,8 +195,8 @@ angular.module('ngModuleTimetable')
                             description: route.description,
                             trips: {},
                             minDistance: undefined,
-                            color: '#' + route.color,
-                            textColor: '#' + route.textColor
+                            color: ngServiceBkkFutar.convertColor(route.color),
+                            textColor: ngServiceBkkFutar.convertColor(route.textColor)
                         };
                     }
 
@@ -307,27 +224,30 @@ angular.module('ngModuleTimetable')
                 for (stopTimeIndex = 0; stopTimeIndex < stopTimeArray.length; stopTimeIndex++) {
                     var stopTime = stopTimeArray[stopTimeIndex];
                     var stopId = angular.isDefined(stopTime.stopId) ? stopTime.stopId : data.data.entry.stopId;
-                    var tripId = stopTime.tripId
+                    var tripId = stopTime.tripId;
                     var trip = tripReferences[tripId];
                     var routeId = trip.routeId;
 
                     var tripStopTime = {
-                        stopId: stopTime.stopId,
+                        stopId: stopId,
                         arrivalTime: stopTime.arrivalTime,
                         departureTime: stopTime.departureTime,
                         predictedArrivalTime:stopTime.predictedArrivalTime,
                         predictedDepartureTime: stopTime.predictedDepartureTime,
+                        tripId: tripId,
                         stopLat: undefined,
                         stopLon: undefined
                     };
 
                     // Feed timetableModel
-                    timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
-                        id: trip.id,
-                        tripHeadsign: trip.tripHeadsign,
-                        directionId: trip.directionId,
-                        stopTime: tripStopTime
-                    };
+                    if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
+                        timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
+                            id: trip.id,
+                            tripHeadsign: trip.tripHeadsign,
+                            directionId: trip.directionId,
+                            stopTime: tripStopTime
+                        };
+                    }
 
                 }
 
@@ -369,17 +289,18 @@ angular.module('ngModuleTimetable')
             function transformTimetableModelToPresentation(timetableModel) {
                 var timetablePresentation = {
                     parentStations: undefined,
+                    baseTime: timetableModel.baseTime,
                     buildTime: new Date()
                 };
 
                 // Group: Stop -> ParentStation
-                timetablePresentation.parentStations = groupStopsIntoParentStations(timetableModel.stops);
+                timetablePresentation.parentStations = groupStopsIntoParentStations(timetableModel.stops, timetableModel.baseTime);
 
                 return timetablePresentation;
             }
 
             // Group: Stop -> ParentStation
-            function groupStopsIntoParentStations(stops) {
+            function groupStopsIntoParentStations(stops, baseTime) {
                 var stopGroups = {};
                 var parentStationArray = [];
 
@@ -416,7 +337,7 @@ angular.module('ngModuleTimetable')
                         name: sourceStopGroup.name,
                         minDistance: sourceStopGroup.minDistance,
                         // Merge: Stop -> RouteGroup
-                        routeGroups: mergeStopsIntoRouteGroup(sourceStopGroup.stops),
+                        routeGroups: mergeStopsIntoRouteGroup(sourceStopGroup.stops, baseTime),
                         routeNames: [],
                         routeColors: [],
                         routeTextColors: [],
@@ -471,7 +392,7 @@ angular.module('ngModuleTimetable')
             }
 
             // Merge: Stop -> RouteGroup
-            function mergeStopsIntoRouteGroup(stops) {
+            function mergeStopsIntoRouteGroup(stops, baseTime) {
                 var routeGroups = {};
                 var routeGroupArray = [];
 
@@ -542,7 +463,7 @@ angular.module('ngModuleTimetable')
                         targetRouteGroup.isExpanded = false;
 
                         // Merge: Trip -> Route
-                        var targetRoute = mergeTripsIntoRoute(actualRoute);
+                        var targetRoute = mergeTripsIntoRoute(actualRoute, baseTime);
                         targetRouteGroup.routes.push(targetRoute);
 
                         // Update: StopTime -> RouteGroup
@@ -598,8 +519,7 @@ angular.module('ngModuleTimetable')
             }
 
             // Merge: Trip -> Route
-            function mergeTripsIntoRoute(route) {
-                var actualDate = new Date();
+            function mergeTripsIntoRoute(route, baseTime) {
                 var targetRoute = {
                     id: route.id,
                     name: route.shortName,
@@ -611,6 +531,10 @@ angular.module('ngModuleTimetable')
                     tripRight: undefined
                 };
                 var stopTimeGroups = {};
+
+                // Base time
+                var actualDate = new Date();
+                if (angular.isUndefined(baseTime) || (angular.isDefined(baseTime) && (baseTime < actualDate))) baseTime = actualDate;
 
                 // Group StopTimes by directions
                 for (tripId in route.trips) {
@@ -625,20 +549,16 @@ angular.module('ngModuleTimetable')
                     }
 
                     var actualStopTimeGroup = stopTimeGroups[actualDirection];
-                    var stopTimeValue = undefined;
 
-                    if (actualStopTime.predictedArrivalTime != undefined) stopTimeValue = actualStopTime.predictedArrivalTime
-                    else if (actualStopTime.arrivalTime != undefined) stopTimeValue = actualStopTime.arrivalTime
-                    else if (actualStopTime.predictedDepartureTime != undefined) stopTimeValue = actualStopTime.predictedDepartureTime
-                    else if (actualStopTime.departureTime != undefined) stopTimeValue = actualStopTime.departureTime;
-
-                    var stopTimeDate = new Date(stopTimeValue * 1000);
+                    var aggrStopTime = ngServiceBkkFutar.aggregateStopTime(actualStopTime);
 
                     var targetStopTime = {
                         name: actualTrip.tripHeadsign,
                         routeName: route.shortName,
-                        stopTime: stopTimeDate,
-                        stopTimeString: stopTimeDate.toLocaleTimeString(),
+                        stopId: actualStopTime.stopId,
+                        tripId: actualStopTime.tripId,
+                        stopTime: aggrStopTime.stopTime,
+                        stopTimeString: aggrStopTime.stopTimeString,
                         stopLat: actualStopTime.stopLat,
                         stopLon: actualStopTime.stopLon
                     };
@@ -654,7 +574,7 @@ angular.module('ngModuleTimetable')
                     for (var stopTimeIndex = 0; stopTimeIndex < actualStopTimeGroup.stopTimes.length; stopTimeIndex++) {
                         var actualStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex];
 
-                        if (actualStopTime.stopTime > actualDate) {
+                        if (actualStopTime.stopTime > (baseTime)) {
                             if ((selectedStopTime == undefined)
                                 || (actualStopTime.stopTime < selectedStopTime.stopTime)) {
                                 selectedStopTime = actualStopTime;
@@ -754,7 +674,7 @@ angular.module('ngModuleTimetable')
                 return timetablePresentation;
             }
 
-            function buildTimetable(position, previousTimetablePresentation) {
+            function buildTimetable(position, baseTime, previousTimetablePresentation) {
                 var deferred = $q.defer();
 
                 var geoPosition = position;
@@ -768,7 +688,8 @@ angular.module('ngModuleTimetable')
 
                         return stopIdArray;
                     },
-                    stops: {}
+                    stops: {},
+                    baseTime: baseTime
                 };
                 var timetablePresentation = undefined;
 
@@ -777,7 +698,7 @@ angular.module('ngModuleTimetable')
                  * Stops for location
                  */
 
-                var promiseGetStopsForLocation = getStopsForLocation(geoPosition);
+                var promiseGetStopsForLocation = ngServiceBkkFutar.getStopsForLocation(geoPosition);
 
                 var promiseCollectStopsForParentStations = promiseGetStopsForLocation.then(
 
@@ -803,7 +724,7 @@ angular.module('ngModuleTimetable')
                     function(stopsAndRoutes) {
                         timetableModel = processStopsForLocationResponse(timetableModel, stopsAndRoutes.stops, stopsAndRoutes.routes);
 
-                        return getArrivalsAndDeparturesForStop(timetableModel.getStopIds());
+                        return ngServiceBkkFutar.getArrivalsAndDeparturesForStop(timetableModel.getStopIds(), timetableModel.baseTime);
                     },
 
                     // Error

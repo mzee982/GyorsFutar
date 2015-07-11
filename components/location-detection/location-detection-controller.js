@@ -4,86 +4,41 @@ angular.module('ngModuleLocationDetection')
             '$state',
             '$stateParams',
             '$q',
+            'ngServiceLocation',
             'STATE',
             'LOCATION_MODE',
             'EVENT',
-            function($scope, $state, $stateParams, $q, STATE, LOCATION_MODE, EVENT) {
+            function($scope, $state, $stateParams, $q, ngServiceLocation, STATE, LOCATION_MODE, EVENT) {
 
-                $scope.selectLocationByGeoLocator = function() {
+                $scope.getLocationByGeoLocator = function() {
                     var deferred = $q.defer();
 
-                    var promiseGetLocation = $scope.getLocation();
+                    var promiseLocationByGeoLocator = ngServiceLocation.getLocationByGeoLocator();
 
-                    promiseGetLocation.then(
+                    promiseLocationByGeoLocator.then(
 
                         // Success
-                        function(position) {
+                        function(data) {
 
-                            console.info(
-                                'Position ' +
-                                'lat: ' + position.coords.latitude +
-                                ' lon: ' + position.coords.longitude +
-                                ' accuracy: ' + position.coords.accuracy +
-                                ' formattedAddress: ' + position.formattedAddress);
-
-                            // Format
-                            position = {
-                                coords: {
-                                    latitude: parseFloat(position.coords.latitude).toFixed(6),
-                                    longitude: parseFloat(position.coords.longitude).toFixed(6),
-                                    accuracy: parseInt((position.coords.accuracy == undefined) ? 1000 : position.coords.accuracy)
-                                },
-                                formattedAddress: position.formattedAddress
-                            };
-
-                            // Accurate enough
-                            if (position.coords.accuracy < 500) {
-
-                                // Min search radius
-                                if (position.coords.accuracy < 250) position.coords.accuracy = 250;
-
-                                deferred.resolve({targetState: STATE.TIMETABLE, position: position});
+                            // Timetable
+                            if (data.isAccurate) {
+                                deferred.resolve({targetState: STATE.TIMETABLE, position: data.location});
                             }
 
-                            // Not accurate enough
+                            // Stored locations
                             else {
-
-                                // Stored locations
-                                deferred.resolve({targetState: STATE.RECENT_LOCATION_LIST, position: position});
-
+                                deferred.resolve({targetState: STATE.RECENT_LOCATION_LIST, position: data.location});
                             }
 
                         },
 
                         // Error
                         function(error) {
-                            var msg = 'getLocation: ' + error.message;
+                            var msg = 'getLocationByGeoLocator: ' + error;
                             deferred.reject(msg);
                         }
 
                     );
-
-                    return deferred.promise;
-                }
-
-                $scope.getLocation = function() {
-                    var deferred = $q.defer();
-
-                    geolocator.locate(
-
-                        // Success
-                        function(position) {
-                            deferred.resolve(position);
-                        },
-
-                        // Error
-                        function(error) {
-                            deferred.reject(error);
-                        },
-
-                        true,
-                        {enableHighAccuracy: true, timeout: 6000, maximumAge: 0},
-                        null);
 
                     return deferred.promise;
                 }
@@ -95,7 +50,7 @@ angular.module('ngModuleLocationDetection')
 
                 switch ($stateParams.locationMode) {
                     case LOCATION_MODE.AUTO:
-                        var promiseSelectLocation = $scope.selectLocationByGeoLocator();
+                        var promiseSelectLocation = $scope.getLocationByGeoLocator();
                         break;
                     case LOCATION_MODE.LIST:
                         var promiseSelectLocation = $q.when({targetState: STATE.RECENT_LOCATION_LIST});
@@ -104,7 +59,7 @@ angular.module('ngModuleLocationDetection')
                         var promiseSelectLocation = $q.when({targetState: STATE.LOCATION_PICKER});
                         break;
                     default:
-                        var promiseSelectLocation = $scope.selectLocationByGeoLocator();
+                        var promiseSelectLocation = $scope.getLocationByGeoLocator();
                 }
 
                 /*
