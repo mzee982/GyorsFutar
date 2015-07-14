@@ -9,7 +9,7 @@ angular.module('ngModuleTrip')
              */
 
             var serviceInstance = {
-                buildTrip: function(id, currentStopId) {return buildTrip(id, currentStopId);}
+                buildTrip: function(id, currentStopId, baseTime) {return buildTrip(id, currentStopId, baseTime);}
             };
 
 
@@ -99,7 +99,7 @@ angular.module('ngModuleTrip')
                 return tripModel;
             }
 
-            function transformTripModelToPresentation(tripModel, currentStopId) {
+            function transformTripModelToPresentation(tripModel, currentStopId, baseTime) {
                 var tripPresentation = {
                     tripHeadsign: undefined,
                     stopTimes: [],
@@ -107,6 +107,7 @@ angular.module('ngModuleTrip')
                     routeDescription: undefined,
                     routeColor: undefined,
                     routeTextColor: undefined,
+                    baseTime: baseTime,
                     buildTime: new Date()
                 };
 
@@ -180,7 +181,7 @@ angular.module('ngModuleTrip')
                 return tripPresentation;
             }
 
-            function buildTrip(id, currentStopId) {
+            function buildTrip(id, currentStopId, baseTime) {
                 var deferred = $q.defer();
 
                 var tripModel = {
@@ -190,7 +191,7 @@ angular.module('ngModuleTrip')
                     vehicle: undefined,
                     route: undefined
                 };
-                var tripPresentation = {};
+                var tripPresentation = undefined;
 
 
                 /*
@@ -204,7 +205,7 @@ angular.module('ngModuleTrip')
                     // Success
                     function(data) {
                         tripModel = processTripDetails(tripModel, data);
-                        tripPresentation = transformTripModelToPresentation(tripModel, currentStopId);
+                        tripPresentation = transformTripModelToPresentation(tripModel, currentStopId, baseTime);
 
                         deferred.resolve(tripPresentation);
                     },
@@ -216,94 +217,6 @@ angular.module('ngModuleTrip')
 
                 );
 
-
-
-
-
-/*
-                var geoPosition = position;
-                var timetableModel = {
-                    getStopIds: function () {
-                        var stopIdArray = [];
-
-                        for (stopId in this.stops) {
-                            stopIdArray.push(this.stops[stopId].id);
-                        }
-
-                        return stopIdArray;
-                    },
-                    stops: {}
-                };
-                var timetablePresentation = undefined;
-
-
-                /!*
-                 * Stops for location
-                 *!/
-
-                var promiseGetStopsForLocation = ngServiceBkkFutar.getStopsForLocation(geoPosition);
-
-                var promiseCollectStopsForParentStations = promiseGetStopsForLocation.then(
-
-                    // Success
-                    function (data) {
-                        return collectStopsForParentStations(data);
-                    },
-
-                    // Error
-                    function (status) {
-                        deferred.reject('getStopsForLocation: ' + status);
-                    }
-
-                );
-
-                /!*
-                 * Extend stops for parent stations
-                 *!/
-
-                var promiseArrivalsAndDeparturesForStop = promiseCollectStopsForParentStations.then(
-
-                    // Success
-                    function(stopsAndRoutes) {
-                        timetableModel = processStopsForLocationResponse(timetableModel, stopsAndRoutes.stops, stopsAndRoutes.routes);
-
-                        return ngServiceBkkFutar.getArrivalsAndDeparturesForStop(timetableModel.getStopIds());
-                    },
-
-                    // Error
-                    function(status) {
-                        deferred.reject('collectStopsForParentStations: ' + status);
-                    }
-
-                );
-
-                /!*
-                 * Arrivals and departures for stop
-                 *!/
-
-                promiseArrivalsAndDeparturesForStop.then(
-
-                    // Success
-                    function (data) {
-
-                        timetableModel = processArrivalsAndDeparturesForStopResponse(timetableModel, data);
-
-                        timetableModel = postProcessTimetableModel(timetableModel, geoPosition);
-
-                        timetablePresentation = transformTimetableModelToPresentation(timetableModel);
-
-                        timetablePresentation = applyPreviousPresentationState(timetablePresentation, previousTimetablePresentation);
-
-                        deferred.resolve(timetablePresentation);
-                    },
-
-                    // Error
-                    function (status) {
-                        deferred.reject('getArrivalsAndDeparturesForStop: ' + status);
-                    }
-
-                );
-*/
 
                 return deferred.promise;
             }

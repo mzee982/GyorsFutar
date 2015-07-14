@@ -8,4 +8,5 @@ angular.module('ngAppGyorsFutar',
         'ngModuleRecentLocationList',
         'ngModuleLocationPicker',
         'ngModuleTimetable',
-        'ngModuleTrip']);
+        'ngModuleTrip',
+        'ngModuleSchedule']);

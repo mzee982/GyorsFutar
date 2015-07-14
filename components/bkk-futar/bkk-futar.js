@@ -26,5 +26,12 @@ angular
 
         'URL_API_TRIP_DETAILS': 'trip-details.json?tripId=$TRIP_ID&includeReferences=$INCLUDE_REFERENCES',
         'PARAM_API_TRIP_DETAILS_TRIP_ID': '$TRIP_ID',
-        'PARAM_VALUE_API_TRIP_DETAILS_REFERENCES': 'routes,stops,trips'
+        'PARAM_VALUE_API_TRIP_DETAILS_REFERENCES': 'routes,stops,trips',
+
+        'URL_API_SCHEDULE_FOR_STOP': 'schedule-for-stop.json?stopId=$STOP_ID&onlyDepartures=$ONLY_DEPARTURES&date=$DATE&includeReferences=$INCLUDE_REFERENCES',
+        'PARAM_API_SCHEDULE_FOR_STOP_STOP_ID': '$STOP_ID',
+        'PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES': '$ONLY_DEPARTURES',
+        'PARAM_VALUE_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES': 'false',
+        'PARAM_API_SCHEDULE_FOR_STOP_DATE': '$DATE',
+        'PARAM_VALUE_API_SCHEDULE_FOR_STOP_REFERENCES': 'routes,stops'
     });

@@ -68,11 +68,33 @@ angular.module('ngModuleTimetable')
                 });
             }
 
-            $scope.onStopTimeClick = function(stopTime) {
+            $scope.onStopTimeClick = function(stopTime, baseTime) {
                 $scope.deferredTimetable.resolve({
                     targetState: STATE.TRIP,
                     tripId: stopTime.tripId,
-                    stopId: stopTime.stopId
+                    stopId: stopTime.stopId,
+                    baseTime: baseTime
+                });
+            }
+
+            $scope.onTripClick = function(stopTime, routes, baseTime) {
+                var routeIds = [];
+
+                if (angular.isArray(routes)) {
+                    for (var routeIndex = 0; routeIndex < routes.length; routeIndex++) {
+                        routeIds.push(routes[routeIndex].id);
+                    }
+                }
+
+                else {
+                    routeIds.push(routes.id);
+                }
+
+                $scope.deferredTimetable.resolve({
+                    targetState: STATE.SCHEDULE,
+                    stopId: stopTime.stopId,
+                    routeIds: routeIds,
+                    baseTime: baseTime
                 });
             }
 
@@ -91,6 +113,9 @@ angular.module('ngModuleTimetable')
             $scope.buildTimetable = function(location, baseTime) {
                 $scope.isBuilding = true;
 
+                // baseTime validation/correction
+                if (angular.isDate(baseTime) && (baseTime <= new Date())) baseTime = undefined;
+
                 var promiseBuildTimetable = ngServiceTimetable.buildTimetable(location, baseTime, $scope.timetablePresentation);
 
                 // Show timetable
@@ -99,6 +124,7 @@ angular.module('ngModuleTimetable')
                     // Done
                     function(timetablePresentation) {
                         $scope.timetablePresentation = timetablePresentation;
+                        $scope.baseTime = timetablePresentation.baseTime;
                         $scope.isBuilding = false;
 
                         // Update timetable regularly
@@ -125,6 +151,7 @@ angular.module('ngModuleTimetable')
             if (angular.isDefined($stateParams.location)) {
                 $scope.geoPosition = $stateParams.location;
                 $scope.baseTime = $stateParams.baseTime;
+
                 $scope.buildTimetable($scope.geoPosition, $scope.baseTime);
             }
 
@@ -160,10 +187,23 @@ angular.module('ngModuleTimetable')
 
                             var tripParams = {
                                 tripId: data.tripId,
-                                stopId: data.stopId
+                                stopId: data.stopId,
+                                baseTime: data.baseTime
                             };
 
                             $state.go(data.targetState, tripParams);
+
+                            break;
+
+                        case STATE.SCHEDULE:
+
+                            var scheduleParams = {
+                                stopId: data.stopId,
+                                routeIds: data.routeIds,
+                                baseTime: data.baseTime
+                            };
+
+                            $state.go(data.targetState, scheduleParams);
 
                             break;
 

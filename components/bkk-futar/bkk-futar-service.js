@@ -1,8 +1,9 @@
 angular.module('ngModuleBkkFutar')
     .factory('ngServiceBkkFutar',
     [   '$q',
+        '$filter',
         'BKK_FUTAR',
-        function($q, BKK_FUTAR) {
+        function($q, $filter, BKK_FUTAR) {
 
             /*
              * Interface
@@ -13,6 +14,7 @@ angular.module('ngModuleBkkFutar')
                 getStopsForLocation: function(position) {return getStopsForLocation(position);},
                 getArrivalsAndDeparturesForStop: function(stopIdArray, baseTime) {return getArrivalsAndDeparturesForStop(stopIdArray, baseTime);},
                 getTripDetails: function(id) {return getTripDetails(id);},
+                getScheduleForStop: function(id, baseTime) {return getScheduleForStop(id, baseTime)},
 
                 aggregateStopTime: function(stopTime) {return aggregateStopTime(stopTime);},
                 convertColor: function(color) {return convertColor(color);}
@@ -123,6 +125,35 @@ angular.module('ngModuleBkkFutar')
                 url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_TRIP_DETAILS_REFERENCES);
 
                 console.info('getTripDetails URL: ' + url);
+
+                $.ajax({
+                    url: url,
+                    jsonp: 'callback',
+                    dataType: 'jsonp',
+                    success: function(data) {deferred.resolve(data);},
+                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
+                });
+
+                return deferred.promise;
+            }
+
+            function getScheduleForStop(id, baseTime) {
+                var deferred = $q.defer();
+
+                // Date
+
+                var dateValue = (angular.isDate(baseTime)) ? baseTime : new Date();
+                var dateString = $filter('date')(dateValue, 'yyyyMMdd');
+
+                // URL build
+
+                var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_SCHEDULE_FOR_STOP;
+                url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_STOP_ID, id);
+                url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES);
+                url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_DATE, dateString);
+                url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOP_REFERENCES);
+
+                console.info('getScheduleForStop URL: ' + url);
 
                 $.ajax({
                     url: url,

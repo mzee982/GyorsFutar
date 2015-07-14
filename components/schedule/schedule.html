@@ -1,0 +1,87 @@
+
+<!-- Toolbar -->
+<div class="panel panel-default">
+
+    <!-- For Schedule Build -->
+    <div class="panel-heading" data-ng-if="isBuilding && (schedulePresentation == undefined)">
+        <h4 class="panel-title">Building schedule...</h4>
+    </div>
+
+    <!-- For Schedule Show -->
+    <div class="panel-heading" data-ng-if="schedulePresentation != undefined">
+        <div class="row">
+            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                <h4 class="no-margin text-center" data-gyf-countdown data-ng-if="schedulePresentation.baseTime == undefined"></h4>
+                <h4 class="no-margin text-center" data-ng-if="schedulePresentation.baseTime != undefined">{{schedulePresentation.baseTime | date: 'H:mm:ss'}}</h4>
+            </div>
+            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                <span class="pull-right">
+                    <span data-gyf-countdown data-source-time='schedulePresentation.buildTime'></span>
+                    <button type="button" class="btn btn-default" data-ng-click="onScheduleRefreshClick()">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Trip -->
+<div class="panel panel-default" data-ng-if="schedulePresentation != undefined">
+
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-xs-2">
+                <h3 class="no-margin text-left">
+                    <span data-ng-repeat="route in schedulePresentation.routes">
+                        <span class="label label-default" data-ng-style="{'color': route.textColor, 'background-color': route.color}">{{route.shortName}}</span>&nbsp;
+                    </span>
+                </h3>
+            </div>
+            <div class="col-xs-10">
+                <h5 class="no-margin text-center">
+                    <div>{{schedulePresentation.stopName}}</div>
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <table class="table table-bordered table-hover table-condensed">
+            <tbody>
+
+                <tr class="row link" data-ng-if="schedulePresentation.visibleStopTimeLowerIndex > 0" data-ng-click="onStopTimeMoreOlderClick()">
+                    <td class="col-xs-12" colspan="4">
+                        <h5 class="text-center">More</h5>
+                    </td>
+                </tr>
+
+                <tr class="row link" data-ng-repeat="stopTime in schedulePresentation.stopTimes | filter: filterStopTimes" data-ng-class="{'row-past': (stopTime.stopTime < schedulePresentation.buildTime)}" data-ng-click="onStopTimeClick(stopTime, schedulePresentation.baseTime)">
+                    <td class="col-xs-1">
+                        <h5>
+                            <span class="label label-default" data-ng-style="{'color': stopTime.routeTextColor, 'background-color': stopTime.routeColor}">{{stopTime.routeShortName}}</span>
+                        </h5>
+                    </td>
+                    <td class="col-xs-9">
+                        <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.groupHeadsign}}</h5>
+                    </td>
+                    <td class="col-xs-1">
+                        <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeString}}</h5>
+                    </td>
+                    <td class="col-xs-1">
+                        <h5 data-ng-if="stopTime.isCurrent || stopTime.isSubsequent" data-ng-class="{'row-current': stopTime.isCurrent}"><span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime'></span></h5>
+                    </td>
+                </tr>
+
+                <tr class="row link" data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < schedulePresentation.stopTimes.length" data-ng-click="onStopTimeMoreNewerClick()">
+                    <td class="col-xs-12" colspan="4">
+                        <h5 class="text-center">More</h5>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+
+</div>

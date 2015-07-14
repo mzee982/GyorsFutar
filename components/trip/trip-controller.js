@@ -19,6 +19,7 @@ angular.module('ngModuleTrip')
 
             $scope.tripId = undefined;
             $scope.stopId = undefined;
+            $scope.baseTime = undefined;
             $scope.tripUpdateTimeout = undefined;
             $scope.isBuilding = undefined;
             $scope.tripPresentation = undefined;
@@ -31,7 +32,7 @@ angular.module('ngModuleTrip')
 
                 // Update Trip
                 $scope.tripUpdateTimeout = $timeout(function() {
-                        $scope.buildTrip($scope.tripId, $scope.stopId);
+                        $scope.buildTrip($scope.tripId, $scope.stopId, $scope.baseTime);
                     },
                     TRIP.AUTO_UPDATE_DELAY);
 
@@ -45,13 +46,47 @@ angular.module('ngModuleTrip')
             }
 
             $scope.onTripRefreshClick = function() {
-                $scope.buildTrip($scope.tripId, $scope.stopId);
+                $scope.buildTrip($scope.tripId, $scope.stopId, $scope.baseTime);
             }
 
-            $scope.buildTrip = function(id, currentStopId) {
+            $scope.onStopClick = function(stopTime, baseTime) {
+                var stopLocation = undefined;
+
+                // Format location
+                var promiseFormatLocation = ngServiceLocation.formatLocation(stopTime.stopLat, stopTime.stopLon, LOCATION.ACCURACY_MIN_SEARCH_RADIUS);
+
+                promiseFormatLocation.then(
+
+                    // Success
+                    function(location) {
+                        stopLocation = location;
+
+                        if (stopTime.isCurrent) {
+                            baseTime = baseTime;
+                        }
+                        else if (stopTime.isSubsequent) {
+                            baseTime = stopTime.stopTime;
+                        }
+                        else {
+                            baseTime = stopTime.stopTime;
+                        }
+
+                        $scope.deferredTrip.resolve({targetState: STATE.TIMETABLE, stopLocation: stopLocation, baseTime: baseTime});
+                    },
+
+                    // Error
+                    function(error) {
+                        $scope.deferredTrip.reject('formatLocation failed');
+                    }
+
+                );
+
+            }
+
+            $scope.buildTrip = function(id, currentStopId, baseTime) {
                 $scope.isBuilding = true;
 
-                var promiseBuildTrip = ngServiceTrip.buildTrip(id, currentStopId);
+                var promiseBuildTrip = ngServiceTrip.buildTrip(id, currentStopId, baseTime);
 
                 promiseBuildTrip.then(
 
@@ -76,33 +111,6 @@ angular.module('ngModuleTrip')
 
             }
 
-            $scope.onStopClick = function(stopTime) {
-                var stopLocation = undefined;
-                var baseTime = undefined;
-
-                // Format location
-                var promiseFormatLocation = ngServiceLocation.formatLocation(stopTime.stopLat, stopTime.stopLon, LOCATION.ACCURACY_MIN_SEARCH_RADIUS);
-
-                promiseFormatLocation.then(
-
-                    // Success
-                    function(location) {
-                        stopLocation = location;
-
-                        if (stopTime.isSubsequent) baseTime = stopTime.stopTime;
-
-                        $scope.deferredTrip.resolve({targetState: STATE.TIMETABLE, stopLocation: stopLocation, baseTime: baseTime});
-                    },
-
-                    // Error
-                    function(error) {
-                        $scope.deferredTrip.reject('formatLocation failed');
-                    }
-
-                );
-
-            }
-
 
             /*
              * Build trip
@@ -111,8 +119,9 @@ angular.module('ngModuleTrip')
             if (angular.isDefined($stateParams.tripId)) {
                 $scope.tripId = $stateParams.tripId;
                 $scope.stopId = $stateParams.stopId;
+                $scope.baseTime = $stateParams.baseTime;
 
-                $scope.buildTrip($scope.tripId, $scope.stopId);
+                $scope.buildTrip($scope.tripId, $scope.stopId, $scope.baseTime);
             }
 
             else {

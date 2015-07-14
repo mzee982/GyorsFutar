@@ -534,7 +534,7 @@ angular.module('ngModuleTimetable')
 
                 // Base time
                 var actualDate = new Date();
-                if (angular.isUndefined(baseTime) || (angular.isDefined(baseTime) && (baseTime < actualDate))) baseTime = actualDate;
+                if (!angular.isDate(baseTime) || (angular.isDate(baseTime) && (baseTime < actualDate))) baseTime = actualDate;
 
                 // Group StopTimes by directions
                 for (tripId in route.trips) {
@@ -574,7 +574,7 @@ angular.module('ngModuleTimetable')
                     for (var stopTimeIndex = 0; stopTimeIndex < actualStopTimeGroup.stopTimes.length; stopTimeIndex++) {
                         var actualStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex];
 
-                        if (actualStopTime.stopTime > (baseTime)) {
+                        if (actualStopTime.stopTime >= (baseTime)) {
                             if ((selectedStopTime == undefined)
                                 || (actualStopTime.stopTime < selectedStopTime.stopTime)) {
                                 selectedStopTime = actualStopTime;

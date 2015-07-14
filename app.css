@@ -91,6 +91,14 @@ html, body {
     padding: 5px;
 }
 
+.row-past {
+    color: gray;
+}
+
+.row-current {
+    font-weight: bold;
+}
+
 .link {
     cursor: pointer;
 }
