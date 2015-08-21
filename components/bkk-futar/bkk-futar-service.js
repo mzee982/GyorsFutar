@@ -17,7 +17,8 @@ angular.module('ngModuleBkkFutar')
                 getScheduleForStop: function(id, baseTime) {return getScheduleForStop(id, baseTime)},
 
                 aggregateStopTime: function(stopTime) {return aggregateStopTime(stopTime);},
-                convertColor: function(color) {return convertColor(color);}
+                convertColor: function(color) {return convertColor(color);},
+                convertDate: function(dateValue) {return convertDate(dateValue);}
             };
 
 
@@ -199,7 +200,7 @@ angular.module('ngModuleBkkFutar')
                     isDeparture = true;
                 }
 
-                stopTimeDate = new Date(stopTimeValue * 1000);
+                stopTimeDate = convertDate(stopTimeValue);
 
                 var targetStopTime = {
                     stopTime: stopTimeDate,
@@ -211,6 +212,10 @@ angular.module('ngModuleBkkFutar')
 
 
                 return targetStopTime;
+            }
+
+            function convertDate(dateValue) {
+                return new Date(dateValue * 1000);
             }
 
             function convertColor(color) {

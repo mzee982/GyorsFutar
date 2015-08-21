@@ -51,9 +51,11 @@
         <table class="table table-bordered table-hover table-condensed">
             <tbody>
 
-                <tr class="row link" data-ng-if="schedulePresentation.visibleStopTimeLowerIndex > 0" data-ng-click="onStopTimeMoreOlderClick()">
+                <tr class="row row-header link" data-ng-if="schedulePresentation.visibleStopTimeLowerIndex > 0" data-ng-click="onStopTimeMoreOlderClick()">
                     <td class="col-xs-12" colspan="4">
-                        <h5 class="text-center">More</h5>
+                        <h5 class="text-center">
+                            <span class="glyphicon glyphicon-chevron-up"></span>
+                        </h5>
                     </td>
                 </tr>
 
@@ -74,9 +76,11 @@
                     </td>
                 </tr>
 
-                <tr class="row link" data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < schedulePresentation.stopTimes.length" data-ng-click="onStopTimeMoreNewerClick()">
+                <tr class="row row-header link" data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < schedulePresentation.stopTimes.length" data-ng-click="onStopTimeMoreNewerClick()">
                     <td class="col-xs-12" colspan="4">
-                        <h5 class="text-center">More</h5>
+                        <h5 class="text-center">
+                            <span class="glyphicon glyphicon-chevron-down"></span>
+                        </h5>
                     </td>
                 </tr>
 

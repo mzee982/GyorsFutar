@@ -6,11 +6,13 @@ angular.module('ngAppGyorsFutar')
         'LOCATION_PICKER': 'location-picker',
         'TIMETABLE': 'timetable',
         'TRIP': 'trip',
-        'SCHEDULE': 'schedule'
+        'SCHEDULE': 'schedule',
+        'MAP': 'map'
     })
     .constant('EVENT', {
         'SUCCESS_MESSAGE': 'successMessage',
-        'ERROR_MESSAGE': 'errorMessage'
+        'ERROR_MESSAGE': 'errorMessage',
+        'ADJUST_HEIGHT': 'adjustHeight'
     })
     .config(['$stateProvider', '$urlRouterProvider', 'STATE', function($stateProvider, $urlRouterProvider, STATE) {
 
@@ -78,5 +80,22 @@ angular.module('ngAppGyorsFutar')
                     routeIds: undefined,
                     baseTime: undefined
                 }
+            })
+            .state(STATE.MAP, {
+                //url: '/map',
+                templateUrl: 'components/map/map.html',
+                controller: 'ngControllerMap',
+                params: {
+                    trip: undefined,
+                    baseTime: undefined
+                }
             });
     }]);
+/*
+    .config(['uiGmapGoogleMapApiProvider', function(uiGmapGoogleMapApiProvider) {
+        uiGmapGoogleMapApiProvider.configure({
+            v: '3.20',
+            libraries: 'geometry,places'
+        });
+    }]);
+*/

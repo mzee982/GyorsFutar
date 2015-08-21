@@ -1,0 +1,91 @@
+
+<!-- Toolbar -->
+<div class="panel panel-default">
+
+    <!-- For Map Build -->
+    <div class="panel-heading" data-ng-if="isBuilding && (mapPresentation == undefined)">
+        <h4 class="panel-title">Building map...</h4>
+    </div>
+
+    <!-- For Map Show -->
+    <div class="panel-heading" data-ng-if="mapPresentation != undefined">
+        <div class="row">
+            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                <h4 class="no-margin text-center" data-gyf-countdown data-ng-if="mapPresentation.baseTime == undefined"></h4>
+                <h4 class="no-margin text-center" data-ng-if="mapPresentation.baseTime != undefined">{{baseTime | date: 'H:mm:ss'}}</h4>
+            </div>
+            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
+                <span class="pull-right">
+                    <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+                    <button type="button" class="btn btn-default" data-ng-click="onMapRefreshClick()">
+                        <span class="glyphicon glyphicon-refresh"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- Map -->
+<div class="panel panel-default no-margin" data-ng-cloak data-ng-if="mapPresentation != undefined">
+
+    <div class="panel-heading">
+        <div class="row">
+            <div class="col-xs-1">
+                <h3 class="no-margin text-left">
+                    <span class="label label-default" data-ng-style="{'color': mapPresentation.trip.routeTextColor, 'background-color': mapPresentation.trip.routeColor}">{{mapPresentation.trip.routeName}}</span>
+                </h3>
+            </div>
+            <div class="col-xs-11">
+                <h5 class="no-margin text-center">
+                    <div>{{mapPresentation.trip.tripHeadsign}}</div>
+                </h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <div data-gyf-fill-height data-target-selector=".angular-google-map-container">
+
+            <div data-gyf-recompile data-accessor="recompileAccessor">
+
+                <ui-gmap-google-map
+                        center="mapPresentation.map.center"
+                        pan="mapPresentation.map.pan"
+                        zoom="mapPresentation.map.zoom"
+                        options="mapPresentation.map.options"
+                        events="mapPresentation.map.events"
+                        control="mapPresentation.map.control">
+
+                    <ui-gmap-polyline
+                        path="mapPresentation.trip.tripPolyline.path"
+                        stroke="mapPresentation.trip.tripPolyline.stroke"
+                        fit="mapPresentation.trip.tripPolyline.fit"
+                        static="mapPresentation.trip.tripPolyline.static">
+                    </ui-gmap-polyline>
+
+                    <ui-gmap-markers
+                        models="mapPresentation.trip.stopMarkers.models"
+                        coords="mapPresentation.trip.stopMarkers.coords"
+                        icon="mapPresentation.trip.stopMarkers.icon"
+                        options="mapPresentation.trip.stopMarkers.options"
+                        click="mapPresentation.trip.stopMarkers.click">
+                    </ui-gmap-markers>
+
+                    <ui-gmap-marker
+                        data-ng-if="mapPresentation.trip.vehicleMarker != undefined"
+                        idKey="mapPresentation.trip.vehicleMarker.idKey"
+                        coords="mapPresentation.trip.vehicleMarker.coords"
+                        icon="mapPresentation.trip.vehicleMarker.icon"
+                        options="mapPresentation.trip.vehicleMarker.options">
+                    </ui-gmap-marker>
+
+                </ui-gmap-google-map>
+
+            </div>
+
+        </div>
+    </div>
+
+</div>

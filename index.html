@@ -6,6 +6,9 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <!-- Google Maps JavaScript API with libraries -->
+        <script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry,places"></script>
+
         <!-- JQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
@@ -22,35 +25,30 @@
         <!-- Angular UI Bootstrap -->
         <script src="lib/ui-bootstrap-tpls-0.12.1.min.js"></script>
 
+        <!-- Angular UI Google Maps -->
+        <script src="lib/lodash.min.js"></script>
+        <script src="lib/angular-google-maps.min.js"></script>
+
         <!-- ngStorage -->
         <script src="lib/ngStorage.min.js"></script>
-
-        <!-- Google Maps JavaScript API Geometry Library -->
-        <script src="https://maps.googleapis.com/maps/api/js?sensor=false&libraries=geometry,places"></script>
 
         <!-- Geolocator Javascript Library -->
         <script src="lib/geolocator.min.js"></script>
 
         <!-- JQuery Location Picker plugin -->
+        <!-- Depends on Google Maps JavaScript API -->
         <script src="lib/locationpicker.jquery.min.js"></script>
 
         <link rel="stylesheet" href="app.css">
     </head>
     <body>
         <div id="container" class="container-fluid" data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
-            <!--TODO Use Angular UI Alert directives-->
-
-            <!-- Alert Success -->
-            <div id="idAlertSuccess" class="alert alert-success" data-ng-show="successMessage != undefined">
-                <button type="button" class="close" aria-label="Close" data-ng-click="successMessage = undefined"><span aria-hidden="true">&times;</span></button>
-                <strong>Success!</strong> {{successMessage}}
-            </div>
 
             <!-- Alert Error -->
-            <div id="idAlertError" class="alert alert-danger" data-ng-show="errorMessage != undefined">
-                <button type="button" class="close" aria-label="Close" data-ng-click="errorMessage = undefined"><span aria-hidden="true">&times;</span></button>
-                <strong>Failed!</strong> {{errorMessage}}
-            </div>
+            <alert ng-repeat="message in errorMessages" data-ng-cloak type="danger" close="closeErrorMessage($index)">{{message}}</alert>
+
+            <!-- Alert Success -->
+            <alert ng-repeat="message in successMessages" data-ng-cloak type="success" close="closeSuccessMessage($index)">{{message}}</alert>
 
             <!-- Root UI view -->
             <div ui-view></div>
@@ -84,6 +82,10 @@
         <script src="components/schedule/schedule.js"></script>
         <script src="components/schedule/schedule-controller.js"></script>
         <script src="components/schedule/schedule-service.js"></script>
+
+        <script src="components/map/map.js"></script>
+        <script src="components/map/map-controller.js"></script>
+        <script src="components/map/map-service.js"></script>
 
         <script src="app.js"></script>
         <script src="app-config.js"></script>

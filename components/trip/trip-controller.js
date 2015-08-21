@@ -83,6 +83,62 @@ angular.module('ngModuleTrip')
 
             }
 
+            $scope.onHeaderClick = function(tripId, stopId, baseTime) {
+/*
+                var paramTrip = {
+                    tripHeadsign: trip.tripHeadsign,
+                    routeName: trip.routeName,
+                    routeColor: trip.routeColor,
+                    routeTextColor: trip.routeTextColor,
+                    polyline: trip.tripPolylinePoints,
+                    stops: [],
+                    vehicle: undefined
+                };
+
+                // Stops
+                for (var stopTimeIndex = 0; stopTimeIndex < trip.stopTimes.length; stopTimeIndex++) {
+                    var actualStopTime = trip.stopTimes[stopTimeIndex];
+
+                    var targetStop = {
+                        id: actualStopTime.stopId,
+                        name: actualStopTime.stopName,
+                        lat: actualStopTime.stopLat,
+                        lon: actualStopTime.stopLon,
+                        direction: actualStopTime.stopDirection,
+                        stopTime: actualStopTime.stopTime,
+                        stopTimeString: actualStopTime.stopTimeString,
+                        isCurrent: actualStopTime.isCurrent,
+                        isSubsequent: actualStopTime.isSubsequent
+                    };
+
+                    // Vehicle
+
+                    if (angular.isDefined(actualStopTime.vehicle)) {
+                        var actualVehicle = actualStopTime.vehicle;
+
+                        var targetVehicle = {
+                            id: actualVehicle.id,
+                            bearing: actualVehicle.bearing,
+                            lat: actualVehicle.lat,
+                            lon: actualVehicle.lon
+                        }
+
+                        paramTrip.vehicle = targetVehicle;
+                    }
+
+                    paramTrip.stops.push(targetStop);
+                }
+*/
+
+                var paramTrip = {
+                    tripId: tripId,
+                    stopId: stopId
+                };
+
+                $scope.deferredTrip.resolve({targetState: STATE.MAP, trip: paramTrip, baseTime: baseTime});
+
+            }
+
             $scope.buildTrip = function(id, currentStopId, baseTime) {
                 $scope.isBuilding = true;
 
@@ -148,6 +204,17 @@ angular.module('ngModuleTrip')
                             };
 
                             $state.go(data.targetState, timetableParams);
+
+                            break;
+
+                        case STATE.MAP:
+
+                            var mapParams = {
+                                trip: data.trip,
+                                baseTime: data.baseTime,
+                            };
+
+                            $state.go(data.targetState, mapParams);
 
                             break;
 

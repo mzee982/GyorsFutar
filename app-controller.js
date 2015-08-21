@@ -9,8 +9,19 @@ angular.module('ngAppGyorsFutar')
             function($rootScope, $scope, $state, STATE, LOCATION_MODE, EVENT) {
 
                 //
-                $scope.successMessage = undefined;
-                $scope.errorMessage = undefined;
+                $scope.successMessages = [];
+                $scope.errorMessages = [];
+
+
+                //
+
+                $scope.closeSuccessMessage = function(index) {
+                    $scope.successMessages.splice(index, 1);
+                };
+
+                $scope.closeErrorMessage = function(index) {
+                    $scope.errorMessages.splice(index, 1);
+                };
 
 
                 /*
@@ -19,15 +30,20 @@ angular.module('ngAppGyorsFutar')
 
                 // Success message event
                 $scope.$on(EVENT.SUCCESS_MESSAGE, function(event, message) {
-                    $scope.successMessage = message;
+                    $scope.successMessages.unshift(message);
+
                 });
 
                 // Error message event
                 $scope.$on(EVENT.ERROR_MESSAGE, function(event, message) {
-                    $scope.errorMessage = message;
+                    $scope.errorMessages.unshift(message);
                 });
 
-                // Redirect to location detection
+
+                /*
+                 * Successful state change event
+                 */
+
                 $rootScope.$on('$stateChangeSuccess',
                     function(event, toState, toParams, fromState, fromParams){
 
@@ -35,15 +51,16 @@ angular.module('ngAppGyorsFutar')
                          * ANY -> ANY
                          */
 
-                        // Clear messages
-                        $scope.successMessage = undefined;
-                        $scope.errorMessage = undefined;
+                        // Clear success/error messages on state change
+                        //$scope.successMessages = [];
+                        //$scope.errorMessages = [];
 
 
                         /*
                          * -> INITIAL
                          */
 
+                        // Redirect to location detection
                         if (toState.name == STATE.INITIAL) {
 
                             var locationDetectionParams = {

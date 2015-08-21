@@ -90,6 +90,7 @@ angular.module('ngModuleLocationPicker')
             require: '^gyfLocationPickerContainer',
             scope: {},
             controller: ['$element', '$window', function($element, $window) {
+/*
 
                 // Adjust location picker height
 
@@ -100,22 +101,42 @@ angular.module('ngModuleLocationPicker')
 
                 $element.height(windowHeight - top - (outerHeight - innerHeight));
 
+*/
             }]
         };
     }])
-    .directive('gyfLocationPicker', [function() {
+    .directive('gyfLocationPicker', ['EVENT', function(EVENT) {
         return {
             restrict: 'A',
             require: '^gyfLocationPickerContainer',
             scope: {},
             link: function(scope, element, attrs, ctrl) {
+
+                function fitBounds(ctrl) {
+                    var mapContext = ctrl.getLocationPicker().locationpicker('map');
+                    var location = ctrl.getLocationPicker().locationpicker('location');
+
+                    var circleOptions = {
+                        radius: location.radius * 1,
+                        center: new google.maps.LatLng(location.latitude, location.longitude)
+                    };
+                    var circle = new google.maps.Circle(circleOptions);
+                    var circleBounds = circle.getBounds();
+
+                    mapContext.map.fitBounds(circleBounds);
+                }
+
+
                 ctrl.setLocationPicker(element);
 
-                // Initialize location picker map
+
+                /*
+                 * Initialize location picker map
+                 */
 
                 var position = ctrl.getInitialPosition();
 
-                var circleOptions = {
+                var locationPickerOptions = {
                     location: {
                         latitude: position.coords.latitude,
                         longitude: position.coords.longitude},
@@ -129,15 +150,20 @@ angular.module('ngModuleLocationPicker')
                     enableAutocomplete: true
                 };
 
-                element.locationpicker(circleOptions);
-                element.locationpicker('autosize');
+                ctrl.getLocationPicker().locationpicker(locationPickerOptions);
 
-                // Show marked position
+                // Auto size the map
+                ctrl.getLocationPicker().locationpicker('autosize');
+
+
+                /*
+                 * Show marked position
+                 */
 
                 var markedPosition = ctrl.getMarkedPosition();
+                var mapContext = ctrl.getLocationPicker().locationpicker('map');
 
                 if (angular.isDefined(markedPosition)) {
-                    var mapContext = element.locationpicker('map');
                     var markedLatlng = new google.maps.LatLng(markedPosition.stopLat, markedPosition.stopLon);
 
                     // Marker
@@ -152,6 +178,7 @@ angular.module('ngModuleLocationPicker')
                     });
 
                     // Info Window
+
                     var markedContentString =
                         '<div>' +
                         '<div>' + markedPosition.name + '</div>' +
@@ -164,18 +191,29 @@ angular.module('ngModuleLocationPicker')
 
                     infoWindow.open(mapContext.map, marker);
 
-                    // Fit bounds
-                    circleOptions = {
-                        radius: mapContext.map.radius * 1,
-                        center: new google.maps.LatLng(mapContext.location.latitude, mapContext.location.longitude)
-                    };
-
-                    var circle = new google.maps.Circle(circleOptions);
-                    var circleBounds = circle.getBounds();
-
-                    mapContext.map.fitBounds(circleBounds);
-
                 }
+
+
+                /*
+                 * Fit bounds
+                 */
+
+                fitBounds(ctrl);
+
+
+                /*
+                 * Event: adjust height
+                 */
+
+                scope.$on(EVENT.ADJUST_HEIGHT, function(event) {
+
+                    // Auto size the map
+                    ctrl.getLocationPicker().locationpicker('autosize');
+
+                    // Fit bounds
+                    fitBounds(ctrl);
+
+                });
 
             }
         };

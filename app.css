@@ -57,6 +57,14 @@ Bootstrap CSS customization
 }
 
 /*
+Angular JS UI Google Maps
+*/
+
+.angular-google-map-container {
+    height: 100px; /* initial value */
+}
+
+/*
 Customization
 */
 
@@ -69,8 +77,8 @@ html, body {
 }
 
 #locationPicker {
+    height: 100px; /* initial value */
     width: 100%;
-    height: 100%;
 }
 
 .no-margin {
@@ -101,4 +109,7 @@ html, body {
 
 .link {
     cursor: pointer;
+}
+.label-gmap {
+    font-size: 10px;
 }

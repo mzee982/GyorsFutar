@@ -33,6 +33,7 @@ angular.module('ngModuleTrip')
 
                 tripModel.tripId = tripId;
                 tripModel.tripHeadsign = trip.tripHeadsign;
+                tripModel.tripPolylinePoints = entry.polyline.points;
 
                 // StopTimes
 
@@ -51,6 +52,8 @@ angular.module('ngModuleTrip')
                         predictedArrivalTime: actualStopTime.predictedArrivalTime,
                         predictedDepartureTime: actualStopTime.predictedDepartureTime
                     };
+
+                    // Stop
 
                     var targetStop =  {
                         id: actualStopId,
@@ -71,11 +74,13 @@ angular.module('ngModuleTrip')
 
                     tripModel.vehicle = {
                         id: vehicle.vehicleId,
+                        stopId: vehicle.stopId,
                         bearing: vehicle.bearing,
                         lat: vehicle.location.lat,
                         lon: vehicle.location.lon,
                         lastUpdateTime: vehicle.lastUpdateTime,
-                        status: vehicle.status
+                        status: vehicle.status,
+                        stopDistancePercent: vehicle.stopDistancePercent
                     };
 
                 }
@@ -102,6 +107,7 @@ angular.module('ngModuleTrip')
             function transformTripModelToPresentation(tripModel, currentStopId, baseTime) {
                 var tripPresentation = {
                     tripHeadsign: undefined,
+                    tripPolylinePoints: undefined,
                     stopTimes: [],
                     routeName: undefined,
                     routeDescription: undefined,
@@ -114,9 +120,11 @@ angular.module('ngModuleTrip')
                 // Trip
 
                 tripPresentation.tripHeadsign = tripModel.tripHeadsign;
+                tripPresentation.tripPolylinePoints = tripModel.tripPolylinePoints;
 
                 // StopTimes
 
+                var actualVehicle = tripModel.vehicle;
                 var currentStopTime = undefined;
 
                 for (var stopTimeIndex = 0; stopTimeIndex < tripModel.stopTimes.length; stopTimeIndex++) {
@@ -130,13 +138,31 @@ angular.module('ngModuleTrip')
                         stopName: actualStop.name,
                         stopLat: actualStop.lat,
                         stopLon: actualStop.lon,
+                        stopDirection: actualStop.direction,
                         stopTime: aggrStopTime.stopTime,
                         stopTimeString: aggrStopTime.stopTimeString,
                         stopTimeDiff: undefined,
+                        vehicle: undefined,
                         isCurrent: undefined,
                         isSubsequent: undefined
                     };
 
+                    // Vehicle
+                    if (angular.isDefined(actualVehicle) && (actualVehicle.stopId == actualStop.id)) {
+                        var targetVehicle = {
+                            id: actualVehicle.id,
+                            bearing: actualVehicle.bearing,
+                            lat: actualVehicle.lat,
+                            lon: actualVehicle.lon,
+                            lastUpdateTime: ngServiceBkkFutar.convertDate(actualVehicle.lastUpdateTime),
+                            status: actualVehicle.status,
+                            stopDistancePercent: actualVehicle.stopDistancePercent
+                        };
+
+                        targetStopTime.vehicle = targetVehicle;
+                    }
+
+                    // Current StopTime
                     if (angular.isUndefined(currentStopTime) && ((actualStop.id == currentStopId) || (angular.isUndefined(currentStopId)))) {
                         currentStopTime = targetStopTime;
                     }
@@ -144,6 +170,7 @@ angular.module('ngModuleTrip')
                     tripPresentation.stopTimes.push(targetStopTime);
                 }
 
+                //TODO Refactor: do the calculation in the model
                 // StopTimes calculated properties
 
                 var isCurrent = false;
@@ -187,6 +214,7 @@ angular.module('ngModuleTrip')
                 var tripModel = {
                     tripId: undefined,
                     tripHeadsign: undefined,
+                    tripPolylinePoints: undefined,
                     stopTimes: {},
                     vehicle: undefined,
                     route: undefined

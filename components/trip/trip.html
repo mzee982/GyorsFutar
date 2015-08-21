@@ -31,7 +31,7 @@
 <div class="panel panel-default" data-ng-if="tripPresentation != undefined">
 
     <div class="panel-heading">
-        <div class="row">
+        <div class="row link" data-ng-click="onHeaderClick(tripId, stopId, tripPresentation.baseTime)">
             <div class="col-xs-1">
                 <h3 class="no-margin text-left">
                     <span class="label label-default" data-ng-style="{'color': tripPresentation.routeTextColor, 'background-color': tripPresentation.routeColor}">{{tripPresentation.routeName}}</span>
@@ -52,8 +52,17 @@
                     <td class="col-xs-1">
                         <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeDiff}}</h5>
                     </td>
-                    <td class="col-xs-9">
+                    <td class="col-xs-8">
                         <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopName}}</h5>
+                    </td>
+                    <td class="col-xs-1">
+                        <div data-ng-if="stopTime.vehicle != undefined">
+                            <h6 data-ng-class="{'row-current': stopTime.isCurrent}">
+                                <span class="glyphicon glyphicon-map-marker"></span>&nbsp;
+                                <span data-gyf-countdown data-source-time='stopTime.vehicle.lastUpdateTime'></span>&nbsp;
+                                <span>{{stopTime.vehicle.status}}</span>
+                            </h6>
+                        </div>
                     </td>
                     <td class="col-xs-1">
                         <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeString}}</h5>

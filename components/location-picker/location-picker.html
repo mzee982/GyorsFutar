@@ -30,12 +30,14 @@
     </div>
 
     <!-- Location Picker -->
-    <div data-gyf-location-picker-panel class="panel panel-default">
+    <div data-gyf-location-picker-panel class="panel panel-default no-margin">
         <input data-gyf-location-picker-input="latitude" type="hidden" id="locationPicker-latitude">
         <input data-gyf-location-picker-input="longitude" type="hidden" id="locationPicker-longitude">
         <input data-gyf-location-picker-input="radius" type="hidden" id="locationPicker-radius">
 
-        <div data-gyf-location-picker id="locationPicker" class="panel-body"></div>
+        <div data-gyf-fill-height data-target-selector="#locationPicker">
+            <div data-gyf-location-picker id="locationPicker" class="panel-body"></div>
+        </div>
     </div>
 
 </gyf-location-picker-container>

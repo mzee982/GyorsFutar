@@ -1,6 +1,7 @@
 angular.module('ngAppGyorsFutar',
     [   'ui.router',
         'ui.bootstrap',
+        'uiGmapgoogle-maps',
         'ngStorage',
         'ngModuleLocation',
         'ngModuleBkkFutar',
@@ -9,4 +10,5 @@ angular.module('ngAppGyorsFutar',
         'ngModuleLocationPicker',
         'ngModuleTimetable',
         'ngModuleTrip',
-        'ngModuleSchedule']);
+        'ngModuleSchedule',
+        'ngModuleMap']);
