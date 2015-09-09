@@ -7,11 +7,12 @@ angular.module('ngModuleTrip')
         '$timeout',
         'ngServiceLocation',
         'ngServiceTrip',
+        'ngServiceContext',
         'STATE',
         'EVENT',
         'LOCATION',
         'TRIP',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceTrip, STATE, EVENT, LOCATION, TRIP) {
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceTrip, ngServiceContext, STATE, EVENT, LOCATION, TRIP) {
 
             //
             $scope.deferredTrip = $q.defer();
@@ -172,10 +173,12 @@ angular.module('ngModuleTrip')
              * Build trip
              */
 
-            if (angular.isDefined($stateParams.tripId)) {
-                $scope.tripId = $stateParams.tripId;
-                $scope.stopId = $stateParams.stopId;
-                $scope.baseTime = $stateParams.baseTime;
+            var stateParams = ngServiceContext.getStateParams();
+
+            if (angular.isDefined(stateParams.tripId)) {
+                $scope.tripId = stateParams.tripId;
+                $scope.stopId = stateParams.stopId;
+                $scope.baseTime = stateParams.baseTime;
 
                 $scope.buildTrip($scope.tripId, $scope.stopId, $scope.baseTime);
             }
@@ -198,23 +201,24 @@ angular.module('ngModuleTrip')
 
                         case STATE.TIMETABLE:
 
-                            var timetableParams = {
-                                location: data.stopLocation,
-                                baseTime: data.baseTime
-                            };
-
-                            $state.go(data.targetState, timetableParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    location: data.stopLocation,
+                                    baseTime: data.baseTime
+                                }
+                            );
 
                             break;
 
                         case STATE.MAP:
 
-                            var mapParams = {
-                                trip: data.trip,
-                                baseTime: data.baseTime,
-                            };
-
-                            $state.go(data.targetState, mapParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    trip: data.trip,
+                                    baseTime: data.baseTime
+                                });
 
                             break;
 

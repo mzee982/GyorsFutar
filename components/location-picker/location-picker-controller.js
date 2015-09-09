@@ -3,12 +3,13 @@ angular.module('ngModuleLocationPicker')
     [   '$scope',
         '$state',
         '$stateParams',
+        'ngServiceContext',
         '$q',
         '$localStorage',
         'STATE',
         'EVENT',
         'LOCATION_PICKER',
-        function($scope, $state, $stateParams, $q, $localStorage, STATE, EVENT, LOCATION_PICKER) {
+        function($scope, $state, $stateParams, ngServiceContext, $q, $localStorage, STATE, EVENT, LOCATION_PICKER) {
 
             //
             $scope.deferredLocationPicker = $q.defer();
@@ -69,9 +70,11 @@ angular.module('ngModuleLocationPicker')
              * Location picker
              */
 
-            if (angular.isDefined($stateParams.initialPosition)) {
-                $scope.initialPosition = $stateParams.initialPosition;
-                $scope.markedPosition = $stateParams.markedPosition;
+            var stateParams = ngServiceContext.getStateParams();
+
+            if (angular.isDefined(stateParams.initialPosition)) {
+                $scope.initialPosition = stateParams.initialPosition;
+                $scope.markedPosition = stateParams.markedPosition;
             }
 
             else {
@@ -91,11 +94,12 @@ angular.module('ngModuleLocationPicker')
                     switch (data.targetState) {
 
                         case STATE.TIMETABLE:
-                            var timetableParams = {
-                                location: data.position
-                            };
 
-                            $state.go(data.targetState, timetableParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    location: data.position
+                                });
 
                             break;
 

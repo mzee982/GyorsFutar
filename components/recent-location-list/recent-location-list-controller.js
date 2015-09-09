@@ -3,11 +3,12 @@ angular.module('ngModuleRecentLocationList')
     [   '$scope',
         '$state',
         '$stateParams',
+        'ngServiceContext',
         '$q',
         '$localStorage',
         'STATE',
         'EVENT',
-        function($scope, $state, $stateParams, $q, $localStorage, STATE, EVENT) {
+        function($scope, $state, $stateParams, ngServiceContext, $q, $localStorage, STATE, EVENT) {
 
             //
             $scope.deferredRecentLocationList = $q.defer();
@@ -54,10 +55,12 @@ angular.module('ngModuleRecentLocationList')
             // Stored locations
             if ($localStorage.locations != undefined) {
 
-                if (angular.isDefined($stateParams.initialPosition)) {
+                var stateParams = ngServiceContext.getStateParams();
+
+                if (angular.isDefined(stateParams.initialPosition)) {
 
                     $scope.showLocationList(
-                        $stateParams.initialPosition,
+                        stateParams.initialPosition,
                         function(selectedPosition) {
 
                             // Location selected
@@ -99,21 +102,25 @@ angular.module('ngModuleRecentLocationList')
                     switch (data.targetState) {
 
                         case STATE.TIMETABLE:
-                            var timetableParams = {
-                                location: data.position
-                            };
 
-                            $state.go(data.targetState, timetableParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    location: data.position
+                                });
+
 
                             break;
 
                         case STATE.LOCATION_PICKER:
-                            var locationPickerParams = {
-                                initialPosition: $stateParams.initialPosition,
-                                markedPosition: $stateParams.markedPosition
-                            };
+                            var stateParams = ngServiceContext.getStateParams();
 
-                            $state.go(data.targetState, locationPickerParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    initialPosition: stateParams.initialPosition,
+                                    markedPosition: stateParams.markedPosition
+                                });
 
                             break;
 

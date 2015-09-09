@@ -7,11 +7,12 @@ angular.module('ngModuleMap')
         '$timeout',
         'ngServiceMap',
         'ngServiceLocation',
+        'ngServiceContext',
         'STATE',
         'EVENT',
         'MAP',
         'LOCATION',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceMap, ngServiceLocation, STATE, EVENT, MAP, LOCATION) {
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceMap, ngServiceLocation, ngServiceContext, STATE, EVENT, MAP, LOCATION) {
 
             //
             $scope.deferredMap = $q.defer();
@@ -148,9 +149,11 @@ angular.module('ngModuleMap')
              * Build map
              */
 
-            if (angular.isDefined($stateParams.trip)) {
-                $scope.trip = $stateParams.trip;
-                $scope.baseTime = $stateParams.baseTime;
+            var stateParams = ngServiceContext.getStateParams();
+
+            if (angular.isDefined(stateParams.trip)) {
+                $scope.trip = stateParams.trip;
+                $scope.baseTime = stateParams.baseTime;
 
                 $scope.buildMap($scope.trip, $scope.baseTime);
             }
@@ -173,12 +176,13 @@ angular.module('ngModuleMap')
 
                         case STATE.TIMETABLE:
 
-                            var timetableParams = {
-                                location: data.stopLocation,
-                                baseTime: data.baseTime
-                            };
-
-                            $state.go(data.targetState, timetableParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    location: data.stopLocation,
+                                    baseTime: data.baseTime
+                                }
+                            );
 
                             break;
 

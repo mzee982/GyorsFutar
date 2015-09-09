@@ -6,11 +6,12 @@ angular.module('ngModuleTimetable')
         '$q',
         '$timeout',
         'ngServiceTimetable',
+        'ngServiceContext',
         'STATE',
         'EVENT',
         'LOCATION_MODE',
         'TIMETABLE',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceTimetable, STATE, EVENT, LOCATION_MODE, TIMETABLE) {
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceTimetable, ngServiceContext, STATE, EVENT, LOCATION_MODE, TIMETABLE) {
 
             //
             $scope.LOCATION_MODE = LOCATION_MODE;
@@ -148,9 +149,11 @@ angular.module('ngModuleTimetable')
              * Build timetable
              */
 
-            if (angular.isDefined($stateParams.location)) {
-                $scope.geoPosition = $stateParams.location;
-                $scope.baseTime = $stateParams.baseTime;
+            var stateParams = ngServiceContext.getStateParams();
+
+            if (angular.isDefined(stateParams.location)) {
+                $scope.geoPosition = stateParams.location;
+                $scope.baseTime = stateParams.baseTime;
 
                 $scope.buildTimetable($scope.geoPosition, $scope.baseTime);
             }
@@ -173,37 +176,38 @@ angular.module('ngModuleTimetable')
 
                         case STATE.LOCATION_DETECTION:
 
-                            var locationDetectionParams = {
-                                locationMode: data.locationMode,
-                                initialPosition: data.initialPosition,
-                                markedPosition: data.markedPosition
-                            };
-
-                            $state.go(data.targetState, locationDetectionParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    locationMode: data.locationMode,
+                                    initialPosition: data.initialPosition,
+                                    markedPosition: data.markedPosition
+                                });
 
                             break;
 
                         case STATE.TRIP:
 
-                            var tripParams = {
-                                tripId: data.tripId,
-                                stopId: data.stopId,
-                                baseTime: data.baseTime
-                            };
-
-                            $state.go(data.targetState, tripParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    tripId: data.tripId,
+                                    stopId: data.stopId,
+                                    baseTime: data.baseTime
+                                });
 
                             break;
 
                         case STATE.SCHEDULE:
 
-                            var scheduleParams = {
-                                stopId: data.stopId,
-                                routeIds: data.routeIds,
-                                baseTime: data.baseTime
-                            };
-
-                            $state.go(data.targetState, scheduleParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    stopId: data.stopId,
+                                    routeIds: data.routeIds,
+                                    baseTime: data.baseTime
+                                }
+                            );
 
                             break;
 

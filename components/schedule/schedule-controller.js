@@ -7,11 +7,12 @@ angular.module('ngModuleSchedule')
         '$timeout',
         'ngServiceLocation',
         'ngServiceSchedule',
+        'ngServiceContext',
         'STATE',
         'EVENT',
         'SCHEDULE',
         'LOCATION',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceSchedule, STATE, EVENT, SCHEDULE, LOCATION) {
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceSchedule, ngServiceContext, STATE, EVENT, SCHEDULE, LOCATION) {
 
             //
             $scope.deferredSchedule = $q.defer();
@@ -133,10 +134,12 @@ angular.module('ngModuleSchedule')
              * Build schedule
              */
 
-            if (angular.isDefined($stateParams.stopId)) {
-                $scope.stopId = $stateParams.stopId;
-                $scope.routeIds = $stateParams.routeIds;
-                $scope.baseTime = $stateParams.baseTime;
+            var stateParams = ngServiceContext.getStateParams();
+
+            if (angular.isDefined(stateParams.stopId)) {
+                $scope.stopId = stateParams.stopId;
+                $scope.routeIds = stateParams.routeIds;
+                $scope.baseTime = stateParams.baseTime;
 
                 $scope.buildSchedule($scope.stopId, $scope.routeIds, $scope.baseTime);
             }
@@ -159,12 +162,12 @@ angular.module('ngModuleSchedule')
 
                         case STATE.TIMETABLE:
 
-                            var timetableParams = {
-                                location: data.stopLocation,
-                                baseTime: data.baseTime
-                            };
-
-                            $state.go(data.targetState, timetableParams);
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    location: data.stopLocation,
+                                    baseTime: data.baseTime
+                                });
 
                             break;
 
