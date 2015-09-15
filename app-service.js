@@ -80,6 +80,7 @@ angular.module('ngAppGyorsFutar')
                 var toParentStateName = toState.data.parentState;
 
                 var isEntry = (fromStateName.length == 0);
+                var isReload = (fromStateName == toStateName);
                 var isDescendant = (angular.isDefined(toParentStateName) && (toParentStateName == fromStateName));
 
                 var isAncestral = false;
@@ -106,6 +107,17 @@ angular.module('ngAppGyorsFutar')
                 //
 
                 if (isEntry) {
+
+                    // Nothing to do
+
+                }
+
+
+                //
+                // Reload
+                //
+
+                else if (isReload) {
 
                     // Nothing to do
 
@@ -157,7 +169,11 @@ angular.module('ngAppGyorsFutar')
 
                 }
 
+
+                //
                 // Lateral
+                //
+
                 else {
 
                     // Back stackable
@@ -179,11 +195,18 @@ angular.module('ngAppGyorsFutar')
 
                 }
 
+
                 /*
                  * State transition
                  */
 
-                $state.go(toStateName);
+
+                if (isReload) {
+                    $state.reload();
+                }
+                else {
+                    $state.go(toStateName);
+                }
 
             }
 

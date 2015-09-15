@@ -22,8 +22,16 @@ angular.module('ngModuleTimetable')
             $scope.geoPosition = undefined;
             $scope.baseTime = undefined;
 
-            $scope.timetableUpdateTimeout = undefined;
             $scope.isBuilding = undefined;
+            $scope.baseTimeDropdown = {
+                isOpen: false,
+                editedBaseTime: undefined,
+                timePickerOptions: undefined,
+                validateTimeout: undefined,
+                minuteStepResetTimeout: undefined
+            }
+            $scope.timePickerOptions = undefined;
+            $scope.timetableUpdateTimeout = undefined;
             $scope.timetablePresentation = undefined;
 
 
@@ -111,6 +119,151 @@ angular.module('ngModuleTimetable')
 
             }
 
+            $scope.onBaseTimeEditClick = function($event) {
+
+                //
+                $event.preventDefault();
+                $event.stopPropagation();
+
+                // Editable base time
+                var editedBaseTime = angular.isDefined($scope.baseTime) ? $scope.baseTime : new Date();
+                editedBaseTime.setSeconds(0);
+                editedBaseTime.setMilliseconds(0);
+
+                // Min date
+                var minDate = new Date();
+                minDate.setSeconds(0);
+                minDate.setMilliseconds(0);
+
+                // Open the time picker dropdown
+                $scope.baseTimeDropdown = {
+                    isOpen: true,
+                    editedBaseTime: editedBaseTime,
+                    timePickerOptions: {
+                        hourStep: 1,
+                        minuteStep: 1,
+                        showMeridian: false,
+                        min: minDate
+                    },
+                    validateTimeout: undefined,
+                    minuteStepResetTimeout: undefined
+                }
+
+            }
+
+            $scope.onBaseTimeEditChange = function(editedBaseTime) {
+
+                // Update min date
+
+                var minDate = new Date();
+                minDate.setSeconds(0);
+                minDate.setMilliseconds(0);
+
+                $scope.baseTimeDropdown.timePickerOptions.min = minDate;
+
+                // Cancel timeouts
+                if (angular.isDefined($scope.baseTimeDropdown.validateTimeout)) $timeout.cancel($scope.baseTimeDropdown.validateTimeout);
+                if (angular.isDefined($scope.baseTimeDropdown.minuteStepResetTimeout)) $timeout.cancel($scope.baseTimeDropdown.minuteStepResetTimeout);
+
+
+                /*
+                 * Invalid base time
+                 */
+
+                if (!angular.isDate(editedBaseTime) || (editedBaseTime < $scope.baseTimeDropdown.timePickerOptions.min)) {
+
+                    // Delayed validation
+                    $scope.baseTimeDropdown.validateTimeout = $timeout(
+                        function() {
+                            $scope.baseTimeDropdown.editedBaseTime = $scope.baseTimeDropdown.timePickerOptions.min;
+                        },
+                        TIMETABLE.BASE_TIME_EDIT_VALIDATION_DELAY);
+
+                    // minuteStep reset
+                    $scope.baseTimeDropdown.timePickerOptions.minuteStep = 1;
+
+                }
+
+
+                /*
+                 * Valid base time
+                 */
+
+                else {
+
+                    // Update minuteStep
+
+                    // minuteStep 1 - Reset
+                    if (   ($scope.baseTimeDropdown.timePickerOptions.minuteStep > 1)
+                        && ((editedBaseTime.getMinutes() % $scope.baseTimeDropdown.timePickerOptions.minuteStep) > 0)) {
+
+                        $scope.baseTimeDropdown.timePickerOptions.minuteStep = 1;
+                    }
+
+                    // minuteStep 5 - Set
+                    else if (      ($scope.baseTimeDropdown.timePickerOptions.minuteStep == 1)
+                                && ((editedBaseTime.getMinutes() % 5) == 0)) {
+
+                        $scope.baseTimeDropdown.timePickerOptions.minuteStep = 5;
+                    }
+
+                    // minuteStep 10 - Set
+                    else if (      ($scope.baseTimeDropdown.timePickerOptions.minuteStep == 5)
+                                && ((editedBaseTime.getMinutes() % 10) == 0)) {
+
+                        $scope.baseTimeDropdown.timePickerOptions.minuteStep = 10;
+                    }
+
+                    // Delayed minuteStep reset
+                    if ($scope.baseTimeDropdown.timePickerOptions.minuteStep > 1) {
+                        $scope.baseTimeDropdown.minuteStepResetTimeout = $timeout(
+                            function() {
+                                $scope.baseTimeDropdown.timePickerOptions.minuteStep = 1;
+                            },
+                            TIMETABLE.BASE_TIME_EDIT_MINSTEP_RESET_DELAY);
+                    }
+
+                }
+
+            }
+
+            $scope.onBaseTimeEditOk = function(location, editedBaseTime) {
+
+                // Valid base time
+                if (angular.isDate(editedBaseTime) && (editedBaseTime >= $scope.baseTimeDropdown.timePickerOptions.min)) {
+
+                    // Reload timetable
+                    $scope.deferredTimetable.resolve({
+                        targetState: STATE.TIMETABLE,
+                        location: location,
+                        baseTime: editedBaseTime
+                    });
+
+                }
+
+                // Close time picker dropdown
+                $scope.baseTimeDropdown.isOpen = false;
+
+            }
+
+            $scope.onBaseTimeEditCancel = function() {
+
+                // Close time picker dropdown
+                $scope.baseTimeDropdown.isOpen = false;
+
+            }
+
+            $scope.onBaseTimeResetClick = function(location) {
+
+                // Reload timetable
+                $scope.deferredTimetable.resolve({
+                    targetState: STATE.TIMETABLE,
+                    location: location,
+                    baseTime: undefined
+                });
+
+            }
+
             $scope.buildTimetable = function(location, baseTime) {
                 $scope.isBuilding = true;
 
@@ -182,6 +335,17 @@ angular.module('ngModuleTimetable')
                                     locationMode: data.locationMode,
                                     initialPosition: data.initialPosition,
                                     markedPosition: data.markedPosition
+                                });
+
+                            break;
+
+                        case STATE.TIMETABLE:
+
+                            ngServiceContext.navigate(
+                                data.targetState,
+                                {
+                                    location: data.location,
+                                    baseTime: data.baseTime
                                 });
 
                             break;

@@ -13,7 +13,7 @@
             <div class="col-sm-6 col-xs-12" style="margin-top: 5px; margin-bottom: 5px;">
                 <input type="text" class="form-control" size="40" readonly value="{{geoPosition.formattedAddress}}">
             </div>
-            <div class="col-sm-3 col-xs-6" style="margin-top: 5px; margin-bottom: 5px;">
+            <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
                 <span class="btn-group">
                     <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE.AUTO)">
                         <span class="glyphicon glyphicon-screenshot"></span>
@@ -26,9 +26,58 @@
                     </button>
                 </span>
             </div>
-            <div class="col-sm-1 col-xs-2" style="margin-top: 5px; margin-bottom: 5px;">
-                <h4 class="no-margin" data-gyf-countdown data-ng-if="timetablePresentation.baseTime == undefined"></h4>
-                <h4 class="no-margin" data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'H:mm:ss'}}</h4>
+            <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
+
+                <div dropdown is-open="baseTimeDropdown.isOpen" auto-close="outsideClick">
+
+                    <div class="btn-group">
+                        <button
+                            type="button"
+                            class="btn btn-lg"
+                            data-ng-class="{'btn-info': timetablePresentation.baseTime == undefined, 'btn-warning': timetablePresentation.baseTime != undefined}"
+                            data-ng-click="onBaseTimeEditClick($event)">
+
+                            <span data-ng-if="timetablePresentation.baseTime == undefined" data-gyf-countdown></span>
+                            <span data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'H:mm:ss'}}</span>
+                        </button>
+                        <button type="button" class="btn btn-lg btn-default" data-ng-if="timetablePresentation.baseTime != undefined" data-ng-click="onBaseTimeResetClick(geoPosition)">
+                            <span class="glyphicon glyphicon-remove"></span>
+                        </button>
+                    </div>
+
+                    <div class="dropdown-menu">
+                        <div style="margin: 10px">
+                            <table>
+                                <tbody>
+                                <tr>
+                                    <td style="padding-right: 10px">
+                                        <timepicker
+                                                ng-model="baseTimeDropdown.editedBaseTime"
+                                                ng-change="onBaseTimeEditChange(baseTimeDropdown.editedBaseTime)"
+                                                hour-step="baseTimeDropdown.timePickerOptions.hourStep"
+                                                minute-step="baseTimeDropdown.timePickerOptions.minuteStep"
+                                                show-meridian="baseTimeDropdown.timePickerOptions.showMeridian"
+                                                min="baseTimeDropdown.timePickerOptions.min">
+                                        </timepicker>
+                                    </td>
+                                    <td style="padding-right: 5px">
+                                        <button type="button" class="btn btn-warning" data-ng-click="onBaseTimeEditCancel()">
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </button>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-info" data-ng-click="onBaseTimeEditOk(geoPosition, baseTimeDropdown.editedBaseTime)">
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
             <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
                 <span class="pull-right">
