@@ -112,6 +112,7 @@ angular.module('ngModuleLocation')
                     coords: {
                         latitude: parseFloat(lat).toFixed(6),
                         longitude: parseFloat(lon).toFixed(6),
+                        detectedAccuracy: parseInt((angular.isNumber(accuracy)) ? accuracy : 0),
                         accuracy: parseInt((angular.isNumber(accuracy)) ? accuracy : LOCATION.ACCURACY_DEFAULT)
                     },
                     formattedAddress: address

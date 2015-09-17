@@ -32,6 +32,7 @@ angular.module('ngAppGyorsFutar')
 
                 stateParams = {
                     locationMode: undefined,
+                    detectedPosition: undefined,
                     initialPosition: undefined,
                     markedPosition: undefined,
                     location: undefined,

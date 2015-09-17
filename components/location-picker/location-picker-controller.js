@@ -17,6 +17,7 @@ angular.module('ngModuleLocationPicker')
 
             $scope.initialPosition = undefined;
             $scope.markedPosition = undefined;
+            $scope.detectedPosition = undefined;
 
 
             $scope.pickPosition = function(pickedPosition) {
@@ -75,6 +76,7 @@ angular.module('ngModuleLocationPicker')
             if (angular.isDefined(stateParams.initialPosition)) {
                 $scope.initialPosition = stateParams.initialPosition;
                 $scope.markedPosition = stateParams.markedPosition;
+                $scope.detectedPosition = stateParams.detectedPosition;
             }
 
             else {
@@ -94,10 +96,12 @@ angular.module('ngModuleLocationPicker')
                     switch (data.targetState) {
 
                         case STATE.TIMETABLE:
+                            var stateParams = ngServiceContext.getStateParams();
 
                             ngServiceContext.navigate(
                                 data.targetState,
                                 {
+                                    detectedPosition: stateParams.detectedPosition,
                                     location: data.position
                                 });
 

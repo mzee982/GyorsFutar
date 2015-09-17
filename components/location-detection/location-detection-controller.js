@@ -81,6 +81,7 @@ angular.module('ngModuleLocationDetection')
                                 ngServiceContext.navigate(
                                     data.targetState,
                                     {
+                                        detectedPosition: data.position,
                                         location: data.position
                                     });
 
@@ -92,6 +93,7 @@ angular.module('ngModuleLocationDetection')
                                 ngServiceContext.navigate(
                                     data.targetState,
                                     {
+                                        detectedPosition: angular.isDefined(data.position) ? data.position : stateParams.detectedPosition,
                                         initialPosition: angular.isDefined(data.position) ? data.position : stateParams.initialPosition,
                                         markedPosition: stateParams.markedPosition
                                     });
@@ -104,6 +106,7 @@ angular.module('ngModuleLocationDetection')
                                 ngServiceContext.navigate(
                                     data.targetState,
                                     {
+                                        detectedPosition: angular.isDefined(data.position) ? data.position : stateParams.detectedPosition,
                                         initialPosition: angular.isDefined(data.position) ? data.position : stateParams.initialPosition,
                                         markedPosition: stateParams.markedPosition
                                     });

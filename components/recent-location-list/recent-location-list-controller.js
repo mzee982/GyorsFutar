@@ -102,10 +102,12 @@ angular.module('ngModuleRecentLocationList')
                     switch (data.targetState) {
 
                         case STATE.TIMETABLE:
+                            var stateParams = ngServiceContext.getStateParams();
 
                             ngServiceContext.navigate(
                                 data.targetState,
                                 {
+                                    detectedPosition: stateParams.detectedPosition,
                                     location: data.position
                                 });
 
@@ -118,6 +120,7 @@ angular.module('ngModuleRecentLocationList')
                             ngServiceContext.navigate(
                                 data.targetState,
                                 {
+                                    detectedPosition: stateParams.detectedPosition,
                                     initialPosition: stateParams.initialPosition,
                                     markedPosition: stateParams.markedPosition
                                 });

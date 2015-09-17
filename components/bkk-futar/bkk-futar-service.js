@@ -84,6 +84,7 @@ angular.module('ngModuleBkkFutar')
                 }
 
                 //
+                //TODO Fix: No usable results for large minutesAfter values
                 var minutesAfter = parseInt(BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_AFTER);
                 if (angular.isDefined(baseTime)) {
                     var actualDate = new Date();

@@ -97,6 +97,7 @@ angular.module('ngAppGyorsFutar')
                 controller: 'ngControllerRecentLocationList',
 /*
                 params: {
+                    detectedPosition: undefined,
                     initialPosition: undefined,
                     markedPosition: undefined
                 },
@@ -112,6 +113,7 @@ angular.module('ngAppGyorsFutar')
                 controller: 'ngControllerLocationPicker',
 /*
                 params: {
+                    detectedPosition: undefined,
                     initialPosition: undefined,
                     markedPosition: undefined
                 },
@@ -127,6 +129,7 @@ angular.module('ngAppGyorsFutar')
                 controller: 'ngControllerTimetable',
 /*
                 params: {
+                    detectedPosition: undefined,
                     location: undefined,
                     baseTime: undefined
                 },
