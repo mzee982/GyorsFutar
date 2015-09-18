@@ -15,6 +15,7 @@ angular.module('ngModuleBkkFutar')
                 getArrivalsAndDeparturesForStop: function(stopIdArray, baseTime) {return getArrivalsAndDeparturesForStop(stopIdArray, baseTime);},
                 getTripDetails: function(id) {return getTripDetails(id);},
                 getScheduleForStop: function(id, baseTime) {return getScheduleForStop(id, baseTime)},
+                getScheduleForStops: function(stopIdArray, baseTime) {return getScheduleForStops(stopIdArray, baseTime)},
 
                 aggregateStopTime: function(stopTime) {return aggregateStopTime(stopTime);},
                 convertColor: function(color) {return convertColor(color);},
@@ -84,7 +85,6 @@ angular.module('ngModuleBkkFutar')
                 }
 
                 //
-                //TODO Fix: No usable results for large minutesAfter values
                 var minutesAfter = parseInt(BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_AFTER);
                 if (angular.isDefined(baseTime)) {
                     var actualDate = new Date();
@@ -166,6 +166,45 @@ angular.module('ngModuleBkkFutar')
                 });
 
                 return deferred.promise;
+            }
+
+            function getScheduleForStops(stopIdArray, baseTime) {
+                var promises = [];
+
+                // Date
+
+                var dateValue = (angular.isDate(baseTime)) ? baseTime : new Date();
+                var dateString = $filter('date')(dateValue, 'yyyyMMdd');
+
+                // Query for each stop id
+                angular.forEach(
+                    stopIdArray,
+                    function(stopId) {
+                        var deferred = $q.defer();
+
+                        // URL build
+
+                        var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_SCHEDULE_FOR_STOP;
+                        url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_STOP_ID, stopId);
+                        url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOPS_ONLY_DEPARTURES);
+                        url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_DATE, dateString);
+                        url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOPS_REFERENCES);
+
+                        console.info('getScheduleForStop URL: ' + url);
+
+                        $.ajax({
+                            url: url,
+                            jsonp: 'callback',
+                            dataType: 'jsonp',
+                            success: function(data) {deferred.resolve(data);},
+                            error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
+                        });
+
+                        promises.push(deferred.promise);
+                    }
+                );
+
+                return $q.all(promises);
             }
 
             function aggregateStopTime(stopTime) {

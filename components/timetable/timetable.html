@@ -34,7 +34,7 @@
                         <button
                             type="button"
                             class="btn btn-lg"
-                            data-ng-class="{'btn-info': timetablePresentation.baseTime == undefined, 'btn-warning': timetablePresentation.baseTime != undefined}"
+                            data-ng-class="{'btn-default': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_LIVE, 'btn-info': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'btn-warning': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}"
                             data-ng-click="onBaseTimeEditClick($event)">
 
                             <span data-ng-if="timetablePresentation.baseTime == undefined" data-gyf-countdown></span>

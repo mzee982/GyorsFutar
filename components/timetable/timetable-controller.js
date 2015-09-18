@@ -15,6 +15,7 @@ angular.module('ngModuleTimetable')
 
             //
             $scope.LOCATION_MODE = LOCATION_MODE;
+            $scope.TIMETABLE = TIMETABLE;
 
             $scope.deferredTimetable = $q.defer();
             $scope.promiseTimetable = $scope.deferredTimetable.promise;
@@ -126,14 +127,9 @@ angular.module('ngModuleTimetable')
                 $event.stopPropagation();
 
                 // Editable base time
-                var editedBaseTime = angular.isDefined($scope.baseTime) ? $scope.baseTime : new Date();
+                var editedBaseTime = angular.isDefined($scope.baseTime) ? new Date($scope.baseTime) : new Date();
                 editedBaseTime.setSeconds(0);
                 editedBaseTime.setMilliseconds(0);
-
-                // Min date
-                var minDate = new Date();
-                minDate.setSeconds(0);
-                minDate.setMilliseconds(0);
 
                 // Open the time picker dropdown
                 $scope.baseTimeDropdown = {
@@ -143,7 +139,7 @@ angular.module('ngModuleTimetable')
                         hourStep: 1,
                         minuteStep: 1,
                         showMeridian: false,
-                        min: minDate
+                        min: undefined
                     },
                     validateTimeout: undefined,
                     minuteStepResetTimeout: undefined
@@ -152,14 +148,6 @@ angular.module('ngModuleTimetable')
             }
 
             $scope.onBaseTimeEditChange = function(editedBaseTime) {
-
-                // Update min date
-
-                var minDate = new Date();
-                minDate.setSeconds(0);
-                minDate.setMilliseconds(0);
-
-                $scope.baseTimeDropdown.timePickerOptions.min = minDate;
 
                 // Cancel timeouts
                 if (angular.isDefined($scope.baseTimeDropdown.validateTimeout)) $timeout.cancel($scope.baseTimeDropdown.validateTimeout);
@@ -170,12 +158,12 @@ angular.module('ngModuleTimetable')
                  * Invalid base time
                  */
 
-                if (!angular.isDate(editedBaseTime) || (editedBaseTime < $scope.baseTimeDropdown.timePickerOptions.min)) {
+                if (!angular.isDate(editedBaseTime)) {
 
                     // Delayed validation
                     $scope.baseTimeDropdown.validateTimeout = $timeout(
                         function() {
-                            $scope.baseTimeDropdown.editedBaseTime = $scope.baseTimeDropdown.timePickerOptions.min;
+                            $scope.baseTimeDropdown.editedBaseTime = angular.isDefined($scope.baseTime) ? $scope.baseTime : new Date();
                         },
                         TIMETABLE.BASE_TIME_EDIT_VALIDATION_DELAY);
 
@@ -230,7 +218,7 @@ angular.module('ngModuleTimetable')
             $scope.onBaseTimeEditOk = function(location, editedBaseTime) {
 
                 // Valid base time
-                if (angular.isDate(editedBaseTime) && (editedBaseTime >= $scope.baseTimeDropdown.timePickerOptions.min)) {
+                if (angular.isDate(editedBaseTime)) {
 
                     // Reload timetable
                     $scope.deferredTimetable.resolve({
@@ -268,7 +256,16 @@ angular.module('ngModuleTimetable')
                 $scope.isBuilding = true;
 
                 // baseTime validation/correction
-                if (angular.isDate(baseTime) && (baseTime <= new Date())) baseTime = undefined;
+                if (angular.isDate(baseTime)) {
+                    var nowMinutes = new Date();
+                    var baseTimeMinutes = new Date(baseTime);
+                    nowMinutes.setSeconds(0);
+                    nowMinutes.setMilliseconds(0);
+                    baseTimeMinutes.setSeconds(0);
+                    baseTimeMinutes.setMilliseconds(0);
+
+                    if (nowMinutes.getTime() == baseTimeMinutes.getTime()) baseTime = undefined;
+                }
 
                 var promiseBuildTimetable = ngServiceTimetable.buildTimetable(location, baseTime, $scope.timetablePresentation);
 

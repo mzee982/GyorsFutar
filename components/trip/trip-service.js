@@ -170,7 +170,6 @@ angular.module('ngModuleTrip')
                     tripPresentation.stopTimes.push(targetStopTime);
                 }
 
-                //TODO Refactor: do the calculation in the model
                 // StopTimes calculated properties
 
                 var isCurrent = false;
