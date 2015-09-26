@@ -17,7 +17,9 @@
         <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
         <!-- AngularJS -->
-        <script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular-animate.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular-aria.min.js"></script>
 
         <!-- Angular UI Router -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
@@ -40,19 +42,42 @@
         <!-- Depends on Google Maps JavaScript API -->
         <script src="lib/locationpicker.jquery.min.js"></script>
 
+        <!-- Angular Material CSS -->
+        <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.11.0/angular-material.min.css">
+
+        <!-- Angular Material Javascript -->
+        <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.11.0/angular-material.min.js"></script>
+
+        <!-- Google Web Fonts Material Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
         <link rel="stylesheet" href="app.css">
     </head>
     <body>
+        <!--TODO Remove Bootstrap container-->
         <div id="container" class="container-fluid" data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
 
-            <!-- Alert Error -->
-            <alert ng-repeat="message in errorMessages" data-ng-cloak type="danger" close="closeErrorMessage($index)">{{message}}</alert>
+            <!--Material main content-->
+            <md-content layout="column" data-ng-if="showErrorPage() == false">
 
-            <!-- Alert Success -->
-            <alert ng-repeat="message in successMessages" data-ng-cloak type="success" close="closeSuccessMessage($index)">{{message}}</alert>
+                <!-- Root UI view -->
+                <div ui-view></div>
 
-            <!-- Root UI view -->
-            <div ui-view></div>
+            </md-content>
+
+            <!-- Material error page -->
+            <md-content layout="column" layout-fill layout-margin layout-padding data-ng-if="showErrorPage() == true" ng-cloak>
+                <div layout="column" layout-align="end center" flex>
+                    <div><md-icon class="material-icons md-48 md-warn">error</md-icon></div>
+                    <div class="md-display-1">Error occured</div>
+                </div>
+                <div layout="column" layout-align="center center" flex="20">
+                    <div class="md-headline">{{errorMessage}}</div>
+                </div>
+                <div layout="column" layout-align="start center" flex>
+                    <md-button class="md-primary" data-ng-click="errorPageGoBackClick()">Go back</md-button>
+                </div>
+            </md-content>
 
         </div>
 

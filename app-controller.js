@@ -4,26 +4,59 @@ angular.module('ngAppGyorsFutar')
             '$scope',
             '$state',
             '$window',
+            '$mdToast',
             'ngServiceContext',
             'STATE',
             'LOCATION_MODE',
             'EVENT',
-            function($rootScope, $scope, $state, $window, ngServiceContext, STATE, LOCATION_MODE, EVENT) {
+            function($rootScope, $scope, $state, $window, $mdToast, ngServiceContext, STATE, LOCATION_MODE, EVENT) {
 
                 //
+                $scope.errorMessage = undefined;
                 $scope.successMessages = [];
-                $scope.errorMessages = [];
+                $scope.toastPromise = undefined;
 
 
                 //
 
-                $scope.closeSuccessMessage = function(index) {
-                    $scope.successMessages.splice(index, 1);
+                $scope.showErrorPage = function() {
+                    return angular.isDefined($scope.errorMessage);
+                }
+
+                $scope.errorPageGoBackClick = function() {
+
+                    // Navigate back
+                    ngServiceContext.navigateBack($state.current);
+
                 };
 
-                $scope.closeErrorMessage = function(index) {
-                    $scope.errorMessages.splice(index, 1);
-                };
+                $scope.processSuccessMessages = function() {
+
+                    if (($scope.successMessages.length > 0) && angular.isUndefined($scope.toastPromise)) {
+                        var message = $scope.successMessages.shift();
+
+                        // Show toast
+                        $scope.successToast(message);
+
+                    }
+
+                }
+
+                $scope.successToast = function(message) {
+
+                    // Show toast
+                    var toastPreset = $mdToast.simple().content(message).action('OK');
+                    $scope.toastPromise = $mdToast.show(toastPreset);
+
+                    // Finally remove the toast promise and continue processing
+                    $scope.toastPromise.finally(
+                        function() {
+                            $scope.toastPromise = undefined;
+                            $scope.processSuccessMessages();
+                        }
+                    );
+
+                }
 
 
                 /*
@@ -32,13 +65,13 @@ angular.module('ngAppGyorsFutar')
 
                 // Success message event
                 $scope.$on(EVENT.SUCCESS_MESSAGE, function(event, message) {
-                    $scope.successMessages.unshift(message);
-
+                    $scope.successMessages.push(message);
+                    $scope.processSuccessMessages();
                 });
 
                 // Error message event
                 $scope.$on(EVENT.ERROR_MESSAGE, function(event, message) {
-                    $scope.errorMessages.unshift(message);
+                    $scope.errorMessage = message;
                 });
 
 
@@ -48,6 +81,20 @@ angular.module('ngAppGyorsFutar')
 
                 $rootScope.$on('$stateChangeStart',
                     function(event, toState, toParams, fromState, fromParams){
+
+                        /*
+                         * ANY -> ANY state
+                         */
+
+                        // Clear error message
+                        $scope.errorMessage = undefined;
+
+                        // Clear success messages
+                        $scope.successMessages = [];
+
+                        // Hide toast messages
+                        if (angular.isDefined($scope.toastPromise)) $mdToast.hide($scope.toastPromise);
+
 
                         /*
                          * Detect page refresh/reload action
@@ -75,9 +122,6 @@ angular.module('ngAppGyorsFutar')
                          * ANY -> ANY state
                          */
 
-                        // Clear success/error messages on state change
-                        //$scope.successMessages = [];
-                        //$scope.errorMessages = [];
 
 
                         /*
