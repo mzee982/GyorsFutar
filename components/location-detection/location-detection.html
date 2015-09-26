@@ -1,10 +1,8 @@
 
-<!-- Toolbar -->
-<div class="panel panel-default">
-
-    <!-- For Location Get -->
-    <div class="panel-heading" data-ng-if="uiMode == UI_MODE_LOCATION_GET">
-        <h4 class="panel-title">Detecting location...</h4>
+<!-- Progress -->
+<div layout="column" layout-fill layout-align="center center" data-ng-if="uiMode == UI_MODE_LOCATION_GET">
+    <div>
+        <h5 class="md-title">Detecting location</h5>
+        <md-progress-linear md-mode="indeterminate"></md-progress-linear>
     </div>
-
 </div>

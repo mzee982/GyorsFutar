@@ -14,24 +14,24 @@ angular.module('ngModuleRecentLocationList')
             $scope.deferredRecentLocationList = $q.defer();
             $scope.promiseRecentLocationList = $scope.deferredRecentLocationList.promise;
 
+            $scope.actualPosition = undefined;
             $scope.recentLocations = undefined;
 
 
-            $scope.showLocationList = function(position, callback) {
-                var storedLocations = $localStorage.recentLocations;
+            $scope.showLocationList = function(position) {
                 var recentLocationArray = [];
 
+                // Load recent location list from local storage
+                var storedLocations = $localStorage.recentLocations;
+
+                // Calculate distances from initial position
                 for (locationId in storedLocations) {
                     var actualLocation = storedLocations[locationId];
 
-                    // Calculate distance
                     var fromLatLng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
                     var toLatLng = new google.maps.LatLng(actualLocation.coords.latitude, actualLocation.coords.longitude);
 
                     actualLocation.distance = google.maps.geometry.spherical.computeDistanceBetween(fromLatLng, toLatLng);
-
-                    // Add callback function
-                    actualLocation.callback = function() {callback(this);};
 
                     recentLocationArray.push(actualLocation);
                 }
@@ -39,12 +39,29 @@ angular.module('ngModuleRecentLocationList')
                 // Sort by ascending distance
                 recentLocationArray.sort(function(a, b) {return a.distance - b.distance});
 
-                // Last item is the Location Picker
-                var locationPickerItem = {callback: function() {callback();}};
-                recentLocationArray.push(locationPickerItem);
-
                 //
                 $scope.recentLocations = recentLocationArray;
+            };
+
+            $scope.recentLocationClick = function(selectedLocation) {
+
+                // Location selected
+                $scope.deferredRecentLocationList.resolve({targetState: STATE.TIMETABLE, position: selectedLocation});
+
+            };
+
+            $scope.recentLocationMapClick = function(selectedLocation) {
+
+                // Show location on map
+                $scope.deferredRecentLocationList.resolve({targetState: STATE.LOCATION_PICKER, initialPosition: selectedLocation});
+
+            };
+
+            $scope.locationPickerClick = function() {
+
+                // Pick location from map
+                $scope.deferredRecentLocationList.resolve({targetState: STATE.LOCATION_PICKER});
+
             };
 
 
@@ -52,30 +69,15 @@ angular.module('ngModuleRecentLocationList')
              * Recent location list
              */
 
-            // Stored locations
-            if ($localStorage.locations != undefined) {
+            // List stored locations
+            if ($localStorage.recentLocations != undefined) {
 
                 var stateParams = ngServiceContext.getStateParams();
 
                 if (angular.isDefined(stateParams.initialPosition)) {
+                    $scope.actualPosition = stateParams.initialPosition;
 
-                    $scope.showLocationList(
-                        stateParams.initialPosition,
-                        function(selectedPosition) {
-
-                            // Location selected
-                            if (selectedPosition != undefined) {
-                                $scope.deferredRecentLocationList.resolve({targetState: STATE.TIMETABLE, position: selectedPosition});
-                            }
-
-                            // Location Picker
-                            else {
-                                $scope.deferredRecentLocationList.resolve({targetState: STATE.LOCATION_PICKER});
-                            }
-
-                        }
-                    );
-
+                    $scope.showLocationList(stateParams.initialPosition);
                 }
 
                 else {
@@ -84,7 +86,7 @@ angular.module('ngModuleRecentLocationList')
 
             }
 
-            // Location Picker
+            // Redirect to Location Picker
             else {
                 $scope.deferredRecentLocationList.resolve({targetState: STATE.LOCATION_PICKER});
             }
@@ -121,7 +123,7 @@ angular.module('ngModuleRecentLocationList')
                                 data.targetState,
                                 {
                                     detectedPosition: stateParams.detectedPosition,
-                                    initialPosition: stateParams.initialPosition,
+                                    initialPosition: angular.isDefined(data.initialPosition) ? data.initialPosition : stateParams.initialPosition,
                                     markedPosition: stateParams.markedPosition
                                 });
 

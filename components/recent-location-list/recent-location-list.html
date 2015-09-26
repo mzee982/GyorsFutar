@@ -1,24 +1,46 @@
 
 <!-- Toolbar -->
-<div class="panel panel-default">
-
-    <!-- For Recent Location List -->
-    <div class="panel-heading">
-        <h4 class="panel-title">Recent location list</h4>
+<md-toolbar>
+    <div class="md-toolbar-tools">
+        <span>Recent locations</span>
+        <span flex></span>
     </div>
+</md-toolbar>
 
-</div>
-
-<!-- Location List -->
-<div class="panel panel-default">
-    <div class="panel-body">
-        <div class="btn-group-vertical btn-block">
-            <button type="button" class="btn btn-default" data-ng-repeat="location in recentLocations" data-ng-if="!$last" data-ng-click="location.callback()">
-                <span>{{location.formattedAddress}}</span>
-            </button>
-        </div>
-        <button type="button" class="btn btn-default btn-block" data-ng-click="recentLocations[recentLocations.length - 1].callback()">
-            <span>Location Picker</span>
-        </button>
-    </div>
-</div>
+<!-- Recent Location List -->
+<md-content layout="column" layout-fill>
+    <md-card>
+        <md-card-content>
+            <h2 class="md-title">Recents</h2>
+            <div layout="row">
+                <div flex>
+                    <div class="md-subhead">Actual location</div>
+                    <div>{{actualPosition.formattedAddress}} (radius {{actualPosition.coords.accuracy | number : 0}} m)</div>
+                </div>
+                <div class="hide-gt-sm">
+                    <md-button class="md-fab md-accent" aria-label="Pick location from map" ng-click="locationPickerClick()">
+                        <md-icon class="material-icons">add</md-icon>
+                    </md-button>
+                </div>
+            </div>
+            <md-list>
+                <md-divider></md-divider>
+                <md-list-item class="md-2-line" ng-repeat="location in recentLocations" ng-click="recentLocationClick(location)">
+                    <md-icon class="material-icons" hide-sm>place</md-icon>
+                    <div class="md-list-item-text">
+                        <h3>{{location.formattedAddress}}</h3>
+                        <p>{{location.distance | number : 0}} meters from actual location (radius {{location.coords.accuracy | number : 0}} m)</p>
+                    </div>
+                    <md-icon class="material-icons md-secondary md-primary" aria-label="Map" ng-click="recentLocationMapClick(location)">map</md-icon>
+                    <md-divider ng-if="!$last"></md-divider>
+                </md-list-item>
+                <md-divider class="hide-sm"></md-divider>
+            </md-list>
+        </md-card-content>
+        <md-card-footer class="hide-sm">
+            <div class="md-actions" layout="row" layout-align="end center">
+                <md-button class="md-primary" ng-click="locationPickerClick()">Pick location from map</md-button>
+            </div>
+        </md-card-footer>
+    </md-card>
+</md-content>
