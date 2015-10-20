@@ -19,11 +19,18 @@ angular.module('ngModuleLocationPicker')
             $scope.markedPosition = undefined;
             $scope.detectedPosition = undefined;
 
+            $scope.pickerLocation = undefined;
 
-            $scope.pickPosition = function(pickedPosition) {
-                $scope.deferredLocationPicker.resolve({targetState: STATE.TIMETABLE, position: pickedPosition});
+
+            $scope.pickLocation = function(pickedLocation) {
+
+                // Store picked location
+                $scope.storeLocation(pickedLocation);
+
+                $scope.deferredLocationPicker.resolve({targetState: STATE.TIMETABLE, position: pickedLocation});
             }
 
+            //TODO Should refactor to location service
             $scope.storeLocation = function(location) {
                 var actualStoreTimestamp = new Date().getTime();
                 var defaultStoreTimestamp = new Date(0).getTime();
@@ -64,6 +71,14 @@ angular.module('ngModuleLocationPicker')
                 // Write storage
                 $localStorage.recentLocations = storedLocations;
 
+            }
+
+            $scope.pickerLocationChange = function(location) {
+                $scope.pickerLocation = location;
+            }
+
+            $scope.compareToPickerLocationRadius = function(radius) {
+                return ((angular.isDefined($scope.pickerLocation)) && ($scope.pickerLocation.radius == radius));
             }
 
 

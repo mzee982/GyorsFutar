@@ -16,8 +16,8 @@ angular.module('ngModuleLocationPicker')
                 initialPosition: '=',
                 detectedPosition: '=',
                 markedPosition: '=',
-                pickPosition: '&',
-                storeLocation: '&'
+                pickLocation: '&',
+                pickerLocationChange: '&'
             },
             controller: ['$scope', function($scope) {
                 $scope.inputAddress = undefined;
@@ -26,12 +26,15 @@ angular.module('ngModuleLocationPicker')
                 $scope.inputRadius = undefined;
                 $scope.locationPicker = undefined;
 
-                this.pickPosition = function(pickedPosition) {
-                    $scope.pickPosition({pickedPosition: pickedPosition});
+                this.pickLocation = function(pickedLocation) {
+                    $scope.pickLocation({pickedLocation: pickedLocation});
                 }
 
-                this.storeLocation = function(location) {
-                    $scope.storeLocation({location: location});
+                this.pickerLocationChange = function(location) {
+
+                    // Triggers UI update
+                    $scope.$apply($scope.pickerLocationChange({location: location}));
+
                 }
 
                 this.setInputAddress = function(element) {
@@ -152,7 +155,37 @@ angular.module('ngModuleLocationPicker')
                         radiusInput: ctrl.getInputRadius(),
                         locationNameInput: ctrl.getInputAddress()
                     },
-                    enableAutocomplete: true
+                    enableAutocomplete: true,
+                    oninitialized: function(component) {
+
+                        // Force refresh the address input field
+                        ctrl.getInputAddress().focus();
+                        ctrl.getInputAddress().blur();
+
+                        // Initial location change
+
+                        var pickerLocation = {
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                            radius: position.coords.accuracy
+                        };
+
+                        ctrl.pickerLocationChange(pickerLocation);
+
+                    },
+                    onchanged: function(currentLocation, radius, isMarkerDropped) {
+
+                        // Notify about change
+
+                        var newLocation = {
+                            latitude: currentLocation.latitude,
+                            longitude: currentLocation.longitude,
+                            radius: radius
+                        };
+
+                        ctrl.pickerLocationChange(newLocation);
+
+                    }
                 };
 
                 ctrl.getLocationPicker().locationpicker(locationPickerOptions);
@@ -172,13 +205,18 @@ angular.module('ngModuleLocationPicker')
 
                         mapClickTimeout = $timeout(
                             function() {
-                                ctrl.getLocationPicker().locationpicker(
-                                    'location',
-                                    {
-                                        latitude: e.latLng.lat(),
-                                        longitude: e.latLng.lng(),
-                                        radius: LOCATION.ACCURACY_MIN_SEARCH_RADIUS
-                                    });
+                                var newLocation = {
+                                    latitude: e.latLng.lat(),
+                                    longitude: e.latLng.lng(),
+                                    radius: LOCATION.ACCURACY_MIN_SEARCH_RADIUS
+                                };
+
+                                // Set new location
+                                ctrl.getLocationPicker().locationpicker('location', newLocation);
+
+                                // Notify about change
+                                ctrl.pickerLocationChange(newLocation);
+
                             },
                             LOCATION_PICKER.CLICK_CANCELLATION_TIMEOUT,
                             false);
@@ -342,10 +380,9 @@ angular.module('ngModuleLocationPicker')
                         var radius = ctrl.getInputRadius().val();
                         var locationName = ctrl.getInputAddress().val();
 
-                        var position = {coords: {latitude: latitude, longitude: longitude, accuracy: radius}, formattedAddress: locationName};
+                        var pickedLocation = {coords: {latitude: latitude, longitude: longitude, accuracy: radius}, formattedAddress: locationName};
 
-                        ctrl.storeLocation(position);
-                        ctrl.pickPosition(position);
+                        ctrl.pickLocation(pickedLocation);
                     });
 
                 }
@@ -357,8 +394,16 @@ angular.module('ngModuleLocationPicker')
                         var latitude = parseFloat(ctrl.getInputLatitude().val()).toFixed(6);
                         var longitude = parseFloat(ctrl.getInputLongitude().val()).toFixed(6);
 
-                        ctrl.getInputRadius().val(scope.radiusValue);
+                        var newLocation = {latitude: latitude, longitude: longitude, radius: scope.radiusValue};
+
+                        // Update radius input
+                        ctrl.getInputRadius().val(newLocation.radius);
+
+                        // Set new location
                         ctrl.getLocationPicker().locationpicker('location', {latitude: latitude, longitude: longitude, radius: scope.radiusValue});
+
+                        // Notify about change
+                        ctrl.pickerLocationChange(newLocation);
 
                     });
 

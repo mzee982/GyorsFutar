@@ -68,6 +68,49 @@ md-list-item.md-2-line>.md-no-style .md-list-item-text h3 {
     line-height: normal;
 }
 
+md-input-container.toolbar {
+    padding-bottom: 2px;
+    margin-top: 7px;
+    margin-bottom: 7px;
+}
+
+.md-button.compact {
+    padding-left: 4px;
+    padding-right: 4px;
+    margin-left: 4px;
+    margin-right: 4px;
+    min-height: inherit;
+    min-width: inherit;
+}
+
+.floating-toolbar {
+    position: absolute;
+    z-index: 1;
+}
+
+.floating-toolbar.top {
+    top: 0px;
+    left: 0px;
+    right: 0px;
+}
+
+.floating-toolbar.top-left {
+    top: 0px;
+    left: 0px;
+}
+
+.floating-toolbar.bottom-left {
+    bottom: 0px;
+    left: 0px;
+}
+
+md-whiteframe {
+    background-color: white;
+    margin: 5px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
 /*
 Material icons
 */
