@@ -1,301 +1,335 @@
 
-<!-- Toolbar -->
-<div class="panel panel-default">
-
-    <!-- For Timetable Build -->
-    <div class="panel-heading" data-ng-if="isBuilding && (timetablePresentation == undefined)">
-        <h4 class="panel-title">Building timetable...</h4>
+<!-- Progress -->
+<div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (timetablePresentation == undefined)">
+    <div>
+        <h5 class="md-title">Building timetable</h5>
+        <md-progress-linear md-mode="indeterminate"></md-progress-linear>
     </div>
-
-    <!-- For Timetable Show -->
-    <div class="panel-heading" data-ng-if="timetablePresentation != undefined">
-        <div class="row">
-            <div class="col-sm-6 col-xs-12" style="margin-top: 5px; margin-bottom: 5px;">
-                <input type="text" class="form-control" size="40" readonly value="{{geoPosition.formattedAddress}}">
-            </div>
-            <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
-                <span class="btn-group">
-                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE.AUTO)">
-                        <span class="glyphicon glyphicon-screenshot"></span>
-                    </button>
-                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE.LIST)">
-                        <span class="glyphicon glyphicon-th-list"></span>
-                    </button>
-                    <button type="button" class="btn btn-default" data-ng-click="onLocationRefreshClick(LOCATION_MODE.MAP)">
-                        <span class="glyphicon glyphicon-picture"></span>
-                    </button>
-                </span>
-            </div>
-            <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
-
-                <div dropdown is-open="baseTimeDropdown.isOpen" auto-close="outsideClick">
-
-                    <div class="btn-group">
-                        <button
-                            type="button"
-                            class="btn btn-lg"
-                            data-ng-class="{'btn-default': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_LIVE, 'btn-info': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'btn-warning': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}"
-                            data-ng-click="onBaseTimeEditClick($event)">
-
-                            <span data-ng-if="timetablePresentation.baseTime == undefined" data-gyf-countdown></span>
-                            <span data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'H:mm:ss'}}</span>
-                        </button>
-                        <button type="button" class="btn btn-lg btn-default" data-ng-if="timetablePresentation.baseTime != undefined" data-ng-click="onBaseTimeResetClick(geoPosition)">
-                            <span class="glyphicon glyphicon-remove"></span>
-                        </button>
-                    </div>
-
-                    <div class="dropdown-menu">
-                        <div style="margin: 10px">
-                            <table>
-                                <tbody>
-                                <tr>
-                                    <td style="padding-right: 10px">
-                                        <timepicker
-                                                ng-model="baseTimeDropdown.editedBaseTime"
-                                                ng-change="onBaseTimeEditChange(baseTimeDropdown.editedBaseTime)"
-                                                hour-step="baseTimeDropdown.timePickerOptions.hourStep"
-                                                minute-step="baseTimeDropdown.timePickerOptions.minuteStep"
-                                                show-meridian="baseTimeDropdown.timePickerOptions.showMeridian"
-                                                min="baseTimeDropdown.timePickerOptions.min">
-                                        </timepicker>
-                                    </td>
-                                    <td style="padding-right: 5px">
-                                        <button type="button" class="btn btn-warning" data-ng-click="onBaseTimeEditCancel()">
-                                            <span class="glyphicon glyphicon-remove"></span>
-                                        </button>
-                                    </td>
-                                    <td>
-                                        <button type="button" class="btn btn-info" data-ng-click="onBaseTimeEditOk(geoPosition, baseTimeDropdown.editedBaseTime)">
-                                            <span class="glyphicon glyphicon-ok"></span>
-                                        </button>
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
-            <div class="col-sm-2 col-xs-4" style="margin-top: 5px; margin-bottom: 5px;">
-                <span class="pull-right">
-                    <span data-gyf-countdown data-source-time='timetablePresentation.buildTime'></span>
-                    <button type="button" class="btn btn-default" data-ng-click="onTimetableRefreshClick()">
-                        <span class="glyphicon glyphicon-refresh"></span>
-                    </button>
-                </span>
-            </div>
-        </div>
-    </div>
-
 </div>
 
+<!-- Toolbar -->
+<md-toolbar data-ng-if="timetablePresentation != undefined">
+    <div class="md-toolbar-tools">
+        <span>Timetable</span>
+        <span flex></span>
+        <md-button class="md-icon-button" aria-label="Detect location" data-ng-click="onLocationRefreshClick(LOCATION_MODE.AUTO)">
+            <md-icon class="material-icons">my_location</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="Recent locations" data-ng-click="onLocationRefreshClick(LOCATION_MODE.LIST)">
+            <md-icon class="material-icons">list</md-icon>
+        </md-button>
+        <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onLocationRefreshClick(LOCATION_MODE.MAP)">
+            <md-icon class="material-icons">map</md-icon>
+        </md-button>
+    </div>
+</md-toolbar>
+
 <!-- Timetable -->
-<accordion close-others="true" data-ng-if="timetablePresentation != undefined">
-    <accordion-group is-open="parentStation.isExpanded" data-ng-repeat="parentStation in timetablePresentation.parentStations">
-        <accordion-heading>
-            <div class="row">
-                <div class="col-xs-10 text-center">
-                    <span>{{parentStation.name}}</span>
-                    <span data-ng-if="!parentStation.isExpanded" data-ng-repeat="routeName in parentStation.routeNames">
-                        <span class="label label-default" data-ng-style="{'color': parentStation.routeTextColors[$index], 'background-color': parentStation.routeColors[$index]}">{{routeName}}</span>&nbsp;
-                    </span>
-                </div>
-                <div class="col-xs-2">
-                    <div class="pull-right glyphicon" data-ng-class="{'glyphicon-chevron-down': parentStation.isExpanded, 'glyphicon-chevron-right': !parentStation.isExpanded}"></div>
+<md-content layout="column" layout-fill data-ng-if="timetablePresentation != undefined">
+
+    <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap flex>
+
+        <!-- Address -->
+        <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
+            <md-icon class="material-icons">place</md-icon>
+            <span class="nowrap-ellipsis" flex>{{geoPosition.formattedAddress}}</span>
+        </div>
+
+        <!-- Base time -->
+        <div layout="row" layout-align="center center">
+            <div uib-dropdown is-open="baseTimeDropdown.isOpen" auto-close="outsideClick">
+                <md-button
+                        class="md-raised compact"
+                        aria-label="Base time"
+                        data-ng-class="{'md-primary': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}"
+                        data-ng-click="onBaseTimeEditClick($event)">
+                    <span data-ng-if="timetablePresentation.baseTime == undefined" data-gyf-countdown></span>
+                    <span data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'mediumTime'}}</span>
+                </md-button>
+                <md-button class="md-icon-button compact" aria-label="Reset" data-ng-if="timetablePresentation.baseTime != undefined" data-ng-click="onBaseTimeResetClick(geoPosition)">
+                    <md-icon class="material-icons">clear</md-icon>
+                </md-button>
+                <div class="uib-dropdown-menu">
+                    <md-whiteframe class="md-whiteframe-2dp" layout="row" layout-align="start center">
+                        <!-- Should be replaced a Material implementation -->
+                        <uib-timepicker
+                                ng-model="baseTimeDropdown.editedBaseTime"
+                                ng-change="onBaseTimeEditChange(baseTimeDropdown.editedBaseTime)"
+                                hour-step="baseTimeDropdown.timePickerOptions.hourStep"
+                                minute-step="baseTimeDropdown.timePickerOptions.minuteStep"
+                                show-meridian="baseTimeDropdown.timePickerOptions.showMeridian"
+                                min="baseTimeDropdown.timePickerOptions.min">
+                        </uib-timepicker>
+                        <md-button class="md-icon-button compact md-warn" aria-label="Cancel" data-ng-click="onBaseTimeEditCancel()">
+                            <md-icon class="material-icons">clear</md-icon>
+                        </md-button>
+                        <md-button class="md-icon-button compact md-primary" aria-label="Ok" data-ng-click="onBaseTimeEditOk(geoPosition, baseTimeDropdown.editedBaseTime)">
+                            <md-icon class="material-icons">done</md-icon>
+                        </md-button>
+                    </md-whiteframe>
                 </div>
             </div>
-        </accordion-heading>
-        <table class="table table-condensed">
-            <tbody>
-            <tr data-ng-repeat="routeGroup in parentStation.routeGroups">
-                <td>
+        </div>
+
+        <!-- Spacer -->
+        <div flex></div>
+
+        <!-- Refresh -->
+        <div>
+            <span data-gyf-countdown data-source-time='timetablePresentation.buildTime'></span>
+            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTimetableRefreshClick()">
+                <md-icon class="material-icons">refresh</md-icon>
+            </md-button>
+        </div>
+
+    </md-whiteframe>
+
+    <uib-accordion close-others="true" template-url="components/angular-ui/bootstrap/template/accordion/accordion.html">
+        <uib-accordion-group is-open="parentStation.isExpanded" template-url="components/angular-ui/bootstrap/template/accordion/accordion-group.html" data-ng-repeat="parentStation in timetablePresentation.parentStations">
+
+            <!-- Heading -->
+            <uib-accordion-heading>
+                <div class="whiteframe-heading" layout="row">
+                    <div layout="column" flex>
+                        <div flex></div>
+                        <div class="md-title">{{parentStation.name}}</div>
+                        <div class="md-body-1" layout="row" layout-align="start start" layout-wrap data-ng-if="!parentStation.isExpanded">
+                            <span class="label label-default label-route"
+                                 data-ng-style="{'color': parentStation.routeTextColors[$index], 'background-color': parentStation.routeColors[$index]}"
+                                 data-ng-repeat="routeName in parentStation.routeNames">{{routeName}}</span>
+                        </div>
+                    </div>
+                    <div layout="column" layout-align="start end">
+                        <md-icon class="material-icons md-48 md-color-inherit whiteframe-heading-icon" hide-sm>directions</md-icon>
+                        <div flex></div>
+                        <md-button class="md-icon-button" aria-label="Expand">
+                            <md-icon class="material-icons md-color-inherit" data-ng-if="!parentStation.isExpanded">expand_more</md-icon>
+                            <md-icon class="material-icons md-color-inherit" data-ng-if="parentStation.isExpanded">expand_less</md-icon>
+                        </md-button>
+                    </div>
+                </div>
+            </uib-accordion-heading>
+
+            <!-- Body -->
+            <div class="whiteframe-body" layout="column">
+                <div class="route-group md-body-1" data-ng-repeat="routeGroup in parentStation.routeGroups">
 
                     <!-- Collapsed -->
-                    <div collapse="routeGroup.isGroup && routeGroup.isExpanded">
-
-                        <!-- Header -->
-                        <div class="row-header" data-ng-class="{'link': routeGroup.isGroup}" data-ng-click="onRouteGroupHeaderClick($event, routeGroup)">
-                            <div class="row">
-                                <div class="col-xs-12">
-                                    <div class="row">
-                                        <div class="col-sm-2 col-xs-6">
-                                            <h3 class="no-margin text-left">
-                                            <span data-ng-repeat="name in routeGroup.names track by $index">
-                                                <span class="label label-default" data-ng-style="{'color': routeGroup.textColors[$index], 'background-color': routeGroup.colors[$index]}">{{name}}</span>&nbsp;
-                                            </span>
-                                            </h3>
-                                        </div>
-                                        <div class="col-sm-2 col-sm-push-8 col-xs-6">
-                                            <div class="pull-right glyphicon glyphicon-chevron-right" data-ng-if="routeGroup.isGroup && !routeGroup.isExpanded"></div>
-                                        </div>
-                                        <div class="col-sm-8 col-sm-pull-2 col-xs-12">
-                                            <h5 class="no-margin text-center">
-                                                <div data-ng-repeat="description in routeGroup.descriptions track by $index">{{description}}</div>
-                                            </h5>
-                                        </div>
-                                    </div>
+                    <div uib-collapse="routeGroup.isGroup && routeGroup.isExpanded">
+                        <div layout="column">
+                            <div class="route-group-header" layout="row" layout-align="start center">
+                                <div flex>
+                                    <table>
+                                        <tbody>
+                                            <tr data-ng-repeat="name in routeGroup.names track by $index">
+                                                <td>
+                                                    <div class="label label-default label-route"
+                                                         data-ng-style="{'color': routeGroup.textColors[$index], 'background-color': routeGroup.colors[$index]}">{{name}}</div>
+                                                </td>
+                                                <td>
+                                                    <div>{{routeGroup.descriptions[$index]}}</div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div data-ng-if="routeGroup.isGroup">
+                                    <md-button class="md-icon-button compact" aria-label="Split" data-ng-click="onRouteGroupHeaderClick($event, routeGroup)">
+                                        <md-icon class="material-icons">import_export</md-icon>
+                                    </md-button>
+                                </div>
+                            </div>
+                            <md-divider></md-divider>
+                            <div class="route-group-body" layout="row" layout-align="center start">
+                                <div flex-sm="95" flex-gt-sm="80">
+                                    <table>
+                                        <tbody>
+                                        <tr hide-gt-sm>
+                                            <td>
+                                                <span class="label label-default label-route" data-ng-if="(routeGroup.tripLeft != undefined) && routeGroup.isGroup">{{routeGroup.tripLeft.routeName}}</span>
+                                            </td>
+                                            <td>
+                                                <span class="label label-default label-route" data-ng-if="(routeGroup.tripRight != undefined) && routeGroup.isGroup">{{routeGroup.tripRight.routeName}}</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-ng-if="routeGroup.tripLeft != undefined">
+                                                    <span class="label label-default label-route" data-ng-if="routeGroup.isGroup" hide-sm>{{routeGroup.tripLeft.routeName}}</span>
+                                                    <span class="md-body-2">{{routeGroup.tripLeft.name}}</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div data-ng-if="routeGroup.tripRight != undefined">
+                                                    <span class="label label-default label-route" data-ng-if="routeGroup.isGroup" hide-sm>{{routeGroup.tripRight.routeName}}</span>
+                                                    <span class="md-body-2">{{routeGroup.tripRight.name}}</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-ng-if="routeGroup.tripLeft != undefined">
+                                                    <span>{{routeGroup.tripLeft.stopTimeString}}</span>
+                                                    <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripLeft.stopTime' hide-sm></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div data-ng-if="routeGroup.tripRight != undefined">
+                                                    <span>{{routeGroup.tripRight.stopTimeString}}</span>
+                                                    <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripRight.stopTime' hide-sm></span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr hide-gt-sm>
+                                            <td>
+                                                <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripLeft.stopTime' data-ng-if="routeGroup.tripLeft != undefined"></span>
+                                            </td>
+                                            <td>
+                                                <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripRight.stopTime' data-ng-if="routeGroup.tripRight != undefined"></span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>
+                                                <div data-ng-if="routeGroup.tripLeft != undefined">
+                                                    <md-button class="md-icon-button compact" aria-label="Show on map" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
+                                                        <md-icon class="material-icons">pin_drop</md-icon>
+                                                    </md-button>
+                                                    <md-button class="md-icon-button compact" aria-label="Trip" data-ng-click="onTripClick(routeGroup.tripLeft, routeGroup.routes, timetablePresentation.baseTime)">
+                                                        <md-icon class="material-icons">schedule</md-icon>
+                                                    </md-button>
+                                                    <md-button class="md-icon-button compact" aria-label="Schedule" data-ng-click="onStopTimeClick(routeGroup.tripLeft, timetablePresentation.baseTime)">
+                                                        <md-icon class="material-icons">directions_transit</md-icon>
+                                                    </md-button>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div data-ng-if="routeGroup.tripRight != undefined">
+                                                    <md-button class="md-icon-button compact" aria-label="Show on map" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
+                                                        <md-icon class="material-icons">pin_drop</md-icon>
+                                                    </md-button>
+                                                    <md-button class="md-icon-button compact" aria-label="Trip" data-ng-click="onTripClick(routeGroup.tripRight, routeGroup.routes, timetablePresentation.baseTime)">
+                                                        <md-icon class="material-icons">schedule</md-icon>
+                                                    </md-button>
+                                                    <md-button class="md-icon-button compact" aria-label="Schedule" data-ng-click="onStopTimeClick(routeGroup.tripRight, timetablePresentation.baseTime)">
+                                                        <md-icon class="material-icons">directions_transit</md-icon>
+                                                    </md-button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- Body -->
-                        <div class="row-body">
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <div class="link" data-ng-if="routeGroup.tripLeft != undefined" data-ng-click="onTripClick(routeGroup.tripLeft, routeGroup.routes, timetablePresentation.baseTime)">
-                                        <h5 class="no-margin text-center">
-                                            <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripLeft.routeName}}</span>
-                                            <span><strong>{{routeGroup.tripLeft.name}}</strong></span>
-                                            <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
-                                                <span class="glyphicon glyphicon-flag"></span>
-                                            </button>
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6">
-                                    <div class="link" data-ng-if="routeGroup.tripRight != undefined" data-ng-click="onTripClick(routeGroup.tripRight, routeGroup.routes, timetablePresentation.baseTime)">
-                                        <h5 class="no-margin text-center">
-                                            <span class="label label-default" data-ng-if="routeGroup.isGroup">{{routeGroup.tripRight.routeName}}</span>
-                                            <span><strong>{{routeGroup.tripRight.name}}</strong></span>
-                                            <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
-                                                <span class="glyphicon glyphicon-flag"></span>
-                                            </button>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <div class="link" data-ng-if="routeGroup.tripLeft != undefined" data-ng-click="onStopTimeClick(routeGroup.tripLeft, timetablePresentation.baseTime)">
-                                        <h6 class="no-margin text-center">{{routeGroup.tripLeft.stopTimeString}}</h6>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6">
-                                    <div class="link" data-ng-if="routeGroup.tripRight != undefined" data-ng-click="onStopTimeClick(routeGroup.tripRight, timetablePresentation.baseTime)">
-                                        <h6 class="no-margin text-center">{{routeGroup.tripRight.stopTimeString}}</h6>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="row">
-                                <div class="col-xs-6">
-                                    <div class="link" data-ng-if="routeGroup.tripLeft != undefined" data-ng-click="onStopTimeClick(routeGroup.tripLeft, timetablePresentation.baseTime)">
-                                        <h5 class="no-margin text-center">
-                                            <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripLeft.stopTime'></strong>
-                                        </h5>
-                                    </div>
-                                </div>
-                                <div class="col-xs-6">
-                                    <div class="link" data-ng-if="routeGroup.tripRight != undefined" data-ng-click="onStopTimeClick(routeGroup.tripRight, timetablePresentation.baseTime)">
-                                        <h5 class="no-margin text-center">
-                                            <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='routeGroup.tripRight.stopTime'></strong>
-                                        </h5>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
                     </div>
 
                     <!-- Expanded -->
-                    <div collapse="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
-                        <table class="table table-condensed">
-                            <tbody>
-                            <tr data-ng-repeat="route in routeGroup.routes">
-                                <td>
-
-                                    <!-- Header -->
-                                    <div class="row-header link" data-ng-click="onRouteGroupHeaderClick($event, routeGroup)">
-                                        <div class="row">
-                                            <div class="col-xs-12">
-                                                <div class="row">
-                                                    <div class="col-sm-1 col-xs-6">
-                                                        <h3 class="no-margin text-left">
-                                                            <span class="label label-default" data-ng-style="{'color': route.textColor, 'background-color': route.color}">{{route.name}}</span>
-                                                        </h3>
-                                                    </div>
-                                                    <div class="col-sm-1 col-sm-push-10 col-xs-6">
-                                                        <div class="pull-right glyphicon glyphicon-chevron-down"></div>
-                                                    </div>
-                                                    <div class="col-sm-10 col-sm-pull-1 col-xs-12">
-                                                        <h5 class="no-margin text-center">
-                                                            <div>{{route.description}}</div>
-                                                        </h5>
-                                                    </div>
-                                                </div>
-                                            </div>
+                    <div uib-collapse="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
+                        <div layout="column">
+                            <div data-ng-repeat="route in routeGroup.routes">
+                                <div layout="column">
+                                    <div class="route-group-header" layout="row" layout-align="start center">
+                                        <div flex>
+                                            <table>
+                                                <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div class="label label-default label-route"
+                                                             data-ng-style="{'color': route.textColor, 'background-color': route.color}">{{route.name}}</div>
+                                                    </td>
+                                                    <td>
+                                                        <div>{{route.description}}</div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div data-ng-if="routeGroup.isGroup">
+                                            <md-button class="md-icon-button compact" aria-label="Group" data-ng-click="onRouteGroupHeaderClick($event, routeGroup)">
+                                                <md-icon class="material-icons">vertical_align_center</md-icon>
+                                            </md-button>
                                         </div>
                                     </div>
-
-                                    <!-- Body -->
-                                    <div class="row-body">
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                <div class="link" data-ng-if="route.tripLeft != undefined" data-ng-click="onTripClick(route.tripLeft, route, timetablePresentation.baseTime)">
-                                                    <h5 class="no-margin text-center">
-                                                        <strong>{{route.tripLeft.name}}</strong>
-                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
-                                                            <span class="glyphicon glyphicon-flag"></span>
-                                                        </button>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <div class="link" data-ng-if="route.tripRight != undefined" data-ng-click="onTripClick(route.tripRight, route, timetablePresentation.baseTime)">
-                                                    <h5 class="no-margin text-center">
-                                                        <strong>{{route.tripRight.name}}</strong>
-                                                        <button type="button" class="btn btn-default" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
-                                                            <span class="glyphicon glyphicon-flag"></span>
-                                                        </button>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                <div class="link" data-ng-if="route.tripLeft != undefined" data-ng-click="onStopTimeClick(route.tripLeft, timetablePresentation.baseTime)">
-                                                    <h6 class="no-margin text-center">{{route.tripLeft.stopTimeString}}</h6>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <div class="link" data-ng-if="route.tripRight != undefined" data-ng-click="onStopTimeClick(route.tripRight, timetablePresentation.baseTime)">
-                                                    <h6 class="no-margin text-center">{{route.tripRight.stopTimeString}}</h6>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-xs-6">
-                                                <div class="link" data-ng-if="route.tripLeft != undefined" data-ng-click="onStopTimeClick(route.tripLeft, timetablePresentation.baseTime)">
-                                                    <h5 class="no-margin text-center">
-                                                        <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripLeft.stopTime'></strong>
-                                                    </h5>
-                                                </div>
-                                            </div>
-                                            <div class="col-xs-6">
-                                                <div class="link" data-ng-if="route.tripRight != undefined" data-ng-click="onStopTimeClick(route.tripRight, timetablePresentation.baseTime)">
-                                                    <h5 class="no-margin text-center">
-                                                        <strong data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripRight.stopTime'></strong>
-                                                    </h5>
-                                                </div>
-                                            </div>
+                                    <md-divider></md-divider>
+                                    <div class="route-group-body" layout="row" layout-align="center start">
+                                        <div flex-sm="95" flex-gt-sm="80">
+                                            <table>
+                                                <tbody>
+                                                <tr>
+                                                    <td>
+                                                        <div data-ng-if="route.tripLeft != undefined">
+                                                            <span class="md-body-2">{{route.tripLeft.name}}</span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div data-ng-if="route.tripRight != undefined">
+                                                            <span class="md-body-2">{{route.tripRight.name}}</span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div data-ng-if="route.tripLeft != undefined">
+                                                            <span>{{route.tripLeft.stopTimeString}}</span>
+                                                            <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripLeft.stopTime' hide-sm></span>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div data-ng-if="route.tripRight != undefined">
+                                                            <span>{{route.tripRight.stopTimeString}}</span>
+                                                            <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripRight.stopTime' hide-sm></span>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                <tr hide-gt-sm>
+                                                    <td>
+                                                        <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripLeft.stopTime' data-ng-if="route.tripLeft != undefined"></span>
+                                                    </td>
+                                                    <td>
+                                                        <span class="md-caption" data-gyf-countdown data-base-time='timetablePresentation.baseTime' data-target-time='route.tripRight.stopTime' data-ng-if="route.tripRight != undefined"></span>
+                                                    </td>
+                                                </tr>
+                                                <tr>
+                                                    <td>
+                                                        <div data-ng-if="route.tripLeft != undefined">
+                                                            <md-button class="md-icon-button compact" aria-label="Show on map" data-ng-click="onStopLocationClick(routeGroup.tripLeft)">
+                                                                <md-icon class="material-icons">pin_drop</md-icon>
+                                                            </md-button>
+                                                            <md-button class="md-icon-button compact" aria-label="Trip" data-ng-click="onTripClick(route.tripLeft, route, timetablePresentation.baseTime)">
+                                                                <md-icon class="material-icons">schedule</md-icon>
+                                                            </md-button>
+                                                            <md-button class="md-icon-button compact" aria-label="Schedule" data-ng-click="onStopTimeClick(route.tripLeft, timetablePresentation.baseTime)">
+                                                                <md-icon class="material-icons">directions_transit</md-icon>
+                                                            </md-button>
+                                                        </div>
+                                                    </td>
+                                                    <td>
+                                                        <div data-ng-if="route.tripRight != undefined">
+                                                            <md-button class="md-icon-button compact" aria-label="Show on map" data-ng-click="onStopLocationClick(routeGroup.tripRight)">
+                                                                <md-icon class="material-icons">pin_drop</md-icon>
+                                                            </md-button>
+                                                            <md-button class="md-icon-button compact" aria-label="Trip" data-ng-click="onTripClick(route.tripRight, route, timetablePresentation.baseTime)">
+                                                                <md-icon class="material-icons">schedule</md-icon>
+                                                            </md-button>
+                                                            <md-button class="md-icon-button compact" aria-label="Schedule" data-ng-click="onStopTimeClick(route.tripRight, timetablePresentation.baseTime)">
+                                                                <md-icon class="material-icons">directions_transit</md-icon>
+                                                            </md-button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
                                         </div>
                                     </div>
-
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </accordion-group>
-</accordion>
+                </div>
+            </div>
+
+        </uib-accordion-group>
+    </uib-accordion>
+
+</md-content>

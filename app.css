@@ -57,6 +57,20 @@ Bootstrap CSS customization
 }
 
 /*
+ * Angular UI Bootstrap
+ */
+
+.dropdown-menu {
+    padding: 0px;
+    margin: 0px;
+    background-color: transparent;
+    border: none;
+    border-radius: 0px;
+    -webkit-box-shadow: none;
+    box-shadow: none;
+}
+
+/*
  * Angular material
  */
 
@@ -79,8 +93,18 @@ md-input-container.toolbar {
     padding-right: 4px;
     margin-left: 4px;
     margin-right: 4px;
-    min-height: inherit;
     min-width: inherit;
+    /*min-height: inherit;*/
+    /*line-height: inherit;*/
+}
+
+.md-icon-button.compact {
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    line-height: 32px;
+    padding: 0px;
+    margin: 0px;
 }
 
 .floating-toolbar {
@@ -107,8 +131,21 @@ md-input-container.toolbar {
 md-whiteframe {
     background-color: white;
     margin: 5px;
-    padding-left: 5px;
-    padding-right: 5px;
+    padding: 5px;
+}
+
+.floating-toolbar > md-whiteframe {
+    padding-top: 0px;
+    padding-bottom: 0px;
+}
+
+.dropdown-menu > md-whiteframe {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
+uib-accordion md-whiteframe {
+    padding: 0px;
 }
 
 /*
@@ -128,6 +165,8 @@ Material icons
 /*Rules for using icons as white on a dark background.*/
 .material-icons.md-light { color: rgba(255, 255, 255, 1); }
 .material-icons.md-light.md-inactive { color: rgba(255, 255, 255, 0.3); }
+
+.material-icons.md-color-inherit { color: inherit; }
 
 /*
 Angular JS UI Google Maps
@@ -183,6 +222,57 @@ html, body {
 .link {
     cursor: pointer;
 }
+
 .label-gmap {
     font-size: 10px;
+}
+
+.label-route {
+    margin: 2px;
+}
+
+.nowrap-ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis
+}
+
+.whiteframe-heading {
+    padding: 5px 10px;
+    color: rgba(255,255,255,0.87);
+    background-color: rgb(63,81,181);
+}
+
+.whiteframe-heading-icon {
+    margin: 10px;
+}
+
+.whiteframe-body {
+    padding: 5px 10px;
+}
+
+.whiteframe-body .route-group {
+    padding: 10px 5px;
+    margin: 5px 0px;
+    background-color: #f0f0f0;
+}
+
+.whiteframe-body .route-group td {
+    vertical-align: top;
+}
+
+.whiteframe-body .route-group .route-group-header tr > td:first-child {
+    min-width: 45px;
+}
+
+.whiteframe-body .route-group .route-group-body {
+    padding-top: 15px;
+}
+
+.whiteframe-body .route-group .route-group-body table {
+    width: 100%;
+}
+
+.whiteframe-body .route-group .route-group-body table td {
+    width: 50%;
 }

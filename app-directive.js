@@ -59,7 +59,7 @@ angular.module('ngAppGyorsFutar')
                     }
 
                     else if (angular.isUndefined(currentBaseTime)) {
-                        countdownString = $filter('date')(now, 'H:mm:ss');
+                        countdownString = $filter('date')(now, 'mediumTime');
                     }
 
                     element.text(countdownString);

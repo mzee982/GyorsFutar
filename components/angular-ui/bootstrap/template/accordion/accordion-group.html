@@ -1,0 +1,11 @@
+<md-whiteframe class="md-whiteframe-1dp" layout="column">
+
+    <div class="accordion-toggle" ng-keypress="toggleOpen($event)" ng-click="toggleOpen()" uib-accordion-transclude="heading">
+        <span ng-class="{'text-muted': isDisabled}">{{heading}}</span>
+    </div>
+
+    <div class="collapse" uib-collapse="!isOpen">
+        <div ng-transclude></div>
+    </div>
+
+</md-whiteframe>
