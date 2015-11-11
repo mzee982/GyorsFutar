@@ -2,7 +2,8 @@ angular.module('ngModuleSchedule')
     .factory('ngServiceSchedule',
     [   '$q',
         'ngServiceBkkFutar',
-        function($q, ngServiceBkkFutar) {
+        'TIMETABLE',
+        function($q, ngServiceBkkFutar, TIMETABLE) {
 
             /*
              * Interface
@@ -121,14 +122,15 @@ angular.module('ngModuleSchedule')
                 return scheduleModel;
             }
 
-            function transformScheduleModelToPresentation(scheduleModel, routeIds, baseTime) {
+            function transformScheduleModelToPresentation(scheduleModel, routeIds) {
                 var schedulePresentation = {
                     stopName: undefined,
                     stopTimes: [],
                     routes: [],
                     visibleStopTimeLowerIndex: undefined,
                     visibleStopTimeUpperIndex: undefined,
-                    baseTime: baseTime,
+                    baseTime: scheduleModel.baseTime,
+                    baseTimeType: scheduleModel.baseTimeType,
                     buildTime: new Date()
                 };
                 var actualStop = scheduleModel.stop;
@@ -204,6 +206,8 @@ angular.module('ngModuleSchedule')
                 var isSubsequent = false;
                 var currentIndex = undefined;
 
+                var baseTime = schedulePresentation.baseTime;
+
                 if (!angular.isDate(baseTime)) baseTime = new Date();
 
                 for (var stopTimeIndex = 0; stopTimeIndex < schedulePresentation.stopTimes.length; stopTimeIndex++) {
@@ -255,10 +259,27 @@ angular.module('ngModuleSchedule')
             function buildSchedule(stopId, routeIds, baseTime, previousSchedulePresentation) {
                 var deferred = $q.defer();
 
+                var baseTimeType = undefined;
+
+                if (angular.isDate(baseTime)) {
+                    if (baseTime > new Date()) {
+                        baseTimeType = TIMETABLE.BASE_TIME_TYPE_FUTURE;
+                    }
+                    else {
+                        baseTimeType = TIMETABLE.BASE_TIME_TYPE_PAST;
+                    }
+                }
+                else {
+                    baseTimeType = TIMETABLE.BASE_TIME_TYPE_LIVE;
+                }
+
                 var scheduleModel = {
                     stop: undefined,
-                    schedules: undefined
+                    schedules: undefined,
+                    baseTime: baseTime,
+                    baseTimeType: baseTimeType
                 };
+
                 var schedulePresentation = undefined;
 
                 /*
@@ -272,7 +293,7 @@ angular.module('ngModuleSchedule')
                     // Success
                     function(data) {
                         scheduleModel = processScheduleForStop(scheduleModel, data);
-                        schedulePresentation = transformScheduleModelToPresentation(scheduleModel, routeIds, baseTime);
+                        schedulePresentation = transformScheduleModelToPresentation(scheduleModel, routeIds);
                         schedulePresentation = applyPreviousPresentationState(schedulePresentation, previousSchedulePresentation);
 
                         deferred.resolve(schedulePresentation);

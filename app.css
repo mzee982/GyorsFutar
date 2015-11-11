@@ -144,7 +144,7 @@ md-whiteframe {
     margin-right: 0px;
 }
 
-uib-accordion md-whiteframe {
+md-whiteframe.no-padding {
     padding: 0px;
 }
 
@@ -275,4 +275,16 @@ html, body {
 
 .whiteframe-body .route-group .route-group-body table td {
     width: 50%;
+}
+
+.whiteframe-body md-list-item .route-short-name {
+    min-width: 45px;
+}
+
+.whiteframe-body md-list-item .route-stop-time {
+    min-width: 75px;
+}
+
+.whiteframe-body md-list-item .route-stop-time-countdown {
+    min-width: 40px;
 }

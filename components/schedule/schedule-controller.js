@@ -12,12 +12,16 @@ angular.module('ngModuleSchedule')
         'EVENT',
         'SCHEDULE',
         'LOCATION',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceSchedule, ngServiceContext, STATE, EVENT, SCHEDULE, LOCATION) {
+        'TIMETABLE',
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceSchedule, ngServiceContext, STATE, EVENT, SCHEDULE, LOCATION, TIMETABLE) {
 
             //
             $scope.deferredSchedule = $q.defer();
             $scope.promiseSchedule = $scope.deferredSchedule.promise;
 
+            $scope.TIMETABLE = TIMETABLE;
+
+            $scope.location = undefined;
             $scope.stopId = undefined;
             $scope.routeIds = undefined;
             $scope.baseTime = undefined;
@@ -137,6 +141,7 @@ angular.module('ngModuleSchedule')
             var stateParams = ngServiceContext.getStateParams();
 
             if (angular.isDefined(stateParams.stopId)) {
+                $scope.location = stateParams.location;
                 $scope.stopId = stateParams.stopId;
                 $scope.routeIds = stateParams.routeIds;
                 $scope.baseTime = stateParams.baseTime;

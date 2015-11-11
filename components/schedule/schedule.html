@@ -1,91 +1,110 @@
 
+<!-- Progress -->
+<div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (schedulePresentation == undefined)">
+    <div>
+        <h5 class="md-title">Building schedule</h5>
+        <md-progress-linear md-mode="indeterminate"></md-progress-linear>
+    </div>
+</div>
+
 <!-- Toolbar -->
-<div class="panel panel-default">
-
-    <!-- For Schedule Build -->
-    <div class="panel-heading" data-ng-if="isBuilding && (schedulePresentation == undefined)">
-        <h4 class="panel-title">Building schedule...</h4>
+<md-toolbar data-ng-if="schedulePresentation != undefined">
+    <div class="md-toolbar-tools">
+        <span>Schedule</span>
+        <span flex></span>
     </div>
+</md-toolbar>
 
-    <!-- For Schedule Show -->
-    <div class="panel-heading" data-ng-if="schedulePresentation != undefined">
-        <div class="row">
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                <h4 class="no-margin text-center" data-gyf-countdown data-ng-if="schedulePresentation.baseTime == undefined"></h4>
-                <h4 class="no-margin text-center" data-ng-if="schedulePresentation.baseTime != undefined">{{schedulePresentation.baseTime | date: 'mediumTime'}}</h4>
+<!-- Schedule -->
+<md-content layout="column" layout-fill data-ng-if="schedulePresentation != undefined">
+
+    <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap flex>
+
+        <!-- Address -->
+        <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
+            <md-icon class="material-icons">place</md-icon>
+            <span class="nowrap-ellipsis" flex>{{location.formattedAddress}}</span>
+        </div>
+
+        <!-- Base time -->
+        <div>
+            <md-button
+                    class="md-raised compact"
+                    md-no-ink
+                    aria-label="Base time"
+                    data-ng-class="{'md-primary': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                <span data-ng-if="schedulePresentation.baseTime == undefined" data-gyf-countdown></span>
+                <span data-ng-if="schedulePresentation.baseTime != undefined">{{schedulePresentation.baseTime | date: 'mediumTime'}}</span>
+            </md-button>
+        </div>
+
+        <!-- Spacer -->
+        <div flex></div>
+
+        <!-- Refresh -->
+        <div>
+            <span data-gyf-countdown data-source-time='schedulePresentation.buildTime'></span>
+            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onScheduleRefreshClick()">
+                <md-icon class="material-icons">refresh</md-icon>
+            </md-button>
+        </div>
+
+    </md-whiteframe>
+
+    <md-whiteframe class="md-whiteframe-1dp no-padding" layout="column">
+
+        <div class="whiteframe-heading" layout="row">
+            <div layout="column" flex>
+                <div flex></div>
+                <div class="md-title">{{schedulePresentation.stopName}}</div>
+                <div class="md-body-1" layout="row" layout-align="start start" layout-wrap>
+                    <span class="label label-default label-route"
+                          data-ng-style="{'color': route.textColor, 'background-color': route.color}"
+                          data-ng-repeat="route in schedulePresentation.routes">{{route.shortName}}</span>
+                </div>
             </div>
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                <span class="pull-right">
-                    <span data-gyf-countdown data-source-time='schedulePresentation.buildTime'></span>
-                    <button type="button" class="btn btn-default" data-ng-click="onScheduleRefreshClick()">
-                        <span class="glyphicon glyphicon-refresh"></span>
-                    </button>
-                </span>
+            <div layout="column" layout-align="start end">
+                <md-icon class="material-icons md-48 md-color-inherit whiteframe-heading-icon" hide-sm>directions</md-icon>
+                <div flex></div>
             </div>
         </div>
-    </div>
 
-</div>
-
-<!-- Trip -->
-<div class="panel panel-default" data-ng-if="schedulePresentation != undefined">
-
-    <div class="panel-heading">
-        <div class="row">
-            <div class="col-xs-2">
-                <h3 class="no-margin text-left">
-                    <span data-ng-repeat="route in schedulePresentation.routes">
-                        <span class="label label-default" data-ng-style="{'color': route.textColor, 'background-color': route.color}">{{route.shortName}}</span>&nbsp;
-                    </span>
-                </h3>
-            </div>
-            <div class="col-xs-10">
-                <h5 class="no-margin text-center">
-                    <div>{{schedulePresentation.stopName}}</div>
-                </h5>
-            </div>
+        <div class="whiteframe-body md-body-1" layout="column">
+            <md-list>
+                <md-list-item data-ng-if="schedulePresentation.visibleStopTimeLowerIndex > 0" ng-click="onStopTimeMoreOlderClick()">
+                    <div layout="row" layout-align="center center" layout-fill>
+                        <md-icon class="material-icons">expand_less</md-icon>
+                    </div>
+                </md-list-item>
+                <md-list-item
+                        data-ng-class="{'row-past': (stopTime.stopTime < schedulePresentation.buildTime)}"
+                        ng-repeat="stopTime in schedulePresentation.stopTimes | filter: filterStopTimes"
+                        ng-click="onStopTimeClick(stopTime, schedulePresentation.baseTime)">
+                    <div class="md-body-1" layout="row" layout-align="start center" layout-fill>
+                        <div class="route-short-name">
+                            <span class="label label-default label-route" data-ng-style="{'color': stopTime.routeTextColor, 'background-color': stopTime.routeColor}">{{stopTime.routeShortName}}</span>
+                        </div>
+                        <div data-ng-class="{'row-current': stopTime.isCurrent}" flex>{{stopTime.groupHeadsign}}</div>
+                        <div layout="column">
+                            <div class="route-stop-time" data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeString}}</div>
+                            <div class="md-caption route-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}" hide-gt-sm>
+                                <span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
+                            </div>
+                        </div>
+                        <div class="md-caption route-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}" hide-sm>
+                            <span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
+                        </div>
+                    </div>
+                    <md-divider ng-if="!$last"></md-divider>
+                </md-list-item>
+                <md-list-item data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < schedulePresentation.stopTimes.length" ng-click="onStopTimeMoreNewerClick()">
+                    <div layout="row" layout-align="center center" layout-fill>
+                        <md-icon class="material-icons">expand_more</md-icon>
+                    </div>
+                </md-list-item>
+            </md-list>
         </div>
-    </div>
 
-    <div class="panel-body">
-        <table class="table table-bordered table-hover table-condensed">
-            <tbody>
+    </md-whiteframe>
 
-                <tr class="row row-header link" data-ng-if="schedulePresentation.visibleStopTimeLowerIndex > 0" data-ng-click="onStopTimeMoreOlderClick()">
-                    <td class="col-xs-12" colspan="4">
-                        <h5 class="text-center">
-                            <span class="glyphicon glyphicon-chevron-up"></span>
-                        </h5>
-                    </td>
-                </tr>
-
-                <tr class="row link" data-ng-repeat="stopTime in schedulePresentation.stopTimes | filter: filterStopTimes" data-ng-class="{'row-past': (stopTime.stopTime < schedulePresentation.buildTime)}" data-ng-click="onStopTimeClick(stopTime, schedulePresentation.baseTime)">
-                    <td class="col-xs-1">
-                        <h5>
-                            <span class="label label-default" data-ng-style="{'color': stopTime.routeTextColor, 'background-color': stopTime.routeColor}">{{stopTime.routeShortName}}</span>
-                        </h5>
-                    </td>
-                    <td class="col-xs-9">
-                        <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.groupHeadsign}}</h5>
-                    </td>
-                    <td class="col-xs-1">
-                        <h5 data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeString}}</h5>
-                    </td>
-                    <td class="col-xs-1">
-                        <h5 data-ng-if="stopTime.isCurrent || stopTime.isSubsequent" data-ng-class="{'row-current': stopTime.isCurrent}"><span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime'></span></h5>
-                    </td>
-                </tr>
-
-                <tr class="row row-header link" data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < schedulePresentation.stopTimes.length" data-ng-click="onStopTimeMoreNewerClick()">
-                    <td class="col-xs-12" colspan="4">
-                        <h5 class="text-center">
-                            <span class="glyphicon glyphicon-chevron-down"></span>
-                        </h5>
-                    </td>
-                </tr>
-
-            </tbody>
-        </table>
-    </div>
-
-</div>
+</md-content>
