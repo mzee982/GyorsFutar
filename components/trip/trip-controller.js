@@ -12,12 +12,16 @@ angular.module('ngModuleTrip')
         'EVENT',
         'LOCATION',
         'TRIP',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceTrip, ngServiceContext, STATE, EVENT, LOCATION, TRIP) {
+        'TIMETABLE',
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceLocation, ngServiceTrip, ngServiceContext, STATE, EVENT, LOCATION, TRIP, TIMETABLE) {
 
             //
             $scope.deferredTrip = $q.defer();
             $scope.promiseTrip = $scope.deferredTrip.promise;
 
+            $scope.TIMETABLE = TIMETABLE;
+
+            $scope.location = undefined;
             $scope.tripId = undefined;
             $scope.stopId = undefined;
             $scope.baseTime = undefined;
@@ -176,6 +180,7 @@ angular.module('ngModuleTrip')
             var stateParams = ngServiceContext.getStateParams();
 
             if (angular.isDefined(stateParams.tripId)) {
+                $scope.location = stateParams.location;
                 $scope.tripId = stateParams.tripId;
                 $scope.stopId = stateParams.stopId;
                 $scope.baseTime = stateParams.baseTime;

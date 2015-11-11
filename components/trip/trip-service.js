@@ -2,7 +2,8 @@ angular.module('ngModuleTrip')
     .factory('ngServiceTrip',
     [   '$q',
         'ngServiceBkkFutar',
-        function($q, ngServiceBkkFutar) {
+        'TIMETABLE',
+        function($q, ngServiceBkkFutar, TIMETABLE) {
 
             /*
              * Interface
@@ -104,7 +105,7 @@ angular.module('ngModuleTrip')
                 return tripModel;
             }
 
-            function transformTripModelToPresentation(tripModel, currentStopId, baseTime) {
+            function transformTripModelToPresentation(tripModel, currentStopId) {
                 var tripPresentation = {
                     tripHeadsign: undefined,
                     tripPolylinePoints: undefined,
@@ -113,7 +114,8 @@ angular.module('ngModuleTrip')
                     routeDescription: undefined,
                     routeColor: undefined,
                     routeTextColor: undefined,
-                    baseTime: baseTime,
+                    baseTime: tripModel.baseTime,
+                    baseTimeType: tripModel.baseTimeType,
                     buildTime: new Date()
                 };
 
@@ -210,14 +212,31 @@ angular.module('ngModuleTrip')
             function buildTrip(id, currentStopId, baseTime) {
                 var deferred = $q.defer();
 
+                var baseTimeType = undefined;
+
+                if (angular.isDate(baseTime)) {
+                    if (baseTime > new Date()) {
+                        baseTimeType = TIMETABLE.BASE_TIME_TYPE_FUTURE;
+                    }
+                    else {
+                        baseTimeType = TIMETABLE.BASE_TIME_TYPE_PAST;
+                    }
+                }
+                else {
+                    baseTimeType = TIMETABLE.BASE_TIME_TYPE_LIVE;
+                }
+
                 var tripModel = {
                     tripId: undefined,
                     tripHeadsign: undefined,
                     tripPolylinePoints: undefined,
                     stopTimes: {},
                     vehicle: undefined,
-                    route: undefined
+                    route: undefined,
+                    baseTime: baseTime,
+                    baseTimeType: baseTimeType
                 };
+
                 var tripPresentation = undefined;
 
 
@@ -232,7 +251,7 @@ angular.module('ngModuleTrip')
                     // Success
                     function(data) {
                         tripModel = processTripDetails(tripModel, data);
-                        tripPresentation = transformTripModelToPresentation(tripModel, currentStopId, baseTime);
+                        tripPresentation = transformTripModelToPresentation(tripModel, currentStopId);
 
                         deferred.resolve(tripPresentation);
                     },

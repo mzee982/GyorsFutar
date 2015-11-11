@@ -1,5 +1,5 @@
 angular
     .module('ngModuleTrip', [])
     .constant('TRIP', {
-        'AUTO_UPDATE_DELAY': 15000
+        'AUTO_UPDATE_DELAY': 30000
     });

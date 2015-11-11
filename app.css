@@ -288,3 +288,19 @@ html, body {
 .whiteframe-body md-list-item .route-stop-time-countdown {
     min-width: 40px;
 }
+
+.whiteframe-body md-list-item .trip-stop-time-diff {
+    min-width: 25px;
+}
+
+.whiteframe-body md-list-item .trip-vehicle {
+    min-width: 100px;
+}
+
+.whiteframe-body md-list-item .trip-stop-time {
+    min-width: 75px;
+}
+
+.whiteframe-body md-list-item .trip-stop-time-countdown {
+    min-width: 40px;
+}
