@@ -12,12 +12,16 @@ angular.module('ngModuleMap')
         'EVENT',
         'MAP',
         'LOCATION',
-        function($scope, $state, $stateParams, $q, $timeout, ngServiceMap, ngServiceLocation, ngServiceContext, STATE, EVENT, MAP, LOCATION) {
+        'TIMETABLE',
+        function($scope, $state, $stateParams, $q, $timeout, ngServiceMap, ngServiceLocation, ngServiceContext, STATE, EVENT, MAP, LOCATION, TIMETABLE) {
 
             //
             $scope.deferredMap = $q.defer();
             $scope.promiseMap = $scope.deferredMap.promise;
 
+            $scope.TIMETABLE = TIMETABLE;
+
+            $scope.location = undefined;
             $scope.trip = undefined;
             $scope.baseTime = undefined;
             $scope.mapUpdateTimeout = undefined;
@@ -152,6 +156,7 @@ angular.module('ngModuleMap')
             var stateParams = ngServiceContext.getStateParams();
 
             if (angular.isDefined(stateParams.trip)) {
+                $scope.location = stateParams.location;
                 $scope.trip = stateParams.trip;
                 $scope.baseTime = stateParams.baseTime;
 

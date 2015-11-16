@@ -4,7 +4,8 @@ angular.module('ngModuleMap')
         'ngServiceBkkFutar',
         'MAP',
         'RECOMPILE',
-        function($q, ngServiceBkkFutar, MAP, RECOMPILE) {
+        'TIMETABLE',
+        function($q, ngServiceBkkFutar, MAP, RECOMPILE, TIMETABLE) {
 
             /*
              * Interface
@@ -64,34 +65,26 @@ angular.module('ngModuleMap')
                 if (angular.isUndefined(tripStopMarkerModel.labelExpansionLevel) || (tripStopMarkerModel.labelExpansionLevel != currentLabelExpansionLevel)) {
                     var labelClass = tripStopMarkerModel.isCurrent ? 'label label-success label-gmap' : 'label label-default label-gmap';
                     var needToRecompile = false;
+                    var currentLabelContent = '';
 
                     switch (currentLabelExpansionLevel) {
 
                         case 0:
                             if (tripStopMarkerModel.isFirst || tripStopMarkerModel.isCurrent || tripStopMarkerModel.isLast) {
-                                tripStopMarkerModel.options.labelClass = labelClass;
-                                tripStopMarkerModel.options.labelContent = tripStopMarkerModel.stopName;
-                            }
-
-                            else {
-                                tripStopMarkerModel.options.labelClass = undefined;
-                                tripStopMarkerModel.options.labelContent = undefined;
+                                currentLabelContent += '<div>' + tripStopMarkerModel.stopName + '</div>';
                             }
 
                             break;
 
                         case 1:
-                            tripStopMarkerModel.options.labelClass = labelClass;
-                            tripStopMarkerModel.options.labelContent = tripStopMarkerModel.stopName;
+                            currentLabelContent += '<div>' + tripStopMarkerModel.stopName + '</div>';
 
                             break;
 
                         case 2:
-                            var currentLabelContent = '';
                             var baseTimeValue = (angular.isDefined(baseTime)) ? baseTime.getTime() : undefined;
                             var now = (angular.isDefined(baseTimeValue)) ? baseTimeValue : new Date();
 
-                            currentLabelContent += '<div class="' + RECOMPILE.CLASS + '">';
                             currentLabelContent += '<div>' + tripStopMarkerModel.stopName + '</div>';
                             currentLabelContent += '<div>' + tripStopMarkerModel.stopTimeString + '</div>';
 
@@ -101,17 +94,24 @@ angular.module('ngModuleMap')
                                 currentLabelContent += ' data-target-time-value="';
                                 currentLabelContent += tripStopMarkerModel.stopTime.getTime();
                                 currentLabelContent += '"></div>';
-
-                                needToRecompile = true;
                             }
-
-                            currentLabelContent += '</div>';
-
-                            tripStopMarkerModel.options.labelClass = labelClass;
-                            tripStopMarkerModel.options.labelContent = currentLabelContent;
 
                             break;
 
+                    }
+
+                    // Show label
+                    if (currentLabelContent.length > 0) {
+                        var currentLabelWrapper = '<div class="' + labelClass + ' ' + RECOMPILE.CLASS + '">' + currentLabelContent + '</div>';
+
+                        tripStopMarkerModel.options.labelContent = currentLabelWrapper;
+                        needToRecompile = true;
+                    }
+
+                    // No label
+                    else {
+                        tripStopMarkerModel.options.labelContent = undefined;
+                        needToRecompile = false;
                     }
 
                     tripStopMarkerModel.labelExpansionLevel = currentLabelExpansionLevel;
@@ -269,7 +269,7 @@ angular.module('ngModuleMap')
                 return mapModel;
             }
 
-            function transformMapModelToPresentation(mapModel, baseTime, zoomChangedListener, markerClickListener) {
+            function transformMapModelToPresentation(mapModel, zoomChangedListener, markerClickListener) {
                 var actualTrip = mapModel.trip;
                 var actualRoute = actualTrip.route;
                 var actualStopTimes = actualTrip.stopTimes;
@@ -278,7 +278,8 @@ angular.module('ngModuleMap')
                 var mapPresentation = {
                     map: undefined,
                     trip: undefined,
-                    baseTime: baseTime,
+                    baseTime: mapModel.baseTime,
+                    baseTimeType: mapModel.baseTimeType,
                     buildTime: new Date(),
                     needToRecompile: false
                 };
@@ -306,6 +307,7 @@ angular.module('ngModuleMap')
                         }
                     },
                     options: {
+                        mapTypeControl: false,
                         streetViewControl: false,
                         styles: [
                             {
@@ -368,13 +370,9 @@ angular.module('ngModuleMap')
                             latitude: actualStop.lat,
                             longitude: actualStop.lon
                         },
-                        icon: {
-                            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                            rotation: 180 + parseInt(actualStop.direction),
-                            scale: 3
-                        },
+                        icon: angular.copy(MAP.SYMBOL_NAVIGATION),
                         options: {
-                            labelClass: undefined,
+                            //labelClass: undefined,
                             labelContent: undefined
                         },
                         stopName: actualStop.name,
@@ -387,6 +385,9 @@ angular.module('ngModuleMap')
                         labelExpansionLevel: undefined,
                         needToRecompile: false
                     }
+
+                    // Set stop marker icon direction
+                    targetStopMarkerModel.icon.rotation = targetStopMarkerModel.icon.rotation + parseInt(actualStop.direction);
 
                     targetStopMarkerModel = generateTripStopMarkerLabel(targetStopMarkerModel, mapPresentation.baseTime, mapPresentation.map.zoom);
 
@@ -403,13 +404,7 @@ angular.module('ngModuleMap')
                             latitude: actualVehicle.lat,
                             longitude: actualVehicle.lon,
                         },
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            //rotation: 180 + parseInt(actualVehicle.bearing),
-                            scale: 8,
-                            //fillColor: trip.routeColor,
-                            strokeColor: targetTrip.routeColor
-                        },
+                        icon: angular.copy(MAP.SYMBOL_DIRECTIONS_TRANSIT),
                         options: {
                             //animation: google.maps.Animation.BOUNCE,
                             zIndex: 1000
@@ -417,6 +412,10 @@ angular.module('ngModuleMap')
                             //labelContent: actualStop.stopTimeString + ' - ' + actualStop.name
                         }
                     }
+
+                    // Set vehicle marker icon color
+                    targetVehicleMarkerModel.icon.fillColor = targetTrip.routeColor;
+                    //targetVehicleMarkerModel.icon.strokeColor = targetTrip.routeColor;
 
                     targetTrip.vehicleMarker = targetVehicleMarkerModel;
                 }
@@ -517,9 +516,26 @@ angular.module('ngModuleMap')
             function buildMap(trip, baseTime, zoomChangedListener, markerClickListener, previousMapPresentation) {
                 var deferred = $q.defer();
 
+                var baseTimeType = undefined;
+
+                if (angular.isDate(baseTime)) {
+                    if (baseTime > new Date()) {
+                        baseTimeType = TIMETABLE.BASE_TIME_TYPE_FUTURE;
+                    }
+                    else {
+                        baseTimeType = TIMETABLE.BASE_TIME_TYPE_PAST;
+                    }
+                }
+                else {
+                    baseTimeType = TIMETABLE.BASE_TIME_TYPE_LIVE;
+                }
+
                 var mapModel = {
-                    trip: undefined
+                    trip: undefined,
+                    baseTime: baseTime,
+                    baseTimeType: baseTimeType
                 };
+
                 var mapPresentation = undefined;
 
 
@@ -535,7 +551,7 @@ angular.module('ngModuleMap')
                     function(data) {
                         mapModel = processTripDetails(mapModel, data);
                         mapModel = postProcessMapModel(mapModel, trip.stopId);
-                        mapPresentation = transformMapModelToPresentation(mapModel, baseTime, zoomChangedListener, markerClickListener);
+                        mapPresentation = transformMapModelToPresentation(mapModel, zoomChangedListener, markerClickListener);
                         mapPresentation = applyPreviousPresentationState(mapPresentation, previousMapPresentation);
                         mapPresentation = postProcessMapPresentation(mapPresentation);
 

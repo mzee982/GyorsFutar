@@ -1,91 +1,112 @@
-
-<!-- Toolbar -->
-<div class="panel panel-default">
-
-    <!-- For Map Build -->
-    <div class="panel-heading" data-ng-if="isBuilding && (mapPresentation == undefined)">
-        <h4 class="panel-title">Building map...</h4>
+<!-- Progress -->
+<div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (mapPresentation == undefined)">
+    <div>
+        <h5 class="md-title">Building map</h5>
+        <md-progress-linear md-mode="indeterminate"></md-progress-linear>
     </div>
-
-    <!-- For Map Show -->
-    <div class="panel-heading" data-ng-if="mapPresentation != undefined">
-        <div class="row">
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                <h4 class="no-margin text-center" data-gyf-countdown data-ng-if="mapPresentation.baseTime == undefined"></h4>
-                <h4 class="no-margin text-center" data-ng-if="mapPresentation.baseTime != undefined">{{baseTime | date: 'mediumTime'}}</h4>
-            </div>
-            <div class="col-sm-6" style="margin-top: 5px; margin-bottom: 5px;">
-                <span class="pull-right">
-                    <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
-                    <button type="button" class="btn btn-default" data-ng-click="onMapRefreshClick()">
-                        <span class="glyphicon glyphicon-refresh"></span>
-                    </button>
-                </span>
-            </div>
-        </div>
-    </div>
-
 </div>
 
-<!-- Map -->
-<div class="panel panel-default no-margin" data-ng-cloak data-ng-if="mapPresentation != undefined">
+<!-- Toolbar -->
+<md-toolbar data-ng-if="mapPresentation != undefined">
+    <div class="md-toolbar-tools">
+        <span>Map</span>
+        <span flex></span>
+    </div>
+</md-toolbar>
 
-    <div class="panel-heading">
-        <div class="row">
-            <div class="col-xs-1">
-                <h3 class="no-margin text-left">
-                    <span class="label label-default" data-ng-style="{'color': mapPresentation.trip.routeTextColor, 'background-color': mapPresentation.trip.routeColor}">{{mapPresentation.trip.routeName}}</span>
-                </h3>
-            </div>
-            <div class="col-xs-11">
-                <h5 class="no-margin text-center">
-                    <div>{{mapPresentation.trip.tripHeadsign}}</div>
-                </h5>
-            </div>
-        </div>
+<!-- Map -->
+<md-content layout="column" layout-fill data-ng-if="mapPresentation != undefined">
+
+    <!-- Top floating toolbar -->
+    <div class="floating-toolbar top" layout="row" layout-align="start center">
+
+        <!-- Trip Bar -->
+        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
+            <span class="label label-default label-route" data-ng-style="{'color': mapPresentation.trip.routeTextColor, 'background-color': mapPresentation.trip.routeColor}">{{mapPresentation.trip.routeName}}</span>&nbsp;
+            <span>{{mapPresentation.trip.tripHeadsign}}</span>
+        </md-whiteframe>
+
+        <!-- Spacer -->
+        <div flex hide-sm></div>
+
+        <!-- Base time bar -->
+        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
+            <md-button
+                    class="compact"
+                    md-no-ink
+                    aria-label="Base time"
+                    data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
+                <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
+            </md-button>
+        </md-whiteframe>
+
+        <!-- Refresh bar -->
+        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
+            <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
+                <md-icon class="material-icons">refresh</md-icon>
+            </md-button>
+        </md-whiteframe>
+
     </div>
 
-    <div class="panel-body">
-        <div data-gyf-fill-height data-target-selector=".angular-google-map-container">
+    <!-- Bottom floating toolbar -->
+    <div class="floating-toolbar bottom-left" layout="row" layout-align="start center" hide-gt-sm>
 
-            <div data-gyf-recompile data-accessor="recompileAccessor">
+        <!-- Base time bar -->
+        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
+            <md-button
+                    class="compact"
+                    md-no-ink
+                    aria-label="Base time"
+                    data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
+                <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
+            </md-button>
+        </md-whiteframe>
 
-                <ui-gmap-google-map
-                        center="mapPresentation.map.center"
-                        pan="mapPresentation.map.pan"
-                        zoom="mapPresentation.map.zoom"
-                        options="mapPresentation.map.options"
-                        events="mapPresentation.map.events"
-                        control="mapPresentation.map.control">
+        <!-- Refresh bar -->
+        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
+            <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
+                <md-icon class="material-icons">refresh</md-icon>
+            </md-button>
+        </md-whiteframe>
 
-                    <ui-gmap-polyline
+    </div>
+
+    <div data-gyf-fill-height data-target-selector=".angular-google-map-container">
+        <div data-gyf-recompile data-accessor="recompileAccessor">
+            <ui-gmap-google-map
+                    center="mapPresentation.map.center"
+                    pan="mapPresentation.map.pan"
+                    zoom="mapPresentation.map.zoom"
+                    options="mapPresentation.map.options"
+                    events="mapPresentation.map.events"
+                    control="mapPresentation.map.control">
+                <ui-gmap-polyline
                         path="mapPresentation.trip.tripPolyline.path"
                         stroke="mapPresentation.trip.tripPolyline.stroke"
                         fit="mapPresentation.trip.tripPolyline.fit"
                         static="mapPresentation.trip.tripPolyline.static">
-                    </ui-gmap-polyline>
-
-                    <ui-gmap-markers
+                </ui-gmap-polyline>
+                <ui-gmap-markers
                         models="mapPresentation.trip.stopMarkers.models"
                         coords="mapPresentation.trip.stopMarkers.coords"
                         icon="mapPresentation.trip.stopMarkers.icon"
                         options="mapPresentation.trip.stopMarkers.options"
                         click="mapPresentation.trip.stopMarkers.click">
-                    </ui-gmap-markers>
-
-                    <ui-gmap-marker
+                </ui-gmap-markers>
+                <ui-gmap-marker
                         data-ng-if="mapPresentation.trip.vehicleMarker != undefined"
                         idKey="mapPresentation.trip.vehicleMarker.idKey"
                         coords="mapPresentation.trip.vehicleMarker.coords"
                         icon="mapPresentation.trip.vehicleMarker.icon"
                         options="mapPresentation.trip.vehicleMarker.options">
-                    </ui-gmap-marker>
-
-                </ui-gmap-google-map>
-
-            </div>
-
+                </ui-gmap-marker>
+            </ui-gmap-google-map>
         </div>
     </div>
 
-</div>
+</md-content>

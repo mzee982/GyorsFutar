@@ -56,6 +56,10 @@ Bootstrap CSS customization
     display: inline-block;
 }
 
+.label-success {
+    display: inline-block;
+}
+
 /*
  * Angular UI Bootstrap
  */
@@ -137,6 +141,7 @@ md-whiteframe {
 .floating-toolbar > md-whiteframe {
     padding-top: 0px;
     padding-bottom: 0px;
+    min-height: 48px;
 }
 
 .dropdown-menu > md-whiteframe {
@@ -224,6 +229,8 @@ html, body {
 }
 
 .label-gmap {
+    margin-top: 5px;
+    margin-left: 5px;
     font-size: 10px;
 }
 
@@ -249,6 +256,10 @@ html, body {
 
 .whiteframe-body {
     padding: 5px 10px;
+}
+
+.whiteframe-body.no-padding {
+    padding: 0px;
 }
 
 .whiteframe-body .route-group {
