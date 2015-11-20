@@ -63,7 +63,7 @@ angular.module('ngModuleMap')
 
                 // Need to update?
                 if (angular.isUndefined(tripStopMarkerModel.labelExpansionLevel) || (tripStopMarkerModel.labelExpansionLevel != currentLabelExpansionLevel)) {
-                    var labelClass = tripStopMarkerModel.isCurrent ? 'label label-success label-gmap' : 'label label-default label-gmap';
+                    var labelClass = tripStopMarkerModel.isCurrent ? 'label label-gmap current' : 'label label-gmap';
                     var needToRecompile = false;
                     var currentLabelContent = '';
 

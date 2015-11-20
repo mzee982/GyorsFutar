@@ -1,46 +1,48 @@
+<div layout="column" layout-fill>
 
-<!-- Toolbar -->
-<md-toolbar>
-    <div class="md-toolbar-tools">
-        <span>Recent locations</span>
-        <span flex></span>
-    </div>
-</md-toolbar>
+    <!-- Toolbar -->
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <span>Recent locations</span>
+            <span flex></span>
+        </div>
+    </md-toolbar>
 
-<!-- Recent Location List -->
-<md-content layout="column" layout-fill>
-    <md-card>
-        <md-card-content>
-            <h2 class="md-title">Recents</h2>
-            <div layout="row">
-                <div flex>
-                    <div class="md-subhead">Actual location</div>
+    <!-- Recent Location List -->
+    <md-content class="md-body-1" layout="column">
+        <md-whiteframe class="md-whiteframe-1dp" layout="column">
+            <div class="whiteframe-title" layout="row" layout-align="start center">
+                <div hide-sm>
+                    <md-icon class="material-icons md-48 whiteframe-heading-icon" hide-sm>my_location</md-icon>
+                </div>
+                <div layout="column" flex>
+                    <div class="md-subhead">My location</div>
                     <div>{{actualPosition.formattedAddress}} (radius {{actualPosition.coords.accuracy | number : 0}} m)</div>
                 </div>
-                <div class="hide-gt-sm">
+                <div hide-gt-sm>
                     <md-button class="md-fab md-accent" aria-label="Pick location from map" ng-click="locationPickerClick()">
                         <md-icon class="material-icons">add</md-icon>
                     </md-button>
                 </div>
             </div>
-            <md-list>
-                <md-divider></md-divider>
-                <md-list-item class="md-2-line" ng-repeat="location in recentLocations" ng-click="recentLocationClick(location)">
-                    <md-icon class="material-icons" hide-sm>place</md-icon>
-                    <div class="md-list-item-text">
-                        <h3>{{location.formattedAddress}}</h3>
-                        <p>{{location.distance | number : 0}} meters from actual location (radius {{location.coords.accuracy | number : 0}} m)</p>
-                    </div>
-                    <md-icon class="material-icons md-secondary md-primary" aria-label="Map" ng-click="recentLocationMapClick(location)">map</md-icon>
-                    <md-divider ng-if="!$last"></md-divider>
-                </md-list-item>
-                <md-divider class="hide-sm"></md-divider>
-            </md-list>
-        </md-card-content>
-        <md-card-footer class="hide-sm">
-            <div class="md-actions" layout="row" layout-align="end center">
+            <div class="whiteframe-body">
+                <md-list>
+                    <md-list-item class="md-2-line" ng-repeat="location in recentLocations" ng-click="recentLocationClick(location)">
+                        <md-icon class="material-icons" hide-sm>place</md-icon>
+                        <div class="md-list-item-text">
+                            <h3>{{location.formattedAddress}}</h3>
+                            <p>{{location.distance | number : 0}} meters from actual location (radius {{location.coords.accuracy | number : 0}} m)</p>
+                        </div>
+                        <md-icon class="material-icons md-secondary md-primary" aria-label="Map" ng-click="recentLocationMapClick(location)">map</md-icon>
+                        <md-divider ng-if="!$last"></md-divider>
+                    </md-list-item>
+                </md-list>
+            </div>
+            <md-divider hide-sm></md-divider>
+            <div class="whiteframe-footer" layout="row" layout-align="end center" hide-sm>
                 <md-button class="md-primary" ng-click="locationPickerClick()">Pick location from map</md-button>
             </div>
-        </md-card-footer>
-    </md-card>
-</md-content>
+        </md-whiteframe>
+    </md-content>
+
+</div>

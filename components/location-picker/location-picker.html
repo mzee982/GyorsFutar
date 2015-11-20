@@ -1,85 +1,86 @@
+<div layout="column" layout-fill>
 
-<!-- Toolbar -->
-<md-toolbar>
-    <div class="md-toolbar-tools">
-        <span>Location picker</span>
-        <span flex></span>
-    </div>
-</md-toolbar>
+    <!-- Toolbar -->
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <span>Location picker</span>
+            <span flex></span>
+        </div>
+    </md-toolbar>
 
-<!-- Location Picker -->
-<md-content layout="column" layout-fill>
+    <!-- Location Picker -->
+    <md-content class="md-body-1" layout="column" flex>
 
-    <gyf-location-picker-container
-            initial-position="initialPosition"
-            detected-position="detectedPosition"
-            marked-position="markedPosition"
-            pick-location="pickLocation(pickedLocation)"
-            picker-location-change="pickerLocationChange(location)">
+        <gyf-location-picker-container
+                initial-position="initialPosition"
+                detected-position="detectedPosition"
+                marked-position="markedPosition"
+                pick-location="pickLocation(pickedLocation)"
+                picker-location-change="pickerLocationChange(location)"
+                layout="column"
+                flex>
 
-        <!-- Top floating toolbar -->
-        <div class="floating-toolbar top" layout="row" layout-align="start center">
+            <!-- Top floating toolbar -->
+            <div class="floating-toolbar top" layout="row" layout-align="start center">
 
-            <!-- Address Bar -->
-            <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" flex>
-                <div layout="row" layout-align="start center" flex>
-                    <div flex>
-                        <md-input-container class="toolbar" md-no-float>
-                            <md-icon class="material-icons">place</md-icon>
-                            <input data-gyf-location-picker-input="address" type="text" placeholder="Address">
-                        </md-input-container>
+                <!-- Address Bar -->
+                <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" flex>
+                    <div layout="row" layout-align="start center" flex>
+                        <div flex>
+                            <md-input-container class="toolbar" md-no-float>
+                                <md-icon class="material-icons">place</md-icon>
+                                <input data-gyf-location-picker-input="address" type="text" placeholder="Address">
+                            </md-input-container>
+                        </div>
+                        <div>
+                            <md-button class="md-icon-button md-primary" aria-label="done" data-gyf-location-picker-action="submit">
+                                <md-icon class="material-icons">done</md-icon>
+                            </md-button>
+                        </div>
+                    </div>
+                </md-whiteframe>
+
+                <!-- Radius Toolbar -->
+                <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" hide-sm>
+                    <div>
+                        <span class="md-subhead">Radius</span>
                     </div>
                     <div>
-                        <md-button class="md-icon-button md-primary" aria-label="done" data-gyf-location-picker-action="submit">
-                            <md-icon class="material-icons">done</md-icon>
-                        </md-button>
+                        <md-button aria-label="250" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(250)}" data-gyf-location-picker-action="radius-change" radius-value="250" ng-click="radiusChangeClick()">250</md-button>
+                        <md-button aria-label="500" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(500)}" data-gyf-location-picker-action="radius-change" radius-value="500" ng-click="radiusChangeClick()">500</md-button>
+                        <md-button aria-label="750" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(750)}" data-gyf-location-picker-action="radius-change" radius-value="750" ng-click="radiusChangeClick()">750</md-button>
+                        <md-button aria-label="1000" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(1000)}" data-gyf-location-picker-action="radius-change" radius-value="1000" ng-click="radiusChangeClick()">1000</md-button>
                     </div>
-                </div>
-            </md-whiteframe>
+                </md-whiteframe>
 
-            <!-- Radius Toolbar -->
-            <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" hide-sm>
-                <div>
-                    <span class="md-subhead">Radius</span>
-                </div>
-                <div>
-                    <md-button aria-label="250" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(250)}" data-gyf-location-picker-action="radius-change" radius-value="250" ng-click="radiusChangeClick()">250</md-button>
-                    <md-button aria-label="500" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(500)}" data-gyf-location-picker-action="radius-change" radius-value="500" ng-click="radiusChangeClick()">500</md-button>
-                    <md-button aria-label="750" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(750)}" data-gyf-location-picker-action="radius-change" radius-value="750" ng-click="radiusChangeClick()">750</md-button>
-                    <md-button aria-label="1000" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(1000)}" data-gyf-location-picker-action="radius-change" radius-value="1000" ng-click="radiusChangeClick()">1000</md-button>
-                </div>
-            </md-whiteframe>
+            </div>
 
-        </div>
+            <!-- Bottom floating toolbar -->
+            <div class="floating-toolbar bottom-left" hide-gt-sm>
 
-        <!-- Bottom floating toolbar -->
-        <div class="floating-toolbar bottom-left" hide-gt-sm>
+                <!-- Radius Toolbar -->
+                <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center">
+                    <div>
+                        <span class="md-subhead">Radius</span>
+                    </div>
+                    <div>
+                        <md-button aria-label="250" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(250)}" data-gyf-location-picker-action="radius-change" radius-value="250" ng-click="radiusChangeClick()">250</md-button>
+                        <md-button aria-label="500" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(500)}" data-gyf-location-picker-action="radius-change" radius-value="500" ng-click="radiusChangeClick()">500</md-button>
+                        <md-button aria-label="750" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(750)}" data-gyf-location-picker-action="radius-change" radius-value="750" ng-click="radiusChangeClick()">750</md-button>
+                        <md-button aria-label="1000" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(1000)}" data-gyf-location-picker-action="radius-change" radius-value="1000" ng-click="radiusChangeClick()">1000</md-button>
+                    </div>
+                </md-whiteframe>
 
-            <!-- Radius Toolbar -->
-            <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center">
-                <div>
-                    <span class="md-subhead">Radius</span>
-                </div>
-                <div>
-                    <md-button aria-label="250" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(250)}" data-gyf-location-picker-action="radius-change" radius-value="250" ng-click="radiusChangeClick()">250</md-button>
-                    <md-button aria-label="500" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(500)}" data-gyf-location-picker-action="radius-change" radius-value="500" ng-click="radiusChangeClick()">500</md-button>
-                    <md-button aria-label="750" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(750)}" data-gyf-location-picker-action="radius-change" radius-value="750" ng-click="radiusChangeClick()">750</md-button>
-                    <md-button aria-label="1000" class="md-primary compact" data-ng-class="{'md-raised': compareToPickerLocationRadius(1000)}" data-gyf-location-picker-action="radius-change" radius-value="1000" ng-click="radiusChangeClick()">1000</md-button>
-                </div>
-            </md-whiteframe>
+            </div>
 
-        </div>
-
-        <!-- Location Picker -->
-        <div data-gyf-location-picker-panel class="panel panel-default no-margin">
             <input data-gyf-location-picker-input="latitude" type="hidden" id="locationPicker-latitude">
             <input data-gyf-location-picker-input="longitude" type="hidden" id="locationPicker-longitude">
             <input data-gyf-location-picker-input="radius" type="hidden" id="locationPicker-radius">
 
-            <div data-gyf-fill-height data-target-selector="#locationPicker">
-                <div data-gyf-location-picker id="locationPicker" class="panel-body"></div>
-            </div>
-        </div>
+            <div data-gyf-location-picker id="locationPicker" flex></div>
 
-    </gyf-location-picker-container>
-</md-content>
+        </gyf-location-picker-container>
+
+    </md-content>
+
+</div>

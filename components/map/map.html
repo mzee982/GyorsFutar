@@ -1,83 +1,85 @@
+
 <!-- Progress -->
-<div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (mapPresentation == undefined)">
+<div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (mapPresentation == undefined)" data-ng-cloak>
     <div>
         <h5 class="md-title">Building map</h5>
         <md-progress-linear md-mode="indeterminate"></md-progress-linear>
     </div>
 </div>
 
-<!-- Toolbar -->
-<md-toolbar data-ng-if="mapPresentation != undefined">
-    <div class="md-toolbar-tools">
-        <span>Map</span>
-        <span flex></span>
-    </div>
-</md-toolbar>
+<div layout="column" layout-fill data-ng-if="mapPresentation != undefined" data-ng-cloak>
 
-<!-- Map -->
-<md-content layout="column" layout-fill data-ng-if="mapPresentation != undefined">
+    <!-- Toolbar -->
+    <md-toolbar>
+        <div class="md-toolbar-tools">
+            <span>Map</span>
+            <span flex></span>
+        </div>
+    </md-toolbar>
 
-    <!-- Top floating toolbar -->
-    <div class="floating-toolbar top" layout="row" layout-align="start center">
+    <!-- Map -->
+    <md-content class="md-body-1" layout="column" flex>
 
-        <!-- Trip Bar -->
-        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
-            <span class="label label-default label-route" data-ng-style="{'color': mapPresentation.trip.routeTextColor, 'background-color': mapPresentation.trip.routeColor}">{{mapPresentation.trip.routeName}}</span>&nbsp;
-            <span>{{mapPresentation.trip.tripHeadsign}}</span>
-        </md-whiteframe>
+        <!-- Top floating toolbar -->
+        <div class="floating-toolbar top" layout="row" layout-align="start center">
 
-        <!-- Spacer -->
-        <div flex hide-sm></div>
+            <!-- Trip Bar -->
+            <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
+                <span class="label" data-ng-style="{'color': mapPresentation.trip.routeTextColor, 'background-color': mapPresentation.trip.routeColor}">{{mapPresentation.trip.routeName}}</span>&nbsp;
+                <span>{{mapPresentation.trip.tripHeadsign}}</span>
+            </md-whiteframe>
 
-        <!-- Base time bar -->
-        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
-            <md-button
-                    class="compact"
-                    md-no-ink
-                    aria-label="Base time"
-                    data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
-                <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
-                <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
-            </md-button>
-        </md-whiteframe>
+            <!-- Spacer -->
+            <div flex hide-sm></div>
 
-        <!-- Refresh bar -->
-        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
-            <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
-            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
-                <md-icon class="material-icons">refresh</md-icon>
-            </md-button>
-        </md-whiteframe>
+            <!-- Base time bar -->
+            <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
+                <md-button
+                        class="compact"
+                        md-no-ink
+                        aria-label="Base time"
+                        data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                    <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
+                    <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
+                </md-button>
+            </md-whiteframe>
 
-    </div>
+            <!-- Refresh bar -->
+            <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
+                <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
+                    <md-icon class="material-icons">refresh</md-icon>
+                </md-button>
+            </md-whiteframe>
 
-    <!-- Bottom floating toolbar -->
-    <div class="floating-toolbar bottom-left" layout="row" layout-align="start center" hide-gt-sm>
+        </div>
 
-        <!-- Base time bar -->
-        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
-            <md-button
-                    class="compact"
-                    md-no-ink
-                    aria-label="Base time"
-                    data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
-                <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
-                <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
-            </md-button>
-        </md-whiteframe>
+        <!-- Bottom floating toolbar -->
+        <div class="floating-toolbar bottom-left" layout="row" layout-align="start center" hide-gt-sm>
 
-        <!-- Refresh bar -->
-        <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
-            <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
-            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
-                <md-icon class="material-icons">refresh</md-icon>
-            </md-button>
-        </md-whiteframe>
+            <!-- Base time bar -->
+            <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
+                <md-button
+                        class="compact"
+                        md-no-ink
+                        aria-label="Base time"
+                        data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                    <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
+                    <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
+                </md-button>
+            </md-whiteframe>
 
-    </div>
+            <!-- Refresh bar -->
+            <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
+                <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
+                    <md-icon class="material-icons">refresh</md-icon>
+                </md-button>
+            </md-whiteframe>
 
-    <div data-gyf-fill-height data-target-selector=".angular-google-map-container">
-        <div data-gyf-recompile data-accessor="recompileAccessor">
+        </div>
+
+            <div id="map_canvas" data-gyf-recompile data-accessor="recompileAccessor" flex>
             <ui-gmap-google-map
                     center="mapPresentation.map.center"
                     pan="mapPresentation.map.pan"
@@ -107,6 +109,8 @@
                 </ui-gmap-marker>
             </ui-gmap-google-map>
         </div>
-    </div>
 
-</md-content>
+    </md-content>
+
+</div>
+

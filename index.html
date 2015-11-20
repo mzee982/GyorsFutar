@@ -12,10 +12,6 @@
         <!-- JQuery -->
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
-        <!-- Bootstrap -->
-        <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
-        <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
         <!-- AngularJS -->
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.6/angular.min.js"></script>
         <script src="https://code.angularjs.org/1.4.6/i18n/angular-locale_hu-hu.js"></script>
@@ -25,7 +21,8 @@
         <!-- Angular UI Router -->
         <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.15/angular-ui-router.min.js"></script>
 
-        <!-- Angular UI Bootstrap -->
+        <!-- Angular UI Bootstrap (depends on Bootstrap CSS) -->
+        <link rel="stylesheet" href="css/bootstrap-stripped-3.3.5.css">
         <script src="lib/ui-bootstrap-tpls-0.14.3.min.js"></script>
 
         <!-- Angular UI Google Maps -->
@@ -38,14 +35,11 @@
         <!-- Geolocator Javascript Library -->
         <script src="lib/geolocator.min.js"></script>
 
-        <!-- JQuery Location Picker plugin -->
-        <!-- Depends on Google Maps JavaScript API -->
+        <!-- JQuery Location Picker plugin (depends on Google Maps JavaScript API) -->
         <script src="lib/locationpicker.jquery.min.js"></script>
 
-        <!-- Angular Material CSS -->
+        <!-- Angular Material -->
         <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/angular_material/0.11.2/angular-material.min.css">
-
-        <!-- Angular Material Javascript -->
         <script src="https://ajax.googleapis.com/ajax/libs/angular_material/0.11.2/angular-material.min.js"></script>
 
         <!-- Google Web Fonts Material Icons -->
@@ -53,32 +47,23 @@
 
         <link rel="stylesheet" href="app.css">
     </head>
-    <body>
-        <!--TODO Remove Bootstrap container-->
-        <div id="container" class="container-fluid" data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
+    <body data-ng-app="ngAppGyorsFutar" data-ng-controller="ngControllerGyorsFutar">
 
-            <!--Material main content-->
-            <md-content layout="column" data-ng-if="showErrorPage() == false">
+        <!-- Material main content - Root UI view -->
+        <div ui-view layout="column" layout-fill data-ng-if="!showErrorPage()" data-ng-cloak></div>
 
-                <!-- Root UI view -->
-                <div ui-view></div>
-
-            </md-content>
-
-            <!-- Material error page -->
-            <md-content layout="column" layout-fill layout-margin layout-padding data-ng-if="showErrorPage() == true" ng-cloak>
-                <div layout="column" layout-align="end center" flex>
-                    <div><md-icon class="material-icons md-48 md-warn">error</md-icon></div>
-                    <div class="md-display-1">Error occured</div>
-                </div>
-                <div layout="column" layout-align="center center" flex="20">
-                    <div class="md-headline">{{errorMessage}}</div>
-                </div>
-                <div layout="column" layout-align="start center" flex>
-                    <md-button class="md-primary" data-ng-click="errorPageGoBackClick()">Go back</md-button>
-                </div>
-            </md-content>
-
+        <!-- Material error page -->
+        <div layout="column" layout-fill data-ng-if="showErrorPage()" data-ng-cloak>
+            <div layout="column" layout-align="end center" flex>
+                <div><md-icon class="material-icons md-48 md-warn">error</md-icon></div>
+                <div class="md-display-1">Error occured</div>
+            </div>
+            <div layout="column" layout-align="center center" flex="20">
+                <div class="md-headline">{{errorMessage}}</div>
+            </div>
+            <div layout="column" layout-align="start center" flex>
+                <md-button class="md-primary" data-ng-click="errorPageGoBackClick()">Go back</md-button>
+            </div>
         </div>
 
         <script src="components/location/location.js"></script>

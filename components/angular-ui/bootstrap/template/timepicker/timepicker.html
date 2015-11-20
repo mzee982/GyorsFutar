@@ -1,0 +1,66 @@
+<table class="timepicker">
+  <tbody>
+    <tr ng-show="::showSpinners">
+      <td>
+        <md-button class="md-icon-button compact" aria-label="Increment hours" ng-click="incrementHours()" ng-disabled="noIncrementHours()" tabindex="{{::tabindex}}">
+          <md-icon class="material-icons">keyboard_arrow_up</md-icon>
+        </md-button>
+      </td>
+      <td>&nbsp;</td>
+      <td>
+        <md-button class="md-icon-button compact" aria-label="Increment minutes" ng-click="incrementMinutes()" ng-disabled="noIncrementMinutes()" tabindex="{{::tabindex}}">
+          <md-icon class="material-icons">keyboard_arrow_up</md-icon>
+        </md-button>
+      </td>
+      <td ng-show="showSeconds">&nbsp;</td>
+      <td ng-show="showSeconds">
+        <md-button class="md-icon-button compact" aria-label="Increment seconds" ng-click="incrementSeconds()" ng-disabled="noIncrementSeconds()" tabindex="{{::tabindex}}">
+          <md-icon class="material-icons">keyboard_arrow_up</md-icon>
+        </md-button>
+      </td>
+      <td ng-show="showMeridian"></td>
+    </tr>
+    <tr>
+      <td>
+        <md-input-container md-is-error="invalidHours" md-no-float>
+          <input type="text" placeholder="HH" ng-model="hours" ng-change="updateHours()" ng-readonly="::readonlyInput" maxlength="2" required tabindex="{{::tabindex}}" ng-disabled="disabled" ng-blur="blur()">
+        </md-input-container>
+      </td>
+      <td>:</td>
+      <td>
+        <md-input-container md-is-error="invalidMinutes" md-no-float>
+          <input type="text" placeholder="MM" ng-model="minutes" ng-change="updateMinutes()" ng-readonly="::readonlyInput" maxlength="2" required tabindex="{{::tabindex}}" ng-disabled="disabled" ng-blur="blur()">
+        </md-input-container>
+      </td>
+      <td ng-show="showSeconds">:</td>
+      <td ng-show="showSeconds">
+        <md-input-container md-is-error="invalidSeconds" md-no-float>
+          <input type="text" placeholder="SS" ng-model="seconds" ng-change="updateSeconds()" ng-readonly="::readonlyInput" maxlength="2" required tabindex="{{::tabindex}}" ng-disabled="disabled" ng-blur="blur()">
+        </md-input-container>
+      </td>
+      <td ng-show="showMeridian">
+        <md-button aria-label="Meridian" ng-click="toggleMeridian()" ng-disabled="noToggleMeridian()" tabindex="{{::tabindex}}">{{meridian}}</md-button>
+      </td>
+    </tr>
+    <tr ng-show="::showSpinners">
+      <td>
+        <md-button class="md-icon-button compact" aria-label="Decrement hours" ng-click="decrementHours()" ng-disabled="noDecrementHours()" tabindex="{{::tabindex}}">
+          <md-icon class="material-icons">keyboard_arrow_down</md-icon>
+        </md-button>
+      </td>
+      <td>&nbsp;</td>
+      <td>
+        <md-button class="md-icon-button compact" aria-label="Decrement minutes" ng-click="decrementMinutes()" ng-disabled="noDecrementMinutes()" tabindex="{{::tabindex}}">
+          <md-icon class="material-icons">keyboard_arrow_down</md-icon>
+        </md-button>
+      </td>
+      <td ng-show="showSeconds">&nbsp;</td>
+      <td ng-show="showSeconds">
+        <md-button class="md-icon-button compact" aria-label="Decrement seconds" ng-click="decrementSeconds()" ng-disabled="noDecrementSeconds()" tabindex="{{::tabindex}}">
+          <md-icon class="material-icons">keyboard_arrow_down</md-icon>
+        </md-button>
+      </td>
+      <td ng-show="showMeridian"></td>
+    </tr>
+  </tbody>
+</table>

@@ -113,12 +113,13 @@ angular.module('ngModuleLocationPicker')
             }]
         };
     }])
-    .directive('gyfLocationPicker', ['$timeout', 'EVENT', 'LOCATION', 'LOCATION_PICKER', function($timeout, EVENT, LOCATION, LOCATION_PICKER) {
+    .directive('gyfLocationPicker', ['$timeout', '$window', 'EVENT', 'LOCATION', 'LOCATION_PICKER', function($timeout, $window, EVENT, LOCATION, LOCATION_PICKER) {
         return {
             restrict: 'A',
             require: '^gyfLocationPickerContainer',
             scope: {},
             link: function(scope, element, attrs, ctrl) {
+                var mapResizeTimeout = undefined;
 
                 function fitBounds(ctrl) {
                     var mapContext = ctrl.getLocationPicker().locationpicker('map');
@@ -134,6 +135,23 @@ angular.module('ngModuleLocationPicker')
                     mapContext.map.fitBounds(circleBounds);
                 }
 
+                function mapResizeHandler(event) {
+                    if (angular.isDefined(mapResizeTimeout)) $timeout.cancel(mapResizeTimeout);
+
+                    // Delayed execution, waiting for the final map resize event
+                    mapResizeTimeout = $timeout(
+                        function(){
+
+                            // Auto size the map
+                            event.data.ctrl.getLocationPicker().locationpicker('autosize');
+
+                            // Fit bounds
+                            fitBounds(event.data.ctrl);
+
+                        },
+                        LOCATION_PICKER.MAP_RESIZE_TIMEOUT,
+                        false);
+                }
 
                 ctrl.setLocationPicker(element);
 
@@ -244,10 +262,7 @@ angular.module('ngModuleLocationPicker')
                     // Marker
                     var detectedPositionMarker = new google.maps.Marker({
                         position: detectedLatLng,
-                        icon: {
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 3
-                        },
+                        icon: LOCATION_PICKER.SYMBOL_DIRECTIONS_WALK,
                         map: mapContext.map,
                         title: detectedPosition.formattedAddress + ' (accuracy: ' + detectedPosition.coords.detectedAccuracy + ' m)'
                     });
@@ -279,10 +294,7 @@ angular.module('ngModuleLocationPicker')
                     // Marker
                     var marker = new google.maps.Marker({
                         position: markedLatLng,
-                        icon: {
-                            path: google.maps.SymbolPath.BACKWARD_CLOSED_ARROW,
-                            scale: 3
-                        },
+                        icon: LOCATION_PICKER.SYMBOL_PIN_DROP,
                         map: mapContext.map,
                         title: markedPosition.routeName
                     });
@@ -291,12 +303,18 @@ angular.module('ngModuleLocationPicker')
 
                     var markedContentString =
                         '<div>' +
-                        '<div>' + markedPosition.name + '</div>' +
-                        '<div>' + markedPosition.routeName + '</div>' +
-                        '<div>' + markedPosition.stopTimeString + '</div>' +
+                            '<div>' +
+                                '<span>' + markedPosition.routeName + '</span>' +
+                                '&nbsp;' +
+                                '<span>' + markedPosition.name + '</span>' +
+                            '</div>' +
+                            '<div>' + markedPosition.stopTimeString + '</div>' +
                         '</div>';
-                    var infoWindow = new google.maps.InfoWindow({
-                        content: markedContentString
+
+                    var infoWindow = new google.maps.InfoWindow({content: markedContentString});
+
+                    marker.addListener('click', function() {
+                        infoWindow.open(mapContext.map, marker);
                     });
 
                     infoWindow.open(mapContext.map, marker);
@@ -316,12 +334,29 @@ angular.module('ngModuleLocationPicker')
                  */
 
                 scope.$on(EVENT.ADJUST_HEIGHT, function(event) {
+                    mapResizeHandler(ctrl);
+                });
 
-                    // Auto size the map
-                    ctrl.getLocationPicker().locationpicker('autosize');
 
-                    // Fit bounds
-                    fitBounds(ctrl);
+                /*
+                 * Event: window resize
+                 */
+
+                // Register
+                angular.element($window).on('resize', {ctrl: ctrl}, mapResizeHandler);
+
+
+                /*
+                 * Element destroy event
+                 */
+
+                element.on('$destroy', function() {
+
+                    // Cancel timeout
+                    if (angular.isDefined(mapResizeTimeout)) $timeout.cancel(mapResizeTimeout);
+
+                    // Unregister window resize event handler
+                    angular.element($window).off('resize', mapResizeHandler);
 
                 });
 

@@ -1,66 +1,5 @@
 
 /*
-Bootstrap CSS customization
-*/
-
-.panel-group {
-    margin-bottom: 0px;
-}
-
-.panel-group .panel-heading+.panel-collapse>.panel-body {
-    border-top: 0px;
-}
-
-.panel {
-    margin-bottom: 5px;
-}
-
-.panel-heading {
-    padding: 5px;
-}
-
-.panel-body {
-    padding: 5px;
-    background-color: #C1D1DD;
-}
-
-.table {
-    margin-bottom: 0px;
-}
-
-.table .table {
-    background-color: inherit;
-}
-
-.table>tbody>tr>td {
-    border-top: 0px;
-}
-
-.table-condensed>tbody>tr>td {
-    padding: 0px;
-}
-
-/*
-.panel-default {
-    border-color: #7695AD;
-}
-*/
-
-.panel-default>.panel-heading {
-    color: #ffffff;
-    background-color: #577C98;
-    border-color: #577C98;
-}
-
-.label-default {
-    display: inline-block;
-}
-
-.label-success {
-    display: inline-block;
-}
-
-/*
  * Angular UI Bootstrap
  */
 
@@ -145,12 +84,25 @@ md-whiteframe {
 }
 
 .dropdown-menu > md-whiteframe {
-    margin-left: 0px;
-    margin-right: 0px;
+    margin: 0px;
 }
 
 md-whiteframe.no-padding {
     padding: 0px;
+}
+
+.timepicker md-input-container {
+    padding: 2px 2px 2px;
+}
+
+.timepicker md-input-container input[type=text] {
+    text-align: center;
+    width: 25px;
+}
+
+.timepicker td {
+    text-align: center;
+    vertical-align: middle;
 }
 
 /*
@@ -177,43 +129,53 @@ Material icons
 Angular JS UI Google Maps
 */
 
+#map_canvas {
+    position: relative;
+}
+
 .angular-google-map-container {
-    height: 100px; /* initial value */
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
 }
 
 /*
 Customization
 */
 
-html, body {
-    height: 100%;
-}
-
-#container {
-    height: 100%;
-}
-
-#locationPicker {
-    height: 100px; /* initial value */
+ui-view {
+    /* Angular Material's layout-fill */
+    margin: 0;
     width: 100%;
+    min-height: 100%;
+    height: 100%;
 }
 
-.no-margin {
-    margin: 0px;
+.label {
+    display: inline-block;
+    padding: .2em .6em .3em;
+    font-size: 75%;
+    font-weight: bold;
+    line-height: 1;
+    color: #fff;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .25em;
+    background-color: #777;
+    margin: 2px;
 }
 
-.row-header {
-    color: #ffffff;
-    background-color: #7695AD;
-    padding: 5px;
+.label-gmap {
+    margin-top: 5px;
+    margin-left: 5px;
+    font-size: 10px;
 }
 
-.row-header a {
-    color: inherit;
-}
-
-.row-body {
-    padding: 5px;
+.label-gmap.current {
+    background-color: #5cb85c;
 }
 
 .row-past {
@@ -226,16 +188,6 @@ html, body {
 
 .link {
     cursor: pointer;
-}
-
-.label-gmap {
-    margin-top: 5px;
-    margin-left: 5px;
-    font-size: 10px;
-}
-
-.label-route {
-    margin: 2px;
 }
 
 .nowrap-ellipsis {
@@ -254,7 +206,15 @@ html, body {
     margin: 10px;
 }
 
+.whiteframe-title {
+    padding: 5px 10px;
+}
+
 .whiteframe-body {
+    padding: 5px 10px;
+}
+
+.whiteframe-footer {
     padding: 5px 10px;
 }
 
