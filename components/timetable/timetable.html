@@ -7,10 +7,10 @@
     </div>
 </div>
 
-<div layout="column" layout-fill data-ng-if="timetablePresentation != undefined" data-ng-cloak>
+<md-content class="no-overflow" layout="column" layout-fill data-ng-if="timetablePresentation != undefined" data-ng-cloak>
 
     <!-- Toolbar -->
-    <md-toolbar>
+    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
         <div class="md-toolbar-tools">
             <span>Timetable</span>
             <span flex></span>
@@ -29,7 +29,7 @@
     <!-- Timetable -->
     <md-content layout="column">
 
-        <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap flex>
+        <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap>
 
             <!-- Address -->
             <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
@@ -337,4 +337,4 @@
 
     </md-content>
 
-</div>
+</md-content>

@@ -53,6 +53,7 @@ md-input-container.toolbar {
 .floating-toolbar {
     position: absolute;
     z-index: 1;
+    pointer-events: none;
 }
 
 .floating-toolbar.top {
@@ -81,6 +82,7 @@ md-whiteframe {
     padding-top: 0px;
     padding-bottom: 0px;
     min-height: 48px;
+    pointer-events: auto;
 }
 
 .dropdown-menu > md-whiteframe {
@@ -103,6 +105,10 @@ md-whiteframe.no-padding {
 .timepicker td {
     text-align: center;
     vertical-align: middle;
+}
+
+md-content.no-overflow {
+    overflow-y: hidden;
 }
 
 /*
@@ -208,6 +214,10 @@ ui-view {
 
 .whiteframe-title {
     padding: 5px 10px;
+}
+
+.whiteframe-title .md-title {
+    line-height: 35px;
 }
 
 .whiteframe-body {

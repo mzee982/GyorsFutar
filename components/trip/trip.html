@@ -7,20 +7,23 @@
     </div>
 </div>
 
-<div layout="column" layout-fill data-ng-if="tripPresentation != undefined" data-ng-cloak>
+<md-content class="no-overflow" layout="column" layout-fill data-ng-if="tripPresentation != undefined" data-ng-cloak>
 
     <!-- Toolbar -->
-    <md-toolbar>
+    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
         <div class="md-toolbar-tools">
             <span>Trip</span>
             <span flex></span>
+            <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onHeaderClick(tripId, stopId, tripPresentation.baseTime)">
+                <md-icon class="material-icons">map</md-icon>
+            </md-button>
         </div>
     </md-toolbar>
 
     <!-- Trip -->
-    <md-content layout="column">
+    <md-content class="md-body-1" layout="column">
 
-        <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap flex>
+        <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" layout-wrap>
 
             <!-- Address -->
             <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
@@ -31,7 +34,7 @@
             <!-- Base time -->
             <div>
                 <md-button
-                        class="md-raised compact"
+                        class="compact"
                         md-no-ink
                         aria-label="Base time"
                         data-ng-class="{'md-primary': tripPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': tripPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
@@ -53,26 +56,24 @@
 
         </md-whiteframe>
 
-        <md-whiteframe class="md-whiteframe-1dp no-padding" layout="column">
+        <md-whiteframe class="md-whiteframe-1dp" layout="column">
 
-            <div class="whiteframe-heading" layout="row">
-                <div layout="column" flex>
-                    <div flex></div>
+            <div class="whiteframe-title" layout="row" layout-align="start center" layout-wrap>
+                <div hide-sm>
+                    <md-icon class="material-icons md-48 whiteframe-heading-icon">directions</md-icon>
+                </div>
+                <div layout="column" flex="auto">
                     <div class="md-title">{{tripPresentation.tripHeadsign}}</div>
-                    <div class="md-body-1" layout="row" layout-align="start start" layout-wrap>
+                    <div class="md-title" layout="row" layout-align="start start" hide-sm>
                         <span class="label" data-ng-style="{'color': tripPresentation.routeTextColor, 'background-color': tripPresentation.routeColor}">{{tripPresentation.routeName}}</span>
                     </div>
                 </div>
-                <div layout="column" layout-align="start end">
-                    <md-icon class="material-icons md-48 md-color-inherit whiteframe-heading-icon" hide-sm>directions</md-icon>
-                    <div flex></div>
-                    <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onHeaderClick(tripId, stopId, tripPresentation.baseTime)">
-                        <md-icon class="material-icons md-color-inherit">map</md-icon>
-                    </md-button>
+                <div class="md-title" layout="row" layout-align="start start" hide-gt-sm>
+                    <span class="label" data-ng-style="{'color': tripPresentation.routeTextColor, 'background-color': tripPresentation.routeColor}">{{tripPresentation.routeName}}</span>
                 </div>
             </div>
 
-            <div class="whiteframe-body md-body-1" layout="column">
+            <div class="whiteframe-body" layout="column">
                 <md-list>
                     <md-list-item
                             data-ng-class="{'row-past': (stopTime.stopTime < tripPresentation.buildTime)}"
@@ -80,7 +81,7 @@
                             ng-repeat="stopTime in tripPresentation.stopTimes"
                             ng-click="onStopClick(stopTime, tripPresentation.baseTime)">
 
-                        <div class="md-body-1" layout="column" layout-fill>
+                        <div layout="column" layout-fill>
                             <div layout="row" layout-align="start center" layout-fill>
                                 <div class="trip-stop-time-diff" data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeDiff}}</div>
                                 <div data-ng-class="{'row-current': stopTime.isCurrent}" flex>{{stopTime.stopName}}</div>
@@ -118,4 +119,4 @@
 
     </md-content>
 
-</div>
+</md-content>

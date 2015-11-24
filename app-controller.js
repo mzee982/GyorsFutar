@@ -5,17 +5,20 @@ angular.module('ngAppGyorsFutar')
             '$state',
             '$window',
             '$mdToast',
+            '$mdMedia',
             'ngServiceContext',
             'STATE',
             'LOCATION_MODE',
             'EVENT',
-            function($rootScope, $scope, $state, $window, $mdToast, ngServiceContext, STATE, LOCATION_MODE, EVENT) {
+            function($rootScope, $scope, $state, $window, $mdToast, $mdMedia, ngServiceContext, STATE, LOCATION_MODE, EVENT) {
 
                 //
                 $scope.errorMessage = undefined;
                 $scope.successMessages = [];
                 $scope.toastPromise = undefined;
 
+                //
+                $scope.isToolbarScrollShrinkEnabled = $mdMedia('sm') ? '' : undefined;
 
                 //
 

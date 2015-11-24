@@ -7,10 +7,10 @@
     </div>
 </div>
 
-<div layout="column" layout-fill data-ng-if="schedulePresentation != undefined" data-ng-cloak>
+<md-content class="no-overflow" layout="column" layout-fill data-ng-if="schedulePresentation != undefined" data-ng-cloak>
 
     <!-- Toolbar -->
-    <md-toolbar>
+    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
         <div class="md-toolbar-tools">
             <span>Schedule</span>
             <span flex></span>
@@ -18,9 +18,9 @@
     </md-toolbar>
 
     <!-- Schedule -->
-    <md-content layout="column">
+    <md-content class="md-body-1" layout="column">
 
-        <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap flex>
+        <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" layout-wrap>
 
             <!-- Address -->
             <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
@@ -31,7 +31,7 @@
             <!-- Base time -->
             <div>
                 <md-button
-                        class="md-raised compact"
+                        class="compact"
                         md-no-ink
                         aria-label="Base time"
                         data-ng-class="{'md-primary': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
@@ -53,25 +53,24 @@
 
         </md-whiteframe>
 
-        <md-whiteframe class="md-whiteframe-1dp no-padding" layout="column">
+        <md-whiteframe class="md-whiteframe-1dp" layout="column">
 
-            <div class="whiteframe-heading" layout="row">
-                <div layout="column" flex>
-                    <div flex></div>
+            <div class="whiteframe-title" layout="row" layout-align="start center" layout-wrap>
+                <div hide-sm>
+                    <md-icon class="material-icons md-48 whiteframe-heading-icon">directions</md-icon>
+                </div>
+                <div layout="column" flex="auto">
                     <div class="md-title">{{schedulePresentation.stopName}}</div>
-                    <div class="md-body-1" layout="row" layout-align="start start" layout-wrap>
-                    <span class="label"
-                          data-ng-style="{'color': route.textColor, 'background-color': route.color}"
-                          data-ng-repeat="route in schedulePresentation.routes">{{route.shortName}}</span>
+                    <div class="md-title" layout="row" layout-align="start start" hide-sm>
+                        <span class="label" data-ng-style="{'color': route.textColor, 'background-color': route.color}" data-ng-repeat="route in schedulePresentation.routes">{{route.shortName}}</span>
                     </div>
                 </div>
-                <div layout="column" layout-align="start end">
-                    <md-icon class="material-icons md-48 md-color-inherit whiteframe-heading-icon" hide-sm>directions</md-icon>
-                    <div flex></div>
+                <div class="md-title" layout="row" layout-align="start start" hide-gt-sm>
+                    <span class="label" data-ng-style="{'color': route.textColor, 'background-color': route.color}" data-ng-repeat="route in schedulePresentation.routes">{{route.shortName}}</span>
                 </div>
             </div>
 
-            <div class="whiteframe-body md-body-1" layout="column">
+            <div class="whiteframe-body" layout="column">
                 <md-list>
                     <md-list-item data-ng-if="schedulePresentation.visibleStopTimeLowerIndex > 0" ng-click="onStopTimeMoreOlderClick()">
                         <div layout="row" layout-align="center center" layout-fill>
@@ -82,7 +81,7 @@
                             data-ng-class="{'row-past': (stopTime.stopTime < schedulePresentation.buildTime)}"
                             ng-repeat="stopTime in schedulePresentation.stopTimes | filter: filterStopTimes"
                             ng-click="onStopTimeClick(stopTime, schedulePresentation.baseTime)">
-                        <div class="md-body-1" layout="row" layout-align="start center" layout-fill>
+                        <div layout="row" layout-align="start center" layout-fill>
                             <div class="route-short-name">
                                 <span class="label" data-ng-style="{'color': stopTime.routeTextColor, 'background-color': stopTime.routeColor}">{{stopTime.routeShortName}}</span>
                             </div>
@@ -111,4 +110,4 @@
 
     </md-content>
 
-</div>
+</md-content>

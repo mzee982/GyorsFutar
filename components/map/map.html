@@ -9,14 +9,6 @@
 
 <div layout="column" layout-fill data-ng-if="mapPresentation != undefined" data-ng-cloak>
 
-    <!-- Toolbar -->
-    <md-toolbar>
-        <div class="md-toolbar-tools">
-            <span>Map</span>
-            <span flex></span>
-        </div>
-    </md-toolbar>
-
     <!-- Map -->
     <md-content class="md-body-1" layout="column" flex>
 
@@ -79,7 +71,7 @@
 
         </div>
 
-            <div id="map_canvas" data-gyf-recompile data-accessor="recompileAccessor" flex>
+        <div id="map_canvas" data-gyf-recompile data-accessor="recompileAccessor" flex>
             <ui-gmap-google-map
                     center="mapPresentation.map.center"
                     pan="mapPresentation.map.pan"
