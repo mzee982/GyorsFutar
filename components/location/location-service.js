@@ -1,8 +1,9 @@
 angular.module('ngModuleLocation')
     .factory('ngServiceLocation',
     [   '$q',
+        '$localStorage',
         'LOCATION',
-        function($q, LOCATION) {
+        function($q, $localStorage, LOCATION) {
 
             /*
              * Interface
@@ -10,7 +11,9 @@ angular.module('ngModuleLocation')
 
             var serviceInstance = {
                 getLocationByGeoLocator: function() {return getLocationByGeoLocator();},
-                formatLocation: function(lat, lon, accuracy, address) {return formatLocation(lat, lon, accuracy, address);}
+                formatLocation: function(lat, lon, accuracy, address) {return formatLocation(lat, lon, accuracy, address);},
+                storeLocation: function(location) {storeLocation(location);},
+                getStoredLocations: function() {return getStoredLocations();}
             };
 
 
@@ -154,6 +157,52 @@ angular.module('ngModuleLocation')
 
 
                 return deferred.promise;
+            }
+
+            function storeLocation(location) {
+                var actualStoreTimestamp = new Date().getTime();
+                var defaultStoreTimestamp = new Date(0).getTime();
+                var locationKey = location.formattedAddress;
+
+                // Read storage
+                var storedLocations = $localStorage.recentLocations;
+
+                // Initialize if not exists yet
+                if (angular.isUndefined(storedLocations)) {
+                    storedLocations = {};
+                }
+
+                // Add / Overwrite
+                location.storeTimestamp = actualStoreTimestamp;
+                storedLocations[locationKey] = location;
+
+                // To array
+                var storedLocationArray = [];
+                angular.forEach(
+                    storedLocations,
+                    function(value, key, obj) {
+                        if (angular.isUndefined(value.storeTimestamp)) value.storeTimestamp = defaultStoreTimestamp;
+                        this.push(value);
+                    },
+                    storedLocationArray);
+
+                // Sort by descending timestamp
+                storedLocationArray.sort(function(a, b) {return b.storeTimestamp - a.storeTimestamp;});
+
+                // Store only the most recent locations
+                storedLocationArray = storedLocationArray.slice(0, LOCATION.RECENT_LOCATION_COUNT);
+
+                // To object
+                storedLocations = {};
+                angular.forEach(storedLocationArray, function(value, key, obj) {this[value.formattedAddress] = value;}, storedLocations);
+
+                // Write storage
+                $localStorage.recentLocations = storedLocations;
+
+            }
+
+            function getStoredLocations() {
+                return $localStorage.recentLocations;
             }
 
 

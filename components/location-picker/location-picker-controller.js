@@ -4,12 +4,11 @@ angular.module('ngModuleLocationPicker')
         '$state',
         '$stateParams',
         'ngServiceContext',
+        'ngServiceLocation',
         '$q',
-        '$localStorage',
         'STATE',
         'EVENT',
-        'LOCATION_PICKER',
-        function($scope, $state, $stateParams, ngServiceContext, $q, $localStorage, STATE, EVENT, LOCATION_PICKER) {
+        function($scope, $state, $stateParams, ngServiceContext, ngServiceLocation, $q, STATE, EVENT) {
 
             //
             $scope.deferredLocationPicker = $q.defer();
@@ -25,52 +24,9 @@ angular.module('ngModuleLocationPicker')
             $scope.pickLocation = function(pickedLocation) {
 
                 // Store picked location
-                $scope.storeLocation(pickedLocation);
+                ngServiceLocation.storeLocation(pickedLocation);
 
                 $scope.deferredLocationPicker.resolve({targetState: STATE.TIMETABLE, position: pickedLocation});
-            }
-
-            //TODO Should refactor to location service
-            $scope.storeLocation = function(location) {
-                var actualStoreTimestamp = new Date().getTime();
-                var defaultStoreTimestamp = new Date(0).getTime();
-                var locationKey = location.formattedAddress;
-
-                // Read storage
-                var storedLocations = $localStorage.recentLocations;
-
-                // Initialize if not exists yet
-                if (angular.isUndefined(storedLocations)) {
-                    storedLocations = {};
-                }
-
-                // Add / Overwrite
-                location.storeTimestamp = actualStoreTimestamp;
-                storedLocations[locationKey] = location;
-
-                // To array
-                var storedLocationArray = [];
-                angular.forEach(
-                    storedLocations,
-                    function(value, key, obj) {
-                        if (angular.isUndefined(value.storeTimestamp)) value.storeTimestamp = defaultStoreTimestamp;
-                        this.push(value);
-                    },
-                    storedLocationArray);
-
-                // Sort by descending timestamp
-                storedLocationArray.sort(function(a, b) {return b.storeTimestamp - a.storeTimestamp;});
-
-                // Store only the most recent locations
-                storedLocationArray = storedLocationArray.slice(0, LOCATION_PICKER.RECENT_LOCATION_COUNT);
-
-                // To object
-                storedLocations = {};
-                angular.forEach(storedLocationArray, function(value, key, obj) {this[value.formattedAddress] = value;}, storedLocations);
-
-                // Write storage
-                $localStorage.recentLocations = storedLocations;
-
             }
 
             $scope.pickerLocationChange = function(location) {

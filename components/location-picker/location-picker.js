@@ -1,7 +1,6 @@
 angular
     .module('ngModuleLocationPicker', [])
     .constant('LOCATION_PICKER', {
-        'RECENT_LOCATION_COUNT': 5,
         'MAP_RESIZE_TIMEOUT': 500,
         'CLICK_CANCELLATION_TIMEOUT': 500,
         'SYMBOL_DIRECTIONS_WALK': {

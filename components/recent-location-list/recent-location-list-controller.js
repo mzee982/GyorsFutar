@@ -4,11 +4,11 @@ angular.module('ngModuleRecentLocationList')
         '$state',
         '$stateParams',
         'ngServiceContext',
+        'ngServiceLocation',
         '$q',
-        '$localStorage',
         'STATE',
         'EVENT',
-        function($scope, $state, $stateParams, ngServiceContext, $q, $localStorage, STATE, EVENT) {
+        function($scope, $state, $stateParams, ngServiceContext, ngServiceLocation, $q, STATE, EVENT) {
 
             //
             $scope.deferredRecentLocationList = $q.defer();
@@ -22,7 +22,7 @@ angular.module('ngModuleRecentLocationList')
                 var recentLocationArray = [];
 
                 // Load recent location list from local storage
-                var storedLocations = $localStorage.recentLocations;
+                var storedLocations = ngServiceLocation.getStoredLocations();
 
                 // Calculate distances from initial position
                 for (locationId in storedLocations) {
@@ -70,7 +70,7 @@ angular.module('ngModuleRecentLocationList')
              */
 
             // List stored locations
-            if ($localStorage.recentLocations != undefined) {
+            if (ngServiceLocation.getStoredLocations() != undefined) {
 
                 var stateParams = ngServiceContext.getStateParams();
 
