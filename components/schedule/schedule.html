@@ -2,7 +2,7 @@
 <!-- Progress -->
 <div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (schedulePresentation == undefined)" data-ng-cloak>
     <div>
-        <h5 class="md-title">Building schedule</h5>
+        <div class="md-title progress-title">Building schedule</div>
         <md-progress-linear md-mode="indeterminate"></md-progress-linear>
     </div>
 </div>
@@ -81,7 +81,7 @@
                             data-ng-class="{'row-past': (stopTime.stopTime < schedulePresentation.buildTime)}"
                             ng-repeat="stopTime in schedulePresentation.stopTimes | filter: filterStopTimes"
                             ng-click="onStopTimeClick(stopTime, schedulePresentation.baseTime)">
-                        <div layout="row" layout-align="start center" layout-fill>
+                        <div layout="row" layout-fill>
                             <div class="route-short-name">
                                 <span class="label" data-ng-style="{'color': stopTime.routeTextColor, 'background-color': stopTime.routeColor}">{{stopTime.routeShortName}}</span>
                             </div>
@@ -92,8 +92,10 @@
                                     <span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
                                 </div>
                             </div>
-                            <div class="md-caption route-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}" hide-sm>
-                                <span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
+                            <div layout="column" hide-sm>
+                                <div class="md-caption route-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}">
+                                    <span data-gyf-countdown data-base-time='schedulePresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
+                                </div>
                             </div>
                         </div>
                         <md-divider ng-if="!$last"></md-divider>

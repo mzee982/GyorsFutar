@@ -2,7 +2,7 @@
 <!-- Progress -->
 <div layout="column" layout-fill layout-align="center center" data-ng-if="isBuilding && (tripPresentation == undefined)" data-ng-cloak>
     <div>
-        <h5 class="md-title">Building trip</h5>
+        <div class="md-title progress-title">Building trip</div>
         <md-progress-linear md-mode="indeterminate"></md-progress-linear>
     </div>
 </div>
@@ -76,37 +76,33 @@
             <div class="whiteframe-body" layout="column">
                 <md-list>
                     <md-list-item
-                            data-ng-class="{'row-past': (stopTime.stopTime < tripPresentation.buildTime)}"
                             data-ng-attr-id="{{stopTime.isCurrent ? 'currentStopTime' : undefined}}"
                             ng-repeat="stopTime in tripPresentation.stopTimes"
                             ng-click="onStopClick(stopTime, tripPresentation.baseTime)">
 
                         <div layout="column" layout-fill>
-                            <div layout="row" layout-align="start center" layout-fill>
+                            <div class="label md-caption trip-vehicle" data-ng-style="{'color': tripPresentation.routeTextColor, 'background-color': tripPresentation.routeColor}" data-ng-if="stopTime.vehicle != undefined">
+                                <span>
+                                    <md-icon class="material-icons md-18 md-color-inherit">directions_transit</md-icon>
+                                </span>
+                                <span>&nbsp;</span>
+                                <span data-gyf-countdown data-source-time='stopTime.vehicle.lastUpdateTime'></span>
+                                <span>&nbsp;</span>
+                                <span>{{stopTime.vehicle.status}}</span>
+                            </div>
+                            <div data-ng-class="{'row-past': (stopTime.stopTime < tripPresentation.buildTime)}" layout="row" layout-fill>
                                 <div class="trip-stop-time-diff" data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeDiff}}</div>
                                 <div data-ng-class="{'row-current': stopTime.isCurrent}" flex>{{stopTime.stopName}}</div>
-                                <div class="md-caption trip-vehicle" data-ng-class="{'row-current': stopTime.isCurrent}" layout="column" data-ng-if="stopTime.vehicle != undefined" hide-sm>
-                                    <div>
-                                        <md-icon class="material-icons md-18 md-color-inherit">directions_transit</md-icon>
-                                        <span data-gyf-countdown data-source-time='stopTime.vehicle.lastUpdateTime'></span>
-                                    </div>
-                                    <div>{{stopTime.vehicle.status}}</div>
-                                </div>
                                 <div layout="column">
                                     <div class="trip-stop-time" data-ng-class="{'row-current': stopTime.isCurrent}">{{stopTime.stopTimeString}}</div>
                                     <div class="md-caption trip-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}" hide-gt-sm>
                                         <span data-gyf-countdown data-base-time='tripPresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
                                     </div>
                                 </div>
-                                <div class="md-caption trip-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}" hide-sm>
-                                    <span data-gyf-countdown data-base-time='tripPresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
-                                </div>
-                            </div>
-                            <div class="md-caption trip-vehicle" data-ng-class="{'row-current': stopTime.isCurrent}" layout="row" layout-align="center center" data-ng-if="stopTime.vehicle != undefined" hide-gt-sm>
-                                <div>
-                                    <md-icon class="material-icons md-18 md-color-inherit">directions_transit</md-icon>
-                                    <span data-gyf-countdown data-source-time='stopTime.vehicle.lastUpdateTime'></span>&nbsp;
-                                    <span>{{stopTime.vehicle.status}}</span>
+                                <div layout="column" hide-sm>
+                                    <div class="md-caption trip-stop-time-countdown" data-ng-class="{'row-current': stopTime.isCurrent}">
+                                        <span data-gyf-countdown data-base-time='tripPresentation.baseTime' data-target-time='stopTime.stopTime' data-ng-if="stopTime.isCurrent || stopTime.isSubsequent"></span>
+                                    </div>
                                 </div>
                             </div>
                         </div>

@@ -159,6 +159,10 @@ ui-view {
     height: 100%;
 }
 
+.progress-title {
+    margin-bottom: 10px;
+}
+
 .label {
     display: inline-block;
     padding: .2em .6em .3em;
@@ -224,13 +228,39 @@ ui-view {
     padding: 5px 10px;
 }
 
+.whiteframe-body.no-padding {
+    padding: 0px;
+}
+
 .whiteframe-footer {
     padding: 5px 10px;
 }
 
-.whiteframe-body.no-padding {
-    padding: 0px;
+@media (max-width: 599px) {
+
+    .whiteframe-body {
+        padding-left: 5px;
+        padding-right: 5px;
+    }
+
+    .whiteframe-body md-list-item {
+        min-height: 36px;
+    }
+
+    .whiteframe-body md-list-item .md-list-item-inner {
+        min-height: 36px;
+    }
+
+    .whiteframe-body md-list-item button {
+        line-height: initial;
+        padding-left: 2px;
+        padding-right: 2px;
+    }
+
 }
+
+
+/* Timetable */
 
 .whiteframe-body .route-group {
     padding: 10px 5px;
@@ -258,30 +288,61 @@ ui-view {
     width: 50%;
 }
 
+
+/* Schedule */
+
 .whiteframe-body md-list-item .route-short-name {
     min-width: 45px;
 }
 
 .whiteframe-body md-list-item .route-stop-time {
     min-width: 75px;
+    text-align: end;
 }
 
 .whiteframe-body md-list-item .route-stop-time-countdown {
     min-width: 40px;
+    text-align: end;
+}
+
+@media (max-width: 599px) {
+
+    .whiteframe-body md-list-item .route-short-name {
+        min-width: 40px;
+    }
+
+    .whiteframe-body md-list-item .route-stop-time {
+        min-width: 65px;
+    }
+
+}
+
+
+/* Trip */
+
+.whiteframe-body md-list-item .trip-vehicle {
+    padding: .1em .3em .1em;
+    margin: 2px 0px;
 }
 
 .whiteframe-body md-list-item .trip-stop-time-diff {
     min-width: 25px;
 }
 
-.whiteframe-body md-list-item .trip-vehicle {
-    min-width: 100px;
-}
-
 .whiteframe-body md-list-item .trip-stop-time {
     min-width: 75px;
+    text-align: end;
 }
 
 .whiteframe-body md-list-item .trip-stop-time-countdown {
     min-width: 40px;
+    text-align: end;
+}
+
+@media (max-width: 599px) {
+
+    .whiteframe-body md-list-item .trip-stop-time {
+        min-width: 65px;
+    }
+
 }
