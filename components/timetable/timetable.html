@@ -7,85 +7,88 @@
     </div>
 </div>
 
-<md-content class="no-overflow" layout="column" layout-fill data-ng-if="timetablePresentation != undefined" data-ng-cloak>
+<md-content layout="column" data-ng-if="timetablePresentation != undefined" data-ng-cloak>
 
     <!-- Toolbar -->
-    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
-        <div class="md-toolbar-tools">
-            <span>Timetable</span>
-            <span flex></span>
-            <md-button class="md-icon-button" aria-label="Detect location" data-ng-click="onLocationRefreshClick(LOCATION_MODE.AUTO)">
-                <md-icon class="material-icons">my_location</md-icon>
-            </md-button>
-            <md-button class="md-icon-button" aria-label="Recent locations" data-ng-click="onLocationRefreshClick(LOCATION_MODE.LIST)">
-                <md-icon class="material-icons">list</md-icon>
-            </md-button>
-            <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onLocationRefreshClick(LOCATION_MODE.MAP)">
-                <md-icon class="material-icons">map</md-icon>
-            </md-button>
-        </div>
-    </md-toolbar>
-
-    <!-- Timetable -->
-    <md-content layout="column">
-
-        <md-whiteframe class="md-whiteframe-1dp md-body-1" layout="row" layout-align="start center" layout-wrap>
-
-            <!-- Address -->
-            <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
-                <md-icon class="material-icons">place</md-icon>
-                <span class="nowrap-ellipsis" flex>{{geoPosition.formattedAddress}}</span>
-            </div>
-
-            <!-- Base time -->
-            <div layout="row" layout-align="center center">
-                <div uib-dropdown is-open="baseTimeDropdown.isOpen" auto-close="outsideClick">
-                    <md-button
-                            class="md-raised compact"
-                            aria-label="Base time"
-                            data-ng-class="{'md-primary': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}"
-                            data-ng-click="onBaseTimeEditClick($event)">
-                        <span data-ng-if="timetablePresentation.baseTime == undefined" data-gyf-countdown></span>
-                        <span data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'mediumTime'}}</span>
-                    </md-button>
-                    <md-button class="md-icon-button compact" aria-label="Reset" data-ng-if="timetablePresentation.baseTime != undefined" data-ng-click="onBaseTimeResetClick(geoPosition)">
-                        <md-icon class="material-icons">clear</md-icon>
-                    </md-button>
-                    <div class="uib-dropdown-menu">
-                        <md-whiteframe class="md-whiteframe-2dp" layout="row" layout-align="start center">
-                            <!-- TODO Should be replaced by a Material implementation -->
-                            <uib-timepicker
-                                    ng-model="baseTimeDropdown.editedBaseTime"
-                                    template-url="components/angular-ui/bootstrap/template/timepicker/timepicker.html"
-                                    ng-change="onBaseTimeEditChange(baseTimeDropdown.editedBaseTime)"
-                                    hour-step="baseTimeDropdown.timePickerOptions.hourStep"
-                                    minute-step="baseTimeDropdown.timePickerOptions.minuteStep"
-                                    show-meridian="baseTimeDropdown.timePickerOptions.showMeridian"
-                                    min="baseTimeDropdown.timePickerOptions.min">
-                            </uib-timepicker>
-                            <md-button class="md-icon-button compact md-warn" aria-label="Cancel" data-ng-click="onBaseTimeEditCancel()">
-                                <md-icon class="material-icons">clear</md-icon>
-                            </md-button>
-                            <md-button class="md-icon-button compact md-primary" aria-label="Ok" data-ng-click="onBaseTimeEditOk(geoPosition, baseTimeDropdown.editedBaseTime)">
-                                <md-icon class="material-icons">done</md-icon>
-                            </md-button>
-                        </md-whiteframe>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Spacer -->
-            <div flex></div>
-
-            <!-- Refresh -->
-            <div>
-                <span data-gyf-countdown data-source-time='timetablePresentation.buildTime'></span>
-                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTimetableRefreshClick()">
-                    <md-icon class="material-icons">refresh</md-icon>
+    <gyf-sticky>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <span>Timetable</span>
+                <span flex></span>
+                <md-button class="md-icon-button" aria-label="Detect location" data-ng-click="onLocationRefreshClick(LOCATION_MODE.AUTO)">
+                    <md-icon class="material-icons">my_location</md-icon>
+                </md-button>
+                <md-button class="md-icon-button" aria-label="Recent locations" data-ng-click="onLocationRefreshClick(LOCATION_MODE.LIST)">
+                    <md-icon class="material-icons">list</md-icon>
+                </md-button>
+                <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onLocationRefreshClick(LOCATION_MODE.MAP)">
+                    <md-icon class="material-icons">map</md-icon>
                 </md-button>
             </div>
 
-        </md-whiteframe>
+            <md-divider></md-divider>
+
+            <gyf-collapsible>
+                <div class="md-body-1" layout="row" layout-align="start center" layout-wrap>
+
+                    <!-- Address -->
+                    <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
+                        <md-icon class="material-icons">place</md-icon>
+                        <span class="nowrap-ellipsis" flex>{{geoPosition.formattedAddress}}</span>
+                    </div>
+
+                    <!-- Base time -->
+                    <div layout="row" layout-align="center center">
+                        <div uib-dropdown class="basetime" is-open="baseTimeDropdown.isOpen" auto-close="outsideClick">
+                            <span class="md-subhead" data-ng-if="timetablePresentation.baseTime == undefined" data-gyf-countdown></span>
+                            <span class="md-subhead" data-ng-class="{'past': timetablePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}" data-ng-if="timetablePresentation.baseTime != undefined">{{timetablePresentation.baseTime | date: 'mediumTime'}}</span>
+                            <md-button class="md-icon-button compact" aria-label="Edit" data-ng-click="onBaseTimeEditClick($event)">
+                                <md-icon class="material-icons">edit</md-icon>
+                            </md-button>
+                            <md-button class="md-icon-button compact" aria-label="Reset" data-ng-if="timetablePresentation.baseTime != undefined" data-ng-click="onBaseTimeResetClick(geoPosition)">
+                                <md-icon class="material-icons">clear</md-icon>
+                            </md-button>
+                            <div class="uib-dropdown-menu">
+                                <md-whiteframe class="md-whiteframe-2dp" layout="row" layout-align="start center">
+                                    <!-- TODO Should be replaced by a Material implementation -->
+                                    <uib-timepicker
+                                            ng-model="baseTimeDropdown.editedBaseTime"
+                                            template-url="components/angular-ui/bootstrap/template/timepicker/timepicker.html"
+                                            ng-change="onBaseTimeEditChange(baseTimeDropdown.editedBaseTime)"
+                                            hour-step="baseTimeDropdown.timePickerOptions.hourStep"
+                                            minute-step="baseTimeDropdown.timePickerOptions.minuteStep"
+                                            show-meridian="baseTimeDropdown.timePickerOptions.showMeridian"
+                                            min="baseTimeDropdown.timePickerOptions.min">
+                                    </uib-timepicker>
+                                    <md-button class="md-icon-button compact md-warn" aria-label="Cancel" data-ng-click="onBaseTimeEditCancel()">
+                                        <md-icon class="material-icons">clear</md-icon>
+                                    </md-button>
+                                    <md-button class="md-icon-button compact md-primary" aria-label="Ok" data-ng-click="onBaseTimeEditOk(geoPosition, baseTimeDropdown.editedBaseTime)">
+                                        <md-icon class="material-icons">done</md-icon>
+                                    </md-button>
+                                </md-whiteframe>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Spacer -->
+                    <div flex></div>
+
+                    <!-- Refresh -->
+                    <div>
+                        <span data-gyf-countdown data-source-time='timetablePresentation.buildTime'></span>
+                        <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTimetableRefreshClick()">
+                            <md-icon class="material-icons">refresh</md-icon>
+                        </md-button>
+                    </div>
+
+                </div>
+            </gyf-collapsible>
+        </md-toolbar>
+    </gyf-sticky>
+
+    <!-- Timetable -->
+    <md-content layout="column">
 
         <uib-accordion close-others="true" template-url="components/angular-ui/bootstrap/template/accordion/accordion.html">
             <uib-accordion-group is-open="parentStation.isExpanded" template-url="components/angular-ui/bootstrap/template/accordion/accordion-group.html" data-ng-repeat="parentStation in timetablePresentation.parentStations">

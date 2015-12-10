@@ -26,14 +26,10 @@
 
             <!-- Base time bar -->
             <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
-                <md-button
-                        class="compact"
-                        md-no-ink
-                        aria-label="Base time"
-                        data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                <div class="basetime">
                     <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
-                    <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
-                </md-button>
+                    <span class="md-subhead" data-ng-class="{'past': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
+                </div>
             </md-whiteframe>
 
             <!-- Refresh bar -->
@@ -51,14 +47,10 @@
 
             <!-- Base time bar -->
             <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
-                <md-button
-                        class="compact"
-                        md-no-ink
-                        aria-label="Base time"
-                        data-ng-class="{'md-primary': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
+                <div class="basetime">
                     <span class="md-subhead" data-ng-if="mapPresentation.baseTime == undefined" data-gyf-countdown></span>
-                    <span class="md-subhead" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
-                </md-button>
+                    <span class="md-subhead" data-ng-class="{'past': mapPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}" data-ng-if="mapPresentation.baseTime != undefined">{{mapPresentation.baseTime | date: 'mediumTime'}}</span>
+                </div>
             </md-whiteframe>
 
             <!-- Refresh bar -->

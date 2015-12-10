@@ -1,12 +1,14 @@
-<md-content class="no-overflow" layout="column" layout-fill>
+<md-content layout="column">
 
     <!-- Toolbar -->
-    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
-        <div class="md-toolbar-tools">
-            <span>Recent locations</span>
-            <span flex></span>
-        </div>
-    </md-toolbar>
+    <gyf-sticky>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <span>Recent locations</span>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+    </gyf-sticky>
 
     <!-- Recent Location List -->
     <md-content class="md-body-1" layout="column">

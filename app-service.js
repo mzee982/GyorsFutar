@@ -257,4 +257,176 @@ angular.module('ngAppGyorsFutar')
 
         }
 
+    ])
+    .factory('ngServiceUtils',
+    [
+        '$timeout',
+        function($timeout) {
+
+            /*
+             * Interface
+             */
+
+            var serviceInstance = {
+                now: function() {return now();}, //TODO Use it
+                throttle: function(func, wait, options) {return throttle(func, wait, options);}, //TODO Apply to resize event handlers
+                debounce: function(func, wait, immediate) {return debounce(func, wait, immediate);}
+            };
+
+
+            /*
+             * Functions
+             */
+
+            //
+            //     Underscore.js 1.8.3
+            //     http://underscorejs.org
+            //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+            //     Underscore may be freely distributed under the MIT license.
+            //
+            // A (possibly faster) way to get the current timestamp as an integer.
+            var now = Date.now || function() {return new Date().getTime();};
+
+            //
+            //     Underscore.js 1.8.3
+            //     http://underscorejs.org
+            //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+            //     Underscore may be freely distributed under the MIT license.
+            //
+            // Similar to ES6's rest param (http://ariya.ofilabs.com/2013/03/es6-and-rest-parameter.html)
+            // This accumulates the arguments passed into an array, after a given index.
+            var restArgs = function(func, startIndex) {
+                startIndex = startIndex == null ? func.length - 1 : +startIndex;
+                return function() {
+                    var length = Math.max(arguments.length - startIndex, 0);
+                    var rest = Array(length);
+                    for (var index = 0; index < length; index++) {
+                        rest[index] = arguments[index + startIndex];
+                    }
+                    switch (startIndex) {
+                        case 0: return func.call(this, rest);
+                        case 1: return func.call(this, arguments[0], rest);
+                        case 2: return func.call(this, arguments[0], arguments[1], rest);
+                    }
+                    var args = Array(startIndex + 1);
+                    for (index = 0; index < startIndex; index++) {
+                        args[index] = arguments[index];
+                    }
+                    args[startIndex] = rest;
+                    return func.apply(this, args);
+                };
+            };
+
+            //
+            //     Underscore.js 1.8.3
+            //     http://underscorejs.org
+            //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+            //     Underscore may be freely distributed under the MIT license.
+            //
+            // Delays a function for the given number of milliseconds, and then calls
+            // it with the arguments supplied.
+            var delay = restArgs(function(func, wait, args) {
+                return $timeout(function() {
+                    return func.apply(null, args);
+                }, wait, false);
+            });
+
+            //
+            //     Underscore.js 1.8.3
+            //     http://underscorejs.org
+            //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+            //     Underscore may be freely distributed under the MIT license.
+            //
+            // Returns a function, that, when invoked, will only be triggered at most once
+            // during a given window of time. Normally, the throttled function will run
+            // as much as it can, without ever going more than once per `wait` duration;
+            // but if you'd like to disable the execution on the leading edge, pass
+            // `{leading: false}`. To disable execution on the trailing edge, ditto.
+            function throttle(func, wait, options) {
+                var timeoutPromise, context, args, result;
+                var previous = 0;
+                if (!options) options = {};
+
+                var later = function() {
+                    previous = options.leading === false ? 0 : now();
+                    timeoutPromise = null;
+                    result = func.apply(context, args);
+                    if (!timeoutPromise) context = args = null;
+                };
+
+                var throttled = function() {
+                    var nowValue = now();
+                    if (!previous && options.leading === false) previous = nowValue;
+                    var remaining = wait - (nowValue - previous);
+                    context = this;
+                    args = arguments;
+                    if (remaining <= 0 || remaining > wait) {
+                        if (timeoutPromise) {
+                            $timeout.cancel(timeoutPromise);
+                            timeoutPromise = null;
+                        }
+                        previous = nowValue;
+                        result = func.apply(context, args);
+                        if (!timeoutPromise) context = args = null;
+                    } else if (!timeoutPromise && options.trailing !== false) {
+                        timeoutPromise = $timeout(later, remaining, false);
+                    }
+                    return result;
+                };
+
+                throttled.clear = function() {
+                    $timeout.cancel(timeoutPromise);
+                    previous = 0;
+                    timeoutPromise = context = args = null;
+                };
+
+                return throttled;
+            }
+
+            //
+            //     Underscore.js 1.8.3
+            //     http://underscorejs.org
+            //     (c) 2009-2015 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+            //     Underscore may be freely distributed under the MIT license.
+            //
+            // Returns a function, that, as long as it continues to be invoked, will not
+            // be triggered. The function will be called after it stops being called for
+            // N milliseconds. If `immediate` is passed, trigger the function on the
+            // leading edge, instead of the trailing.
+            function debounce(func, wait, immediate) {
+                var timeoutPromise, result;
+
+                var later = function(context, args) {
+                    timeoutPromise = null;
+                    if (args) result = func.apply(context, args);
+                };
+
+                var debounced = restArgs(function(args) {
+                    var callNow = immediate && !timeoutPromise;
+                    if (timeoutPromise) $timeout.cancel(timeoutPromise);
+                    if (callNow) {
+                        timeoutPromise = $timeout(later, wait, false);
+                        result = func.apply(this, args);
+                    } else if (!immediate) {
+                        timeoutPromise = delay(later, wait, this, args);
+                    }
+
+                    return result;
+                });
+
+                debounced.cancel = function() {
+                    $timeout.cancel(timeoutPromise);
+                    timeoutPromise = null;
+                };
+
+                return debounced;
+            };
+
+            /*
+             * The service instance
+             */
+
+            return serviceInstance;
+
+        }
     ]);

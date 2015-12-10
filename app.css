@@ -260,6 +260,17 @@ ui-view {
 }
 
 
+/* Basetime */
+
+.basetime {
+    padding: 0px 5px;
+}
+
+.basetime .past {
+    color: darkgray;
+}
+
+
 /* Timetable */
 
 .whiteframe-body .route-group {
@@ -346,3 +357,42 @@ ui-view {
     }
 
 }
+
+
+/* Sticky */
+
+.sticky {}
+
+.sticky.placeholder {}
+
+.sticky.sticked {
+    position: fixed;
+    left: 0px;
+    width: 100%;
+    z-index: 999;
+}
+
+
+/* Collapsible */
+
+.collapsible {
+    transition: height 0.25s, opacity 0.25s;
+}
+
+.collapsible > * {
+    position: relative;
+    transition: top 0.25s;
+}
+
+.collapsible.collapsed {
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.collapsible.transition {
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.collapsible.expanded {}

@@ -7,54 +7,54 @@
     </div>
 </div>
 
-<md-content class="no-overflow" layout="column" layout-fill data-ng-if="tripPresentation != undefined" data-ng-cloak>
+<md-content layout="column" data-ng-if="tripPresentation != undefined" data-ng-cloak>
 
     <!-- Toolbar -->
-    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
-        <div class="md-toolbar-tools">
-            <span>Trip</span>
-            <span flex></span>
-            <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onHeaderClick(tripId, stopId, tripPresentation.baseTime)">
-                <md-icon class="material-icons">map</md-icon>
-            </md-button>
-        </div>
-    </md-toolbar>
+    <gyf-sticky>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <span>Trip</span>
+                <span flex></span>
+                <md-button class="md-icon-button" aria-label="Show on map" data-ng-click="onHeaderClick(tripId, stopId, tripPresentation.baseTime)">
+                    <md-icon class="material-icons">map</md-icon>
+                </md-button>
+            </div>
+
+            <md-divider></md-divider>
+
+            <gyf-collapsible>
+                <div class="md-body-1" layout="row" layout-align="start center" layout-wrap>
+
+                    <!-- Address -->
+                    <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
+                        <md-icon class="material-icons">place</md-icon>
+                        <span class="nowrap-ellipsis" flex>{{location.formattedAddress}}</span>
+                    </div>
+
+                    <!-- Base time -->
+                    <div class="basetime">
+                        <span class="md-subhead" data-ng-if="tripPresentation.baseTime == undefined" data-gyf-countdown></span>
+                        <span class="md-subhead" data-ng-class="{'past': tripPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}" data-ng-if="tripPresentation.baseTime != undefined">{{tripPresentation.baseTime | date: 'mediumTime'}}</span>
+                    </div>
+
+                    <!-- Spacer -->
+                    <div flex></div>
+
+                    <!-- Refresh -->
+                    <div>
+                        <span data-gyf-countdown data-source-time='tripPresentation.buildTime'></span>
+                        <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTripRefreshClick()">
+                            <md-icon class="material-icons">refresh</md-icon>
+                        </md-button>
+                    </div>
+
+                </div>
+            </gyf-collapsible>
+        </md-toolbar>
+    </gyf-sticky>
 
     <!-- Trip -->
     <md-content class="md-body-1" layout="column">
-
-        <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" layout-wrap>
-
-            <!-- Address -->
-            <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
-                <md-icon class="material-icons">place</md-icon>
-                <span class="nowrap-ellipsis" flex>{{location.formattedAddress}}</span>
-            </div>
-
-            <!-- Base time -->
-            <div>
-                <md-button
-                        class="compact"
-                        md-no-ink
-                        aria-label="Base time"
-                        data-ng-class="{'md-primary': tripPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': tripPresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
-                    <span data-ng-if="tripPresentation.baseTime == undefined" data-gyf-countdown></span>
-                    <span data-ng-if="tripPresentation.baseTime != undefined">{{tripPresentation.baseTime | date: 'mediumTime'}}</span>
-                </md-button>
-            </div>
-
-            <!-- Spacer -->
-            <div flex></div>
-
-            <!-- Refresh -->
-            <div>
-                <span data-gyf-countdown data-source-time='tripPresentation.buildTime'></span>
-                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTripRefreshClick()">
-                    <md-icon class="material-icons">refresh</md-icon>
-                </md-button>
-            </div>
-
-        </md-whiteframe>
 
         <md-whiteframe class="md-whiteframe-1dp" layout="column">
 

@@ -7,51 +7,51 @@
     </div>
 </div>
 
-<md-content class="no-overflow" layout="column" layout-fill data-ng-if="schedulePresentation != undefined" data-ng-cloak>
+<md-content layout="column" data-ng-if="schedulePresentation != undefined" data-ng-cloak>
 
     <!-- Toolbar -->
-    <md-toolbar ng-attr-md-scroll-shrink="{{::isToolbarScrollShrinkEnabled}}">
-        <div class="md-toolbar-tools">
-            <span>Schedule</span>
-            <span flex></span>
-        </div>
-    </md-toolbar>
+    <gyf-sticky>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <span>Schedule</span>
+                <span flex></span>
+            </div>
+
+            <md-divider></md-divider>
+
+            <gyf-collapsible>
+                <div class="md-body-1" layout="row" layout-align="start center" layout-wrap>
+
+                    <!-- Address -->
+                    <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
+                        <md-icon class="material-icons">place</md-icon>
+                        <span class="nowrap-ellipsis" flex>{{location.formattedAddress}}</span>
+                    </div>
+
+                    <!-- Base time -->
+                    <div class="basetime">
+                        <span class="md-subhead" data-ng-if="schedulePresentation.baseTime == undefined" data-gyf-countdown></span>
+                        <span class="md-subhead" data-ng-class="{'past': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}" data-ng-if="schedulePresentation.baseTime != undefined">{{schedulePresentation.baseTime | date: 'mediumTime'}}</span>
+                    </div>
+
+                    <!-- Spacer -->
+                    <div flex></div>
+
+                    <!-- Refresh -->
+                    <div>
+                        <span data-gyf-countdown data-source-time='schedulePresentation.buildTime'></span>
+                        <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onScheduleRefreshClick()">
+                            <md-icon class="material-icons">refresh</md-icon>
+                        </md-button>
+                    </div>
+
+                </div>
+            </gyf-collapsible>
+        </md-toolbar>
+    </gyf-sticky>
 
     <!-- Schedule -->
     <md-content class="md-body-1" layout="column">
-
-        <md-whiteframe class="md-whiteframe-1dp" layout="row" layout-align="start center" layout-wrap>
-
-            <!-- Address -->
-            <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
-                <md-icon class="material-icons">place</md-icon>
-                <span class="nowrap-ellipsis" flex>{{location.formattedAddress}}</span>
-            </div>
-
-            <!-- Base time -->
-            <div>
-                <md-button
-                        class="compact"
-                        md-no-ink
-                        aria-label="Base time"
-                        data-ng-class="{'md-primary': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_FUTURE, 'md-warn': schedulePresentation.baseTimeType == TIMETABLE.BASE_TIME_TYPE_PAST}">
-                    <span data-ng-if="schedulePresentation.baseTime == undefined" data-gyf-countdown></span>
-                    <span data-ng-if="schedulePresentation.baseTime != undefined">{{schedulePresentation.baseTime | date: 'mediumTime'}}</span>
-                </md-button>
-            </div>
-
-            <!-- Spacer -->
-            <div flex></div>
-
-            <!-- Refresh -->
-            <div>
-                <span data-gyf-countdown data-source-time='schedulePresentation.buildTime'></span>
-                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onScheduleRefreshClick()">
-                    <md-icon class="material-icons">refresh</md-icon>
-                </md-button>
-            </div>
-
-        </md-whiteframe>
 
         <md-whiteframe class="md-whiteframe-1dp" layout="column">
 
