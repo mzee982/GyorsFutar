@@ -113,13 +113,13 @@ angular.module('ngModuleLocationPicker')
             }]
         };
     }])
-    .directive('gyfLocationPicker', ['$timeout', '$window', 'EVENT', 'LOCATION', 'LOCATION_PICKER', function($timeout, $window, EVENT, LOCATION, LOCATION_PICKER) {
+    .directive('gyfLocationPicker', ['$timeout', '$window', 'ngServiceUtils', 'EVENT', 'LOCATION', 'LOCATION_PICKER', function($timeout, $window, ngServiceUtils, EVENT, LOCATION, LOCATION_PICKER) {
         return {
             restrict: 'A',
             require: '^gyfLocationPickerContainer',
             scope: {},
             link: function(scope, element, attrs, ctrl) {
-                var mapResizeTimeout = undefined;
+                var debouncedMapResizeHandler = ngServiceUtils.debounce(mapResizeHandler, LOCATION_PICKER.MAP_RESIZE_HANDLER_DEBOUNCE_WAIT);
 
                 function fitBounds(ctrl) {
                     var mapContext = ctrl.getLocationPicker().locationpicker('map');
@@ -136,21 +136,13 @@ angular.module('ngModuleLocationPicker')
                 }
 
                 function mapResizeHandler(event) {
-                    if (angular.isDefined(mapResizeTimeout)) $timeout.cancel(mapResizeTimeout);
 
-                    // Delayed execution, waiting for the final map resize event
-                    mapResizeTimeout = $timeout(
-                        function(){
+                    // Auto size the map
+                    event.data.ctrl.getLocationPicker().locationpicker('autosize');
 
-                            // Auto size the map
-                            event.data.ctrl.getLocationPicker().locationpicker('autosize');
+                    // Fit bounds
+                    fitBounds(event.data.ctrl);
 
-                            // Fit bounds
-                            fitBounds(event.data.ctrl);
-
-                        },
-                        LOCATION_PICKER.MAP_RESIZE_TIMEOUT,
-                        false);
                 }
 
                 ctrl.setLocationPicker(element);
@@ -343,7 +335,7 @@ angular.module('ngModuleLocationPicker')
                  */
 
                 // Register
-                angular.element($window).on('resize', {ctrl: ctrl}, mapResizeHandler);
+                angular.element($window).on('resize', {ctrl: ctrl}, debouncedMapResizeHandler);
 
 
                 /*
@@ -352,11 +344,9 @@ angular.module('ngModuleLocationPicker')
 
                 element.on('$destroy', function() {
 
-                    // Cancel timeout
-                    if (angular.isDefined(mapResizeTimeout)) $timeout.cancel(mapResizeTimeout);
-
                     // Unregister window resize event handler
-                    angular.element($window).off('resize', mapResizeHandler);
+                    angular.element($window).off('resize', debouncedMapResizeHandler);
+                    debouncedMapResizeHandler.cancel();
 
                 });
 

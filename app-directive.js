@@ -1,6 +1,6 @@
 angular.module('ngAppGyorsFutar')
     .constant('FILL_HEIGHT', {
-        'WINDOW_RESIZE_HEIGHT_ADJUSTMENT_TIMEOUT': 500,
+        'RESIZE_HANDLER_DEBOUNCE_WAIT': 500,
         'INITIAL_HEIGHT_ADJUSTMENT_TIMEOUT': 500
     })
     .constant('RECOMPILE', {
@@ -98,17 +98,17 @@ angular.module('ngAppGyorsFutar')
             }
         };
     }])
-    .directive('gyfFillHeight', ['$window', '$rootElement', '$timeout', 'EVENT', 'FILL_HEIGHT', function($window, $rootElement, $timeout, EVENT, FILL_HEIGHT) {
+    .directive('gyfFillHeight', ['$window', '$rootElement', '$timeout', 'ngServiceUtils', 'EVENT', 'FILL_HEIGHT', function($window, $rootElement, $timeout, ngServiceUtils, EVENT, FILL_HEIGHT) {
         return {
             restrict: 'A',
             scope: {
                 targetSelector: '@'
             },
             link: function(scope, element, attrs) {
-                var windowResizeTimeout = undefined;
                 var initialHeightAdjustmentTimeout = undefined;
                 var windowHeight = $window.innerHeight;
                 var targetElement = selectTargetElement(scope.targetSelector);
+                var debouncedWindowResizeHandler = ngServiceUtils.debounce(resizeHandler, FILL_HEIGHT.RESIZE_HANDLER_DEBOUNCE_WAIT);
 
                 // Select target element
                 function selectTargetElement(targetSelector) {
@@ -149,27 +149,19 @@ angular.module('ngAppGyorsFutar')
                 }
 
                 // Window resize event handler
-                function onWindowResize() {
-                    if (angular.isDefined(windowResizeTimeout)) $timeout.cancel(windowResizeTimeout);
-
-                    // Delayed execution, waiting for the final window resize event
-                    windowResizeTimeout = $timeout(
-                        function(){
-                            windowHeight = $window.innerHeight;
-                            adjustHeight(targetElement, windowHeight);
-                        },
-                        FILL_HEIGHT.WINDOW_RESIZE_HEIGHT_ADJUSTMENT_TIMEOUT,
-                        false);
+                function resizeHandler() {
+                    windowHeight = $window.innerHeight;
+                    adjustHeight(targetElement, windowHeight);
                 }
 
                 // Window resize event handling
-                angular.element($window).on('resize', onWindowResize);
+                angular.element($window).on('resize', debouncedWindowResizeHandler);
 
                 // Element destroy event handling
                 element.on('$destroy', function() {
-                    if (angular.isDefined(windowResizeTimeout)) $timeout.cancel(windowResizeTimeout);
                     if (angular.isDefined(initialHeightAdjustmentTimeout)) $timeout.cancel(initialHeightAdjustmentTimeout);
-                    angular.element($window).off('resize', onWindowResize);
+                    angular.element($window).off('resize', debouncedWindowResizeHandler);
+                    debouncedWindowResizeHandler.cancel();
                 });
 
                 // Initial height adjustment
@@ -448,10 +440,10 @@ angular.module('ngAppGyorsFutar')
                 // Destroy
 
                 element.on('$destroy', function() {
-
                     $document.off('scroll', scrollHandler);
-                    angular.element($window).off('resize', scope.throttledResizeHandler);
-
+                    angular.element($window).off('resize', scope.debouncedResizeHandler);
+                    scope.debouncedResizeHandler.cancel();
+                    scope.throttledNotifyCollapsibles.clear();
                 });
 
             }

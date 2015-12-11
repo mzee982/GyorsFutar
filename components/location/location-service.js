@@ -2,8 +2,9 @@ angular.module('ngModuleLocation')
     .factory('ngServiceLocation',
     [   '$q',
         '$localStorage',
+        'ngServiceUtils',
         'LOCATION',
-        function($q, $localStorage, LOCATION) {
+        function($q, $localStorage, ngServiceUtils, LOCATION) {
 
             /*
              * Interface
@@ -160,7 +161,7 @@ angular.module('ngModuleLocation')
             }
 
             function storeLocation(location) {
-                var actualStoreTimestamp = new Date().getTime();
+                var actualStoreTimestamp = ngServiceUtils.now();
                 var defaultStoreTimestamp = new Date(0).getTime();
                 var locationKey = location.formattedAddress;
 

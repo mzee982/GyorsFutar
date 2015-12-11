@@ -1,7 +1,7 @@
 angular
     .module('ngModuleLocationPicker', [])
     .constant('LOCATION_PICKER', {
-        'MAP_RESIZE_TIMEOUT': 500,
+        'MAP_RESIZE_HANDLER_DEBOUNCE_WAIT': 500,
         'CLICK_CANCELLATION_TIMEOUT': 500,
         'SYMBOL_DIRECTIONS_WALK': {
             anchor: {x: 12, y: 12},

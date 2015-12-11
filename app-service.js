@@ -268,8 +268,8 @@ angular.module('ngAppGyorsFutar')
              */
 
             var serviceInstance = {
-                now: function() {return now();}, //TODO Use it
-                throttle: function(func, wait, options) {return throttle(func, wait, options);}, //TODO Apply to resize event handlers
+                now: function() {return now();},
+                throttle: function(func, wait, options) {return throttle(func, wait, options);},
                 debounce: function(func, wait, immediate) {return debounce(func, wait, immediate);}
             };
 
