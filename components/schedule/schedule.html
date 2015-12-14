@@ -100,7 +100,7 @@
                         </div>
                         <md-divider ng-if="!$last"></md-divider>
                     </md-list-item>
-                    <md-list-item data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < schedulePresentation.stopTimes.length" ng-click="onStopTimeMoreNewerClick()">
+                    <md-list-item data-ng-if="schedulePresentation.visibleStopTimeUpperIndex < (schedulePresentation.stopTimes.length - 1)" ng-click="onStopTimeMoreNewerClick()">
                         <div layout="row" layout-align="center center" layout-fill>
                             <md-icon class="material-icons">expand_more</md-icon>
                         </div>

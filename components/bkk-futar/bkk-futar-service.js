@@ -19,7 +19,8 @@ angular.module('ngModuleBkkFutar')
 
                 aggregateStopTime: function(stopTime) {return aggregateStopTime(stopTime);},
                 convertColor: function(color) {return convertColor(color);},
-                convertDate: function(dateValue) {return convertDate(dateValue);}
+                convertDate: function(dateValue) {return convertDate(dateValue);},
+                isNightTransport: function(route) {return isNightTransport(route);}
             };
 
 
@@ -260,6 +261,10 @@ angular.module('ngModuleBkkFutar')
 
             function convertColor(color) {
                 return '#' + color;
+            }
+
+            function isNightTransport(route) {
+                return ((route.type == 'BUS') && BKK_FUTAR.REGEXP_ROUTE_ID_NIGHT_TRANSPORT.test(route.id));
             }
 
 

@@ -197,7 +197,8 @@ angular.module('ngModuleTimetable')
                             trips: {},
                             minDistance: undefined,
                             color: ngServiceBkkFutar.convertColor(route.color),
-                            textColor: ngServiceBkkFutar.convertColor(route.textColor)
+                            textColor: ngServiceBkkFutar.convertColor(route.textColor),
+                            type: route.type
                         };
                     }
 
@@ -278,39 +279,89 @@ angular.module('ngModuleTimetable')
                                         var groups = direction.groups;
 
                                         // Stop time
+
+                                        var stopTimeArray = [];
+
+                                        // Aggregate stop times
                                         angular.forEach(
                                             direction.stopTimes,
                                             function(stopTime) {
                                                 var aggrStopTime = ngServiceBkkFutar.aggregateStopTime(stopTime);
 
-                                                // Base time filtering
-                                                if (aggrStopTime.stopTime >= baseTime) {
-                                                    var tripId = stopTime.tripId;
-                                                    var headsign = groups[stopTime.groupIds[0]].headsign;
-
-                                                    var tripStopTime = {
-                                                        stopId: stopId,
-                                                        arrivalTime: stopTime.arrivalTime,
-                                                        departureTime: stopTime.departureTime,
-                                                        predictedArrivalTime:stopTime.predictedArrivalTime,
-                                                        predictedDepartureTime: stopTime.predictedDepartureTime,
-                                                        tripId: tripId,
-                                                        stopLat: undefined,
-                                                        stopLon: undefined
-                                                    };
-
-                                                    // Feed timetableModel
-                                                    if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
-                                                        timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
-                                                            id: tripId,
-                                                            tripHeadsign: headsign,
-                                                            directionId: directionId,
-                                                            stopTime: tripStopTime
-                                                        };
+                                                stopTimeArray.push(
+                                                    {
+                                                        aggrStopTime: aggrStopTime,
+                                                        stopTime: stopTime
                                                     }
-                                                }
+                                                )
                                             }
                                         );
+
+                                        // Sort by aggrStopTime
+                                        stopTimeArray.sort(function(a, b) {return a.aggrStopTime.stopTime - b.aggrStopTime.stopTime});
+
+                                        // Find the nearest stopTime to baseTime which is greater than baseTime
+
+                                        var index = 0;
+                                        while ((index < stopTimeArray.length) && (stopTimeArray[index].aggrStopTime.stopTime < baseTime)) index++;
+
+                                        // Select stopTime just before baseTime
+                                        if (0 < index) {
+                                            var actualAggrStopTime = stopTimeArray[index - 1].aggrStopTime;
+                                            var actualStopTime = stopTimeArray[index - 1].stopTime;
+                                            var tripId = actualStopTime.tripId;
+                                            var headsign = groups[actualStopTime.groupIds[0]].headsign;
+
+                                            var tripStopTime = {
+                                                stopId: stopId,
+                                                arrivalTime: actualStopTime.arrivalTime,
+                                                departureTime: actualStopTime.departureTime,
+                                                predictedArrivalTime:actualStopTime.predictedArrivalTime,
+                                                predictedDepartureTime: actualStopTime.predictedDepartureTime,
+                                                tripId: tripId,
+                                                stopLat: undefined,
+                                                stopLon: undefined
+                                            };
+
+                                            // Feed timetableModel
+                                            if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
+                                                timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
+                                                    id: tripId,
+                                                    tripHeadsign: headsign,
+                                                    directionId: directionId,
+                                                    stopTime: tripStopTime
+                                                };
+                                            }
+                                        }
+
+                                        // Select stopTime just after baseTime
+                                        if (index < stopTimeArray.length) {
+                                            var actualAggrStopTime = stopTimeArray[index].aggrStopTime;
+                                            var actualStopTime = stopTimeArray[index].stopTime;
+                                            var tripId = actualStopTime.tripId;
+                                            var headsign = groups[actualStopTime.groupIds[0]].headsign;
+
+                                            var tripStopTime = {
+                                                stopId: stopId,
+                                                arrivalTime: actualStopTime.arrivalTime,
+                                                departureTime: actualStopTime.departureTime,
+                                                predictedArrivalTime:actualStopTime.predictedArrivalTime,
+                                                predictedDepartureTime: actualStopTime.predictedDepartureTime,
+                                                tripId: tripId,
+                                                stopLat: undefined,
+                                                stopLon: undefined
+                                            };
+
+                                            // Feed timetableModel
+                                            if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
+                                                timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
+                                                    id: tripId,
+                                                    tripHeadsign: headsign,
+                                                    directionId: directionId,
+                                                    stopTime: tripStopTime
+                                                };
+                                            }
+                                        }
 
                                     }
                                 );
@@ -441,15 +492,19 @@ angular.module('ngModuleTimetable')
                         var actualRouteGroup = targetParentStation.routeGroups[routeGroupIndex];
 
                         for (var nameIndex = 0; nameIndex < actualRouteGroup.names.length; nameIndex++) {
+                            var actualId = actualRouteGroup.id;
                             var actualName = actualRouteGroup.names[nameIndex];
                             var actualColor = actualRouteGroup.colors[nameIndex];
                             var actualTextColor = actualRouteGroup.textColors[nameIndex];
+                            var actualType = actualRouteGroup.types[nameIndex];
 
                             if (routeAttributes[actualName] == undefined) {
                                 routeAttributes[actualName] = {
+                                    id: actualId,
                                     name: actualName,
                                     color: actualColor,
-                                    textColor: actualTextColor
+                                    textColor: actualTextColor,
+                                    type: actualType
                                 };
                             }
                         }
@@ -461,7 +516,7 @@ angular.module('ngModuleTimetable')
                         routeAttributeArray.push(routeAttributes[attributeName]);
                     }
 
-                    routeAttributeArray.sort(function(a, b) {return compareRouteNames(a.name, b.name);});
+                    routeAttributeArray.sort(function(a, b) {return compareRoutes(a, b);});
 
                     for (var attributeIndex = 0; attributeIndex < routeAttributeArray.length; attributeIndex++) {
                         var actualRouteAttribute = routeAttributeArray[attributeIndex];
@@ -523,6 +578,7 @@ angular.module('ngModuleTimetable')
                         descriptions: [],
                         colors: [],
                         textColors: [],
+                        types: [],
                         minDistance: Infinity,
                         tripLeft: undefined,
                         tripRight: undefined,
@@ -547,6 +603,7 @@ angular.module('ngModuleTimetable')
                         targetRouteGroup.descriptions.push(actualRoute.description);
                         targetRouteGroup.colors.push(actualRoute.color);
                         targetRouteGroup.textColors.push(actualRoute.textColor);
+                        targetRouteGroup.types.push(actualRoute.type);
                         if (targetRouteGroup.minDistance > actualRoute.minDistance) targetRouteGroup.minDistance = actualRoute.minDistance;
                         targetRouteGroup.isGroup = sourceRouteGroupRouteArray.length > 1;
                         targetRouteGroup.isExpanded = false;
@@ -588,7 +645,8 @@ angular.module('ngModuleTimetable')
                     trips: {},
                     minDistance: route1.minDistance < route2.minDistance ? route1.minDistance : route2.minDistance,
                     color: route1.color,
-                    textColor: route1.textColor
+                    textColor: route1.textColor,
+                    type: route1.type
                 };
 
                 // Merge trips
@@ -615,6 +673,7 @@ angular.module('ngModuleTimetable')
                     description: route.description,
                     color: route.color,
                     textColor: route.textColor,
+                    type: route.type,
                     minDistance: route.minDistance,
                     tripLeft: undefined,
                     tripRight: undefined
@@ -659,16 +718,19 @@ angular.module('ngModuleTimetable')
                     var actualStopTimeGroup = stopTimeGroups[direction];
                     var selectedStopTime = undefined;
 
-                    for (var stopTimeIndex = 0; stopTimeIndex < actualStopTimeGroup.stopTimes.length; stopTimeIndex++) {
-                        var actualStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex];
+                    // Find the nearest stopTime to baseTime which is greater than baseTime
+                    var stopTimeIndex = 0;
+                    while ((stopTimeIndex < actualStopTimeGroup.stopTimes.length) && (actualStopTimeGroup.stopTimes[stopTimeIndex].stopTime < baseTime)) stopTimeIndex++;
 
-                        if (actualStopTime.stopTime >= (baseTime)) {
-                            if ((selectedStopTime == undefined)
-                                || (actualStopTime.stopTime < selectedStopTime.stopTime)) {
-                                selectedStopTime = actualStopTime;
-                            }
-                        }
+                    // Select stopTime just after baseTime
+                    if (stopTimeIndex < actualStopTimeGroup.stopTimes.length) {
+                        selectedStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex]
                     }
+
+                    // Select stopTime just before baseTime
+                    else if (0 < stopTimeIndex) {
+                        selectedStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex - 1];
+                    };
 
                     if (direction == 0) {
                         targetRoute.tripLeft = selectedStopTime;
@@ -927,18 +989,54 @@ angular.module('ngModuleTimetable')
                 return ret;
             }
 
+            function compareRoutes(a, b) {
+                var ret = undefined;
+
+                // Day/night transport
+
+                var aNightTransport = ngServiceBkkFutar.isNightTransport(a) ? 1 : 0;
+                var bNightTransport = ngServiceBkkFutar.isNightTransport(b) ? 1 : 0;
+
+                ret = aNightTransport - bNightTransport;
+
+                // Type
+
+                if (ret == 0) {
+                    var aTypeOrder = TIMETABLE.ROUTE_TYPE_ORDER.indexOf(a.type);
+                    var bTypeOrder = TIMETABLE.ROUTE_TYPE_ORDER.indexOf(b.type);
+
+                    aTypeOrder = (aTypeOrder >= 0) ? aTypeOrder : Number.MAX_VALUE;
+                    bTypeOrder = (bTypeOrder >= 0) ? bTypeOrder : Number.MAX_VALUE;
+
+                    ret = aTypeOrder - bTypeOrder;
+                }
+
+                // Name
+
+                if (ret == 0) {
+                    ret = compareRouteNames(a.name, b.name);
+                }
+
+                return ret;
+            }
+
             function compareRouteGroups(a, b) {
-                var aHasTrips = (a.tripLeft != undefined) || (a.tripRight != undefined);
-                var bHasTrips = (b.tripLeft != undefined) || (b.tripRight != undefined);
                 var ret = undefined;
 
                 // RouteGroups with Trips first
+
+                var aHasTrips = (a.tripLeft != undefined) || (a.tripRight != undefined);
+                var bHasTrips = (b.tripLeft != undefined) || (b.tripRight != undefined);
+
                 ret = Number(!aHasTrips) - Number(!bHasTrips);
 
-                // Order by route name
+                // Order by route comparison
 
                 if (ret == 0) {
-                    ret = compareRouteNames(a.names[0], b.names[0]);
+                    var aRoute = {id: a.id, type: a.types[0], name: a.names[0]};
+                    var bRoute = {id: b.id, type: b.types[0], name: b.names[0]};
+
+                    ret = compareRoutes(aRoute, bRoute);
                 }
 
 /*

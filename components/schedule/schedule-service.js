@@ -222,9 +222,14 @@ angular.module('ngModuleSchedule')
                     if (isCurrent) currentIndex = stopTimeIndex;
                 }
 
-                schedulePresentation.visibleStopTimeLowerIndex = Math.max(currentIndex - 3, 0);
-                schedulePresentation.visibleStopTimeUpperIndex = Math.min(currentIndex + 3, schedulePresentation.stopTimes.length);
-
+                if (angular.isUndefined(currentIndex)) {
+                    schedulePresentation.visibleStopTimeLowerIndex = Math.max(schedulePresentation.stopTimes.length - 1 - 6, 0);
+                    schedulePresentation.visibleStopTimeUpperIndex = schedulePresentation.stopTimes.length - 1;
+                }
+                else {
+                    schedulePresentation.visibleStopTimeLowerIndex = Math.max(currentIndex - 3, 0);
+                    schedulePresentation.visibleStopTimeUpperIndex = Math.min(currentIndex + 3, schedulePresentation.stopTimes.length - 1);
+                }
 
                 return schedulePresentation;
             }
