@@ -122,7 +122,9 @@
 
                         <!-- Collapsed -->
                         <div uib-collapse="routeGroup.isGroup && routeGroup.isExpanded">
-                            <div layout="column">
+                            <div layout="column" data-ng-switch="(routeGroup.tripLeft != undefined) || (routeGroup.tripRight != undefined)">
+
+                                <!-- Header -->
                                 <div class="route-group-header" layout="row" layout-align="start center">
                                     <div flex>
                                         <table>
@@ -145,8 +147,11 @@
                                         </md-button>
                                     </div>
                                 </div>
+
                                 <md-divider></md-divider>
-                                <div class="route-group-body" layout="row" layout-align="center start">
+
+                                <!-- Schedule -->
+                                <div class="route-group-body" layout="row" layout-align="center start" data-ng-switch-when="true">
                                     <div flex-sm="95" flex-gt-sm="80">
                                         <table>
                                             <tbody>
@@ -226,6 +231,12 @@
                                         </table>
                                     </div>
                                 </div>
+
+                                <!-- No schedule -->
+                                <div class="route-group-body" layout="row" layout-align="center start" data-ng-switch-when="false">
+                                    <span class="md-subhead">No schedule for today</span>
+                                </div>
+
                             </div>
                         </div>
 
@@ -233,7 +244,9 @@
                         <div uib-collapse="!routeGroup.isGroup || (routeGroup.isGroup && !routeGroup.isExpanded)">
                             <div layout="column">
                                 <div data-ng-repeat="route in routeGroup.routes">
-                                    <div layout="column">
+                                    <div layout="column" data-ng-switch="(route.tripLeft != undefined) || (route.tripRight != undefined)">
+
+                                        <!-- Header -->
                                         <div class="route-group-header" layout="row" layout-align="start center">
                                             <div flex>
                                                 <table>
@@ -256,8 +269,11 @@
                                                 </md-button>
                                             </div>
                                         </div>
+
                                         <md-divider></md-divider>
-                                        <div class="route-group-body" layout="row" layout-align="center start">
+
+                                        <!-- Schedule -->
+                                        <div class="route-group-body" layout="row" layout-align="center start" data-ng-switch-when="true">
                                             <div flex-sm="95" flex-gt-sm="80">
                                                 <table>
                                                     <tbody>
@@ -327,6 +343,12 @@
                                                 </table>
                                             </div>
                                         </div>
+
+                                        <!-- No schedule -->
+                                        <div class="route-group-body" layout="row" layout-align="center start" data-ng-switch-when="false">
+                                            <span class="md-subhead">No schedule for today</span>
+                                        </div>
+
                                     </div>
                                 </div>
                             </div>

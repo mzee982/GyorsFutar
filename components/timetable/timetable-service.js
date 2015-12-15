@@ -270,6 +270,7 @@ angular.module('ngModuleTimetable')
                             data.data.entry.schedules,
                             function(schedule) {
                                 var routeId = schedule.routeId;
+                                var stopTimeArray = [];
 
                                 // Direction
                                 angular.forEach(
@@ -279,92 +280,94 @@ angular.module('ngModuleTimetable')
                                         var groups = direction.groups;
 
                                         // Stop time
-
-                                        var stopTimeArray = [];
-
-                                        // Aggregate stop times
                                         angular.forEach(
                                             direction.stopTimes,
                                             function(stopTime) {
+
+                                                // Aggregate stop times
                                                 var aggrStopTime = ngServiceBkkFutar.aggregateStopTime(stopTime);
 
                                                 stopTimeArray.push(
                                                     {
                                                         aggrStopTime: aggrStopTime,
-                                                        stopTime: stopTime
+                                                        stopTime: stopTime,
+                                                        directionId: directionId,
+                                                        group: groups[stopTime.groupIds[0]]
                                                     }
                                                 )
                                             }
                                         );
 
-                                        // Sort by aggrStopTime
-                                        stopTimeArray.sort(function(a, b) {return a.aggrStopTime.stopTime - b.aggrStopTime.stopTime});
-
-                                        // Find the nearest stopTime to baseTime which is greater than baseTime
-
-                                        var index = 0;
-                                        while ((index < stopTimeArray.length) && (stopTimeArray[index].aggrStopTime.stopTime < baseTime)) index++;
-
-                                        // Select stopTime just before baseTime
-                                        if (0 < index) {
-                                            var actualAggrStopTime = stopTimeArray[index - 1].aggrStopTime;
-                                            var actualStopTime = stopTimeArray[index - 1].stopTime;
-                                            var tripId = actualStopTime.tripId;
-                                            var headsign = groups[actualStopTime.groupIds[0]].headsign;
-
-                                            var tripStopTime = {
-                                                stopId: stopId,
-                                                arrivalTime: actualStopTime.arrivalTime,
-                                                departureTime: actualStopTime.departureTime,
-                                                predictedArrivalTime:actualStopTime.predictedArrivalTime,
-                                                predictedDepartureTime: actualStopTime.predictedDepartureTime,
-                                                tripId: tripId,
-                                                stopLat: undefined,
-                                                stopLon: undefined
-                                            };
-
-                                            // Feed timetableModel
-                                            if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
-                                                timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
-                                                    id: tripId,
-                                                    tripHeadsign: headsign,
-                                                    directionId: directionId,
-                                                    stopTime: tripStopTime
-                                                };
-                                            }
-                                        }
-
-                                        // Select stopTime just after baseTime
-                                        if (index < stopTimeArray.length) {
-                                            var actualAggrStopTime = stopTimeArray[index].aggrStopTime;
-                                            var actualStopTime = stopTimeArray[index].stopTime;
-                                            var tripId = actualStopTime.tripId;
-                                            var headsign = groups[actualStopTime.groupIds[0]].headsign;
-
-                                            var tripStopTime = {
-                                                stopId: stopId,
-                                                arrivalTime: actualStopTime.arrivalTime,
-                                                departureTime: actualStopTime.departureTime,
-                                                predictedArrivalTime:actualStopTime.predictedArrivalTime,
-                                                predictedDepartureTime: actualStopTime.predictedDepartureTime,
-                                                tripId: tripId,
-                                                stopLat: undefined,
-                                                stopLon: undefined
-                                            };
-
-                                            // Feed timetableModel
-                                            if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
-                                                timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
-                                                    id: tripId,
-                                                    tripHeadsign: headsign,
-                                                    directionId: directionId,
-                                                    stopTime: tripStopTime
-                                                };
-                                            }
-                                        }
-
                                     }
+
                                 );
+
+                                // Sort by aggrStopTime
+                                stopTimeArray.sort(function(a, b) {return a.aggrStopTime.stopTime - b.aggrStopTime.stopTime});
+
+                                // Find the nearest stopTime to baseTime which is greater than baseTime
+                                var index = 0;
+                                while ((index < stopTimeArray.length) && (stopTimeArray[index].aggrStopTime.stopTime < baseTime)) index++;
+
+                                // Select stopTime just before baseTime
+                                if (0 < index) {
+                                    var actualStopTime = stopTimeArray[index - 1].stopTime;
+                                    var tripId = actualStopTime.tripId;
+                                    var headsign = stopTimeArray[index - 1].group.headsign;
+                                    var directionId = stopTimeArray[index - 1].directionId;
+
+                                    var tripStopTime = {
+                                        stopId: stopId,
+                                        arrivalTime: actualStopTime.arrivalTime,
+                                        departureTime: actualStopTime.departureTime,
+                                        predictedArrivalTime:actualStopTime.predictedArrivalTime,
+                                        predictedDepartureTime: actualStopTime.predictedDepartureTime,
+                                        tripId: tripId,
+                                        stopLat: undefined,
+                                        stopLon: undefined
+                                    };
+
+                                    // Feed timetableModel
+                                    if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
+                                        timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
+                                            id: tripId,
+                                            stopId: stopId,
+                                            tripHeadsign: headsign,
+                                            directionId: directionId,
+                                            stopTime: tripStopTime
+                                        };
+                                    }
+                                }
+
+                                // Select stopTime just after baseTime
+                                if (index < stopTimeArray.length) {
+                                    var actualStopTime = stopTimeArray[index].stopTime;
+                                    var tripId = actualStopTime.tripId;
+                                    var headsign = stopTimeArray[index].group.headsign;
+                                    var directionId = stopTimeArray[index].directionId;
+
+                                    var tripStopTime = {
+                                        stopId: stopId,
+                                        arrivalTime: actualStopTime.arrivalTime,
+                                        departureTime: actualStopTime.departureTime,
+                                        predictedArrivalTime:actualStopTime.predictedArrivalTime,
+                                        predictedDepartureTime: actualStopTime.predictedDepartureTime,
+                                        tripId: tripId,
+                                        stopLat: undefined,
+                                        stopLon: undefined
+                                    };
+
+                                    // Feed timetableModel
+                                    if (angular.isDefined(timetableModel.stops[stopId].routes[routeId])) {
+                                        timetableModel.stops[stopId].routes[routeId].trips[tripId] = {
+                                            id: tripId,
+                                            stopId: stopId,
+                                            tripHeadsign: headsign,
+                                            directionId: directionId,
+                                            stopTime: tripStopTime
+                                        };
+                                    }
+                                }
 
                             }
                         );
@@ -614,15 +617,25 @@ angular.module('ngModuleTimetable')
 
                         // Update: StopTime -> RouteGroup
 
-                        if ((targetRouteGroup.tripLeft == undefined)
-                            || ((targetRoute.tripLeft != undefined)
-                            && (targetRouteGroup.tripLeft.stopTime > targetRoute.tripLeft.stopTime))) {
+                        var baseTime = (!angular.isDate(baseTime)) ? new Date() : baseTime;
+
+                        if (   (angular.isDefined(targetRoute.tripLeft))
+                            && (   angular.isUndefined(targetRouteGroup.tripLeft)
+                                || ((baseTime <= targetRoute.tripLeft.stopTime) && (targetRoute.tripLeft.stopTime < targetRouteGroup.tripLeft.stopTime))
+                                || ((targetRouteGroup.tripLeft.stopTime < baseTime) && (targetRouteGroup.tripLeft.stopTime < targetRoute.tripLeft.stopTime))
+                               )
+                           )
+                        {
                             targetRouteGroup.tripLeft = targetRoute.tripLeft;
                         }
 
-                        if ((targetRouteGroup.tripRight == undefined)
-                            || ((targetRoute.tripRight != undefined)
-                            && (targetRouteGroup.tripRight.stopTime > targetRoute.tripRight.stopTime))) {
+                        if (   (angular.isDefined(targetRoute.tripRight))
+                            && (   angular.isUndefined(targetRouteGroup.tripRight)
+                                || ((baseTime <= targetRoute.tripRight.stopTime) && (targetRoute.tripRight.stopTime < targetRouteGroup.tripRight.stopTime))
+                                || ((targetRouteGroup.tripRight.stopTime < baseTime) && (targetRouteGroup.tripRight.stopTime < targetRoute.tripRight.stopTime))
+                               )
+                           )
+                        {
                             targetRouteGroup.tripRight = targetRoute.tripRight;
                         }
 
@@ -681,21 +694,19 @@ angular.module('ngModuleTimetable')
                 var stopTimeGroups = {};
 
                 // Base time
-                if (!angular.isDate(baseTime)) baseTime = new Date();
+                var baseTime = (!angular.isDate(baseTime)) ? new Date() : baseTime;
 
-                // Group StopTimes by directions
+                // Group StopTimes by stopIds
                 for (tripId in route.trips) {
                     var actualTrip = route.trips[tripId];
-                    var actualDirection = actualTrip.directionId;
+                    var actualStopId = actualTrip.stopId;
                     var actualStopTime = actualTrip.stopTime;
 
-                    if (stopTimeGroups[actualDirection] == undefined) {
-                        stopTimeGroups[actualDirection] = {
-                            stopTimes: []
-                        };
+                    if (stopTimeGroups[actualStopId] == undefined) {
+                        stopTimeGroups[actualStopId] = [];
                     }
 
-                    var actualStopTimeGroup = stopTimeGroups[actualDirection];
+                    var actualStopTimeGroup = stopTimeGroups[actualStopId];
 
                     var aggrStopTime = ngServiceBkkFutar.aggregateStopTime(actualStopTime);
 
@@ -704,48 +715,68 @@ angular.module('ngModuleTimetable')
                         routeName: route.shortName,
                         stopId: actualStopTime.stopId,
                         tripId: actualStopTime.tripId,
+                        directionId: actualTrip.directionId,
                         stopTime: aggrStopTime.stopTime,
                         stopTimeString: aggrStopTime.stopTimeString,
                         stopLat: actualStopTime.stopLat,
                         stopLon: actualStopTime.stopLon
                     };
 
-                    actualStopTimeGroup.stopTimes.push(targetStopTime);
+                    actualStopTimeGroup.push(targetStopTime);
                 }
 
                 // Select: StopTime
-                for (direction in stopTimeGroups) {
-                    var actualStopTimeGroup = stopTimeGroups[direction];
+                for (stopId in stopTimeGroups) {
+                    var actualStopTimeGroup = stopTimeGroups[stopId];
                     var selectedStopTime = undefined;
 
                     // Find the nearest stopTime to baseTime which is greater than baseTime
                     var stopTimeIndex = 0;
-                    while ((stopTimeIndex < actualStopTimeGroup.stopTimes.length) && (actualStopTimeGroup.stopTimes[stopTimeIndex].stopTime < baseTime)) stopTimeIndex++;
+                    while ((stopTimeIndex < actualStopTimeGroup.length) && (actualStopTimeGroup[stopTimeIndex].stopTime < baseTime)) stopTimeIndex++;
 
                     // Select stopTime just after baseTime
-                    if (stopTimeIndex < actualStopTimeGroup.stopTimes.length) {
-                        selectedStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex]
+                    if (stopTimeIndex < actualStopTimeGroup.length) {
+                        selectedStopTime = actualStopTimeGroup[stopTimeIndex]
                     }
 
                     // Select stopTime just before baseTime
                     else if (0 < stopTimeIndex) {
-                        selectedStopTime = actualStopTimeGroup.stopTimes[stopTimeIndex - 1];
+                        selectedStopTime = actualStopTimeGroup[stopTimeIndex - 1];
                     };
 
-                    if (direction == 0) {
+
+                    // Select: tripLeft and tripRight
+
+                    if (   (selectedStopTime.directionId == '0')
+                        && (   (angular.isUndefined(targetRoute.tripLeft))
+                            || (targetRoute.tripLeft.directionId != '0')
+                            || ((selectedStopTime.stopTime < targetRoute.tripLeft.stopTime) && (baseTime <= selectedStopTime.stopTime))
+                            || ((targetRoute.tripLeft.stopTime < baseTime) && (targetRoute.tripLeft.stopTime < selectedStopTime.stopTime))
+                           )
+                       )
+                    {
                         targetRoute.tripLeft = selectedStopTime;
                     }
-                    else if (direction == 1) {
+
+                    else if (  (selectedStopTime.directionId == '1')
+                            && (   (angular.isUndefined(targetRoute.tripRight))
+                                || (targetRoute.tripRight.directionId != '1')
+                                || ((selectedStopTime.stopTime < targetRoute.tripRight.stopTime) && (baseTime <= selectedStopTime.stopTime))
+                                || ((targetRoute.tripRight.stopTime < baseTime) && (targetRoute.tripRight.stopTime < selectedStopTime.stopTime))
+                               )
+                            )
+                    {
                         targetRoute.tripRight = selectedStopTime;
                     }
-                    else {
-                        if (targetRoute.tripLeft == undefined) {
-                            targetRoute.tripLeft = selectedStopTime;
-                        }
-                        else if (targetRoute.tripRight == undefined) {
-                            targetRoute.tripRight = selectedStopTime;
-                        }
+
+                    else if (angular.isUndefined(targetRoute.tripLeft)) {
+                        targetRoute.tripLeft = selectedStopTime;
                     }
+
+                    else if (angular.isUndefined(targetRoute.tripRight)) {
+                        targetRoute.tripRight = selectedStopTime;
+                    }
+
                 }
 
                 return targetRoute;
