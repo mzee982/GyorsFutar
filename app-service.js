@@ -261,7 +261,8 @@ angular.module('ngAppGyorsFutar')
     .factory('ngServiceUtils',
     [
         '$timeout',
-        function($timeout) {
+        '$filter',
+        function($timeout, $filter) {
 
             /*
              * Interface
@@ -270,7 +271,8 @@ angular.module('ngAppGyorsFutar')
             var serviceInstance = {
                 now: function() {return now();},
                 throttle: function(func, wait, options) {return throttle(func, wait, options);},
-                debounce: function(func, wait, immediate) {return debounce(func, wait, immediate);}
+                debounce: function(func, wait, immediate) {return debounce(func, wait, immediate);},
+                formatTimeDiff: function(date1, date2) {return formatTimeDiff(date1, date2);}
             };
 
 
@@ -421,6 +423,27 @@ angular.module('ngAppGyorsFutar')
 
                 return debounced;
             };
+
+            function formatTimeDiff(date1, date2) {
+                var diffTimeMillis = date1 - date2;
+                var diffTimeMillisSign = diffTimeMillis >= 0 ? 1 : -1;
+
+                diffTimeMillis = Math.abs(diffTimeMillis);
+                var diffTime = new Date(diffTimeMillis);
+
+                var signString = diffTimeMillisSign < 0 ? '-' : '';
+                var formattedDiffTime = signString;
+
+                if (diffTime.getUTCHours() > 0) {
+                    formattedDiffTime += $filter('date')(diffTime, 'H:mm:ss', 'UTC');
+                }
+                else {
+                    formattedDiffTime += $filter('date')(diffTime, 'mm:ss', 'UTC');
+                }
+
+                return formattedDiffTime;
+            };
+
 
             /*
              * The service instance

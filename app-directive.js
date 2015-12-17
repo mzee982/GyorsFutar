@@ -23,9 +23,67 @@ angular.module('ngAppGyorsFutar')
         'CLASS_COLLAPSED': 'collapsed',
         'CLASS_TRANSITION': 'transition'
     })
-    .directive('gyfCountdown', ['$interval', '$filter', function($interval, $filter) {
+    .directive('gyfCountdownContainer', ['$interval', function($interval) {
         return {
             restrict: 'A',
+            scope: {},
+            controller: ['$scope', function($scope) {
+                $scope.countdowns = [];
+                $scope.countdownsInterval = undefined;
+
+                this.registerCountdown = function(countdown) {
+                    $scope.countdowns.push(countdown);
+                }
+
+                this.unRegisterCountdown = function(countdown) {
+                    var index = $scope.countdowns.indexOf(countdown);
+                    if (index >=0) $scope.countdowns.splice(index, 1);
+                }
+
+                function updateCountdowns() {
+                    var nowDate = new Date();
+                    var domUpdates = [];
+
+
+                    // Prepare DOM changes
+                    for (var index = 0; index < $scope.countdowns.length; index++) {
+                        var countdown = $scope.countdowns[index];
+
+                        var domNewValue = countdown.update(countdown.scope, countdown.element, nowDate, false);
+
+                        domUpdates.push({element: countdown.element, value: domNewValue});
+                    }
+
+                    // Apply DOM changes
+                    for (var index = 0; index < domUpdates.length; index++) {
+                        var element = domUpdates[index].element;
+                        var value = domUpdates[index].value;
+
+                        // Update
+                        element.text(value);
+
+                    }
+
+                }
+
+                // Init
+                $scope.countdownsInterval = $interval(updateCountdowns, 1000, false);
+
+                // Destroy
+                $scope.$on('$destroy', function() {
+                    if (angular.isDefined($scope.countdownsInterval)) {
+                        $interval.cancel($scope.countdownsInterval);
+                        $scope.countdownsInterval = undefined;
+                    }
+                });
+
+            }]
+        };
+    }])
+    .directive('gyfCountdown', ['$interval', '$filter', 'ngServiceUtils', function($interval, $filter, ngServiceUtils) {
+        return {
+            restrict: 'A',
+            require: '^gyfCountdownContainer',
             scope: {
                 baseTime: '=',
                 sourceTime: '=',
@@ -34,66 +92,120 @@ angular.module('ngAppGyorsFutar')
                 sourceTimeValue: '@',
                 targetTimeValue: '@'
             },
-            link: function(scope, element, attrs) {
-                var countdownInterval = undefined;
+            link: function(scope, element, attrs, ctrl) {
+                scope.countdownInterface = {scope: scope, element: element, update: update};
+                scope.currentBaseTime = undefined;
+                scope.currentSourceTime = undefined;
+                scope.currentTargetTime = undefined;
+                scope.hasTargetTime = undefined;
+                scope.hasSourceTime = undefined;
+                scope.hasBaseTime = undefined;
+                scope.isRegistered = undefined;
+                scope.deregisterWatchGroup = undefined;
 
-                function formatTimeDiff(date1, date2) {
-                    var diffTimeMillis = date1 - date2;
-                    var diffTimeMillisSign = diffTimeMillis >= 0 ? 1 : -1;
+                function init(scope, ctrl) {
 
-                    diffTimeMillis = Math.abs(diffTimeMillis);
-                    var diffTime = new Date(diffTimeMillis);
+                    // Un-register at container
 
-                    var signString = diffTimeMillisSign < 0 ? '-' : '';
-                    var formattedDiffTime = signString;
+                    if (scope.isRegistered === true) {
+                        ctrl.unRegisterCountdown(scope.countdownInterface);
+                        scope.isRegistered = false;
+                    }
 
-                    if (diffTime.getUTCHours() > 0) {
-                        formattedDiffTime += $filter('date')(diffTime, 'H:mm:ss', 'UTC');
+                    // Calculate working values
+
+                    scope.currentBaseTime = (angular.isDefined(scope.baseTime)) ?
+                        scope.baseTime : (angular.isDefined(scope.baseTimeValue)) ?
+                            new Date(parseInt(scope.baseTimeValue)) : undefined;
+
+                    scope.currentSourceTime = (angular.isDefined(scope.sourceTime)) ?
+                        scope.sourceTime : (angular.isDefined(scope.sourceTimeValue)) ?
+                            new Date(parseInt(scope.sourceTimeValue)) : undefined;
+
+                    scope.currentTargetTime = (angular.isDefined(scope.targetTime)) ?
+                        scope.targetTime : (angular.isDefined(scope.targetTimeValue)) ?
+                            new Date(parseInt(scope.targetTimeValue)) : undefined;
+
+                    scope.hasTargetTime = angular.isDefined(scope.currentTargetTime);
+                    scope.hasSourceTime = angular.isDefined(scope.currentSourceTime);
+                    scope.hasBaseTime = angular.isDefined(scope.currentBaseTime);
+
+                    // Register at container
+
+                    if (!scope.hasBaseTime) {
+                        ctrl.registerCountdown(scope.countdownInterface);
+                        scope.isRegistered = true;
                     }
                     else {
-                        formattedDiffTime += $filter('date')(diffTime, 'mm:ss', 'UTC');
+                        scope.isRegistered = false;
                     }
 
-                    return formattedDiffTime;
                 }
 
                 // Update
-                function update() {
-                    var currentBaseTime = (angular.isDefined(scope.baseTime)) ? scope.baseTime : (angular.isDefined(scope.baseTimeValue)) ? new Date(parseInt(scope.baseTimeValue)) : undefined;
-                    var currentSourceTime = (angular.isDefined(scope.sourceTime)) ? scope.sourceTime : (angular.isDefined(scope.sourceTimeValue)) ? new Date(parseInt(scope.sourceTimeValue)) : undefined;
-                    var currentTargetTime = (angular.isDefined(scope.targetTime)) ? scope.targetTime : (angular.isDefined(scope.targetTimeValue)) ? new Date(parseInt(scope.targetTimeValue)) : undefined;
-                    var now = new Date();
-                    var baseTime = (angular.isDefined(currentBaseTime)) ? currentBaseTime : now;
+                function update(scope, element, nowDate, domUpdate) {
+                    var baseTime = scope.hasBaseTime ? scope.currentBaseTime : nowDate;
                     var countdownString = undefined;
 
+                    // Prepare countdown string
 
-                    if (angular.isDefined(currentTargetTime)) {
-                        countdownString = formatTimeDiff(currentTargetTime, baseTime);
+                    // Count to target
+                    if (scope.hasTargetTime) {
+                        countdownString = ngServiceUtils.formatTimeDiff(scope.currentTargetTime, baseTime);
                     }
 
-                    else if (angular.isDefined(currentSourceTime)) {
-                        countdownString = formatTimeDiff(baseTime, currentSourceTime);
+                    // Count from source
+                    else if (scope.hasSourceTime) {
+                        countdownString = ngServiceUtils.formatTimeDiff(baseTime, scope.currentSourceTime);
                     }
 
-                    else if (angular.isUndefined(currentBaseTime)) {
-                        countdownString = $filter('date')(now, 'mediumTime');
+                    // Timer
+                    else if (!scope.hasBaseTime) {
+                        countdownString = $filter('date')(baseTime, 'mediumTime');
                     }
 
-                    element.text(countdownString);
+                    // DOM update or return prepared value
+
+                    if (domUpdate) {
+                        element.text(countdownString);
+                    }
+
+                    else {
+                        return countdownString;
+                    }
+
                 }
+
+                // Init
+                init(scope, ctrl);
+                update(scope, element, new Date(), true);
+
+                // Watch scope changes
+                scope.deregisterWatchGroup = scope.$watchGroup(
+                    ['baseTime', 'sourceTime', 'targetTime', 'baseTimeValue', 'sourceTimeValue', 'targetTimeValue'],
+                    function (newValues, oldValues) {
+                        if (!angular.equals(newValues, oldValues)) {
+                            init(scope, ctrl);
+                        }
+                    }
+                );
 
                 // Destroy
                 element.on('$destroy', function() {
-                    $interval.cancel(countdownInterval);
+
+                    // Unregister at container
+                    if (scope.isRegistered) {
+                        ctrl.unRegisterCountdown(scope.countdownInterface);
+                        scope.isRegistered = false;
+                    }
+
+                    // De-register watch group listener
+                    if (angular.isFunction(scope.deregisterWatchGroup)) {
+                        scope.deregisterWatchGroup();
+                        scope.deregisterWatchGroup = undefined;
+                    }
+
                 });
-
-                // Initial UI update
-                update();
-
-                // Regular UI update
-                if (angular.isUndefined(scope.baseTime) && angular.isUndefined(scope.baseTimeValue)) {
-                    countdownInterval = $interval(update, 1000, false);
-                }
 
             }
         };
@@ -281,7 +393,7 @@ angular.module('ngAppGyorsFutar')
                     return scrollParent;
                 }
 
-                function stick(scope) {
+                function stick(scope, scrollTop) {
 
                     // Dimensions
 
@@ -308,7 +420,7 @@ angular.module('ngAppGyorsFutar')
 
 
                     //
-                    scope.collapsiblesScrollOffset = scope.stickyScrollOffset;
+                    scope.collapsiblesScrollOffset = scrollTop;
 
                 }
 
@@ -397,7 +509,7 @@ angular.module('ngAppGyorsFutar')
 
                         // Stick
                         if ((scrollTop >= scope.stickyScrollOffset) && (scope.state == STICKY.STATE_UNSTICKED)) {
-                            stick(scope);
+                            stick(scope, scrollTop);
                         }
 
                         // Notify collapsible
