@@ -381,7 +381,7 @@ angular.module('ngModuleTimetable')
 
                 // Error
                 function(error) {
-                    var msg = 'timetable: ' + error;
+                    var msg = 'Timetable ' + error;
                     $scope.$emit(EVENT.ERROR_MESSAGE, msg);
                 }
 

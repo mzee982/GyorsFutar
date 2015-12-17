@@ -236,7 +236,7 @@ angular.module('ngModuleTrip')
 
                 // Error
                 function(error) {
-                    var msg = 'trip: ' + error;
+                    var msg = 'Trip ' + error;
                     $scope.$emit(EVENT.ERROR_MESSAGE, msg);
                 }
 

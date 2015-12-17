@@ -114,7 +114,7 @@ angular.module('ngModuleLocationDetection')
                                 break;
 
                             default:
-                                $scope.$emit(EVENT.ERROR_MESSAGE, 'selectLocation: Invalid target state');
+                                $scope.$emit(EVENT.ERROR_MESSAGE, 'LocationDetection: Invalid target state');
 
                         }
 
@@ -122,7 +122,7 @@ angular.module('ngModuleLocationDetection')
 
                     // Error
                     function(error) {
-                        var msg = 'selectLocation: ' + error;
+                        var msg = 'LocationDetection ' + error;
                         $scope.$emit(EVENT.ERROR_MESSAGE, msg);
                     }
 

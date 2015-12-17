@@ -185,7 +185,7 @@ angular.module('ngModuleSchedule')
 
                 // Error
                 function(error) {
-                    var msg = 'schedule: ' + error;
+                    var msg = 'Schedule ' + error;
                     $scope.$emit(EVENT.ERROR_MESSAGE, msg);
                 }
 

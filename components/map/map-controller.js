@@ -200,7 +200,7 @@ angular.module('ngModuleMap')
 
                 // Error
                 function(error) {
-                    var msg = 'map: ' + error;
+                    var msg = 'Map ' + error;
                     $scope.$emit(EVENT.ERROR_MESSAGE, msg);
                 }
 

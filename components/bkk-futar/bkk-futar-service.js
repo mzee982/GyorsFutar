@@ -1,9 +1,10 @@
 angular.module('ngModuleBkkFutar')
     .factory('ngServiceBkkFutar',
     [   '$q',
+        '$http',
         '$filter',
         'BKK_FUTAR',
-        function($q, $filter, BKK_FUTAR) {
+        function($q, $http, $filter, BKK_FUTAR) {
 
             /*
              * Interface
@@ -28,62 +29,96 @@ angular.module('ngModuleBkkFutar')
              * Functions
              */
 
-            function searchStops(id, name) {
-                var deferred = $q.defer();
+            function concatRequestUrl(config, url) {
+                var query = [];
 
-                var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_SEARCH;
-                url = url.replace(BKK_FUTAR.PARAM_API_SEARCH_QUERY, name);
-                url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_SEARCH_REFERENCES);
-
-                console.info('searchStops URL: ' + url);
-
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {deferred.resolve({id: id, data: data});},
-                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
+                Object.keys(config.params || {}).forEach(function (key) {
+                    var val = config.params[key];
+                    query.push([key, val].join('='));
                 });
 
+                var queryStr = query.join('&');
+                var path = (url || config.url) + '?' + queryStr;
+
+                return path;
+            }
+
+            function requestBkkFutarJsonp(apiUrl, params, logLabel) {
+                var deferred = $q.defer();
+                var config = {params: params};
+
+                // URL
+                var url = BKK_FUTAR.URL_API_BASE + apiUrl;
+
+                // Additional params
+                config.params[BKK_FUTAR.PARAM_NAME_JSONP_CALLBACK] = BKK_FUTAR.PARAM_VALUE_JSONP_CALLBACK;
+
+                // Timeout
+                config.timeout = BKK_FUTAR.HTTP_JSONP_REQUEST_TIMEOUT;
+
+                console.info(logLabel + ' URL: ' + concatRequestUrl(config, url));
+
+                // JSONP request
+                $http.jsonp(url, config).then(
+
+                    // Success
+                    function (successResponse) {
+                        deferred.resolve(successResponse.data);
+                    },
+
+                    // Error
+                    function (errorResponse) {
+                        deferred.reject(errorResponse);
+                    }
+
+                );
+
                 return deferred.promise;
+            }
+
+            function searchStops(id, name) {
+
+                // Params
+                var params = {};
+                params[BKK_FUTAR.PARAM_API_SEARCH_QUERY] = name;
+                params[BKK_FUTAR.PARAM_NAME_API_BASE_REFERENCES] = BKK_FUTAR.PARAM_VALUE_API_SEARCH_REFERENCES;
+
+                // Request
+                var promise = requestBkkFutarJsonp(BKK_FUTAR.URL_API_SEARCH, params, 'searchStops');
+
+                // Transform response
+                var transformedPromise = promise.then(
+
+                    // Success
+                    function (data) {
+                        return {id: id, data: data};
+                    },
+
+                    // Error
+                    function (error) {
+                        return $q.reject(error);
+                    }
+
+                );
+
+                return transformedPromise;
             }
 
             function getStopsForLocation(position) {
-                var deferred = $q.defer();
 
-                var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_STOPS_FOR_LOCATION;
-                url = url.replace(BKK_FUTAR.PARAM_API_STOPS_FOR_LOCATION_LATITUDE, position.coords.latitude);
-                url = url.replace(BKK_FUTAR.PARAM_API_STOPS_FOR_LOCATION_LONGITUDE, position.coords.longitude);
-                url = url.replace(BKK_FUTAR.PARAM_API_STOPS_FOR_LOCATION_RADIUS, position.coords.accuracy);
-                url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_STOPS_FOR_LOCATION_REFERENCES);
+                // Params
+                var params = {};
+                params[BKK_FUTAR.PARAM_NAME_API_STOPS_FOR_LOCATION_LATITUDE] = position.coords.latitude;
+                params[BKK_FUTAR.PARAM_NAME_API_STOPS_FOR_LOCATION_LONGITUDE] = position.coords.longitude;
+                params[BKK_FUTAR.PARAM_NAME_API_STOPS_FOR_LOCATION_RADIUS] = position.coords.accuracy;
+                params[BKK_FUTAR.PARAM_NAME_API_BASE_REFERENCES] = BKK_FUTAR.PARAM_VALUE_API_STOPS_FOR_LOCATION_REFERENCES;
 
-                console.info('getStopsForLocation URL: ' + url);
+                // Request
+                return requestBkkFutarJsonp(BKK_FUTAR.URL_API_STOPS_FOR_LOCATION, params, 'getStopsForLocation');
 
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {deferred.resolve(data);},
-                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
-                });
-
-                return deferred.promise;
             }
 
             function getArrivalsAndDeparturesForStop(stopIdArray, baseTime) {
-                var deferred = $q.defer();
-
-                // Collect stop ids
-
-                var stopIdsString = '';
-
-                if (stopIdArray.length > 0) {
-                    stopIdsString = stopIdsString + 'stopId=' + stopIdArray[0];
-
-                    for (var i = 1; i < stopIdArray.length; i++) {
-                        stopIdsString = stopIdsString + '&stopId=' + stopIdArray[i];
-                    }
-                }
 
                 //
                 var minutesAfter = parseInt(BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_AFTER);
@@ -94,86 +129,53 @@ angular.module('ngModuleBkkFutar')
                     minutesAfter = minutesAfter + lookAheadMinutes;
                 }
 
-                // URL build
+                // Params
+                var params = {};
+                params[BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_STOP_IDS] = stopIdArray;
+                params[BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_ONLY_DEPARTURES] = BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_ONLY_DEPARTURES;
+                params[BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_BEFORE] = BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_BEFORE;
+                params[BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_AFTER] = minutesAfter;
+                params[BKK_FUTAR.PARAM_NAME_API_BASE_REFERENCES] = BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_REFERENCES;
 
-                var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_ARRIVALS_AND_DEPARTURES_FOR_STOP;
-                url = url.replace(BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_STOP_IDS, stopIdsString);
-                url = url.replace(BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_ONLY_DEPARTURES, BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_ONLY_DEPARTURES);
-                url = url.replace(BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_BEFORE, BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_BEFORE);
-                url = url.replace(BKK_FUTAR.PARAM_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_MINUTES_AFTER, minutesAfter);
-                url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_ARRIVALS_AND_DEPARTURES_FOR_STOP_REFERENCES);
+                // Request
+                return requestBkkFutarJsonp(BKK_FUTAR.URL_API_ARRIVALS_AND_DEPARTURES_FOR_STOP, params, 'getArrivalsAndDeparturesForStop');
 
-                console.info('getArrivalsAndDeparturesForStop URL: ' + url);
-
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {
-                        deferred.resolve(data);
-                    },
-                    error: function(xhr, status, errorThrown) {
-                        deferred.reject(status + ' ' + errorThrown);
-                    }
-                });
-
-                return deferred.promise;
             }
 
             function getTripDetails(id) {
-                var deferred = $q.defer();
 
-                var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_TRIP_DETAILS;
-                url = url.replace(BKK_FUTAR.PARAM_API_TRIP_DETAILS_TRIP_ID, id);
-                url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_TRIP_DETAILS_REFERENCES);
+                // Params
+                var params = {};
+                params[BKK_FUTAR.PARAM_API_TRIP_DETAILS_TRIP_ID] = id;
+                params[BKK_FUTAR.PARAM_NAME_API_BASE_REFERENCES] = BKK_FUTAR.PARAM_VALUE_API_TRIP_DETAILS_REFERENCES;
 
-                console.info('getTripDetails URL: ' + url);
+                // Request
+                return requestBkkFutarJsonp(BKK_FUTAR.URL_API_TRIP_DETAILS, params, 'getTripDetails');
 
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {deferred.resolve(data);},
-                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
-                });
-
-                return deferred.promise;
             }
 
             function getScheduleForStop(id, baseTime) {
-                var deferred = $q.defer();
 
                 // Date
-
                 var dateValue = (angular.isDate(baseTime)) ? baseTime : new Date();
                 var dateString = $filter('date')(dateValue, 'yyyyMMdd');
 
-                // URL build
+                // Params
+                var params = {};
+                params[BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_STOP_ID] = id;
+                params[BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES] = BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES;
+                params[BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_DATE] = dateString;
+                params[BKK_FUTAR.PARAM_NAME_API_BASE_REFERENCES] = BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOP_REFERENCES;
 
-                var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_SCHEDULE_FOR_STOP;
-                url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_STOP_ID, id);
-                url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES);
-                url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_DATE, dateString);
-                url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOP_REFERENCES);
+                // Request
+                return requestBkkFutarJsonp(BKK_FUTAR.URL_API_SCHEDULE_FOR_STOP, params, 'getScheduleForStop');
 
-                console.info('getScheduleForStop URL: ' + url);
-
-                $.ajax({
-                    url: url,
-                    jsonp: 'callback',
-                    dataType: 'jsonp',
-                    success: function(data) {deferred.resolve(data);},
-                    error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
-                });
-
-                return deferred.promise;
             }
 
             function getScheduleForStops(stopIdArray, baseTime) {
                 var promises = [];
 
                 // Date
-
                 var dateValue = (angular.isDate(baseTime)) ? baseTime : new Date();
                 var dateString = $filter('date')(dateValue, 'yyyyMMdd');
 
@@ -181,27 +183,17 @@ angular.module('ngModuleBkkFutar')
                 angular.forEach(
                     stopIdArray,
                     function(stopId) {
-                        var deferred = $q.defer();
 
-                        // URL build
+                        // Params
+                        var params = {};
+                        params[BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_STOP_ID] = stopId;
+                        params[BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES] = BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOPS_ONLY_DEPARTURES;
+                        params[BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_DATE] = dateString;
+                        params[BKK_FUTAR.PARAM_NAME_API_BASE_REFERENCES] = BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOPS_REFERENCES;
 
-                        var url = BKK_FUTAR.URL_API_BASE + BKK_FUTAR.URL_API_SCHEDULE_FOR_STOP;
-                        url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_STOP_ID, stopId);
-                        url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_ONLY_DEPARTURES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOPS_ONLY_DEPARTURES);
-                        url = url.replace(BKK_FUTAR.PARAM_API_SCHEDULE_FOR_STOP_DATE, dateString);
-                        url = url.replace(BKK_FUTAR.PARAM_API_BASE_REFERENCES, BKK_FUTAR.PARAM_VALUE_API_SCHEDULE_FOR_STOPS_REFERENCES);
+                        // Request
+                        promises.push(requestBkkFutarJsonp(BKK_FUTAR.URL_API_SCHEDULE_FOR_STOP, params, 'getScheduleForStop'));
 
-                        console.info('getScheduleForStop URL: ' + url);
-
-                        $.ajax({
-                            url: url,
-                            jsonp: 'callback',
-                            dataType: 'jsonp',
-                            success: function(data) {deferred.resolve(data);},
-                            error: function(xhr, status, errorThrown) {deferred.reject(status + ' ' + errorThrown);}
-                        });
-
-                        promises.push(deferred.promise);
                     }
                 );
 
@@ -276,4 +268,92 @@ angular.module('ngModuleBkkFutar')
 
         }
 
-    ]);
+    ])
+    .factory('ngServiceBkkFutarInterceptor',
+        ['$q', 'BKK_FUTAR', function($q, BKK_FUTAR) {
+            return {
+
+                'response': function(response) {
+
+                    /*
+                     * BKK Futar API responses
+                     */
+
+                    if (response.config.url.indexOf(BKK_FUTAR.URL_API_BASE) >= 0) {
+
+                        // Validate data
+                        if (angular.isObject(response.data)) {
+
+                            // Validate status
+                            if (response.data.status == 'OK') {
+
+                                // Validate data
+                                if ((angular.isObject(response.data.data))) {
+
+                                    // Validate limit
+                                    if (response.data.data.limitExceeded === true) {
+                                        return $q.reject('Limit exceeded');
+                                    }
+
+                                    // Validate outOfRange
+                                    if (response.data.data.outOfRange === true) {
+                                        return $q.reject('Out of range');
+                                    }
+
+                                }
+
+                                else {
+                                    return $q.reject('No data to process');
+                                }
+
+                            }
+
+                            else {
+                                return $q.reject(response.data.status + ' ' + response.data.text);
+                            }
+
+                        }
+
+                        else {
+                            return $q.reject('No data received');
+                        }
+
+                        return response;
+
+                    }
+
+
+                    /*
+                     * Other responses
+                     */
+
+                    else {
+                        return response;
+                    }
+
+                },
+
+                'responseError': function(rejection) {
+
+                    /*
+                     * BKK Futar API responses
+                     */
+
+                    if (rejection.config.url.indexOf(BKK_FUTAR.URL_API_BASE) >= 0) {
+                        return $q.reject('Request failed (' + rejection.status + ' - ' + rejection.statusText + ')');
+                    }
+
+
+                    /*
+                     * Other responses
+                     */
+
+                    else {
+                        return $q.reject(rejection);
+                    }
+
+                }
+
+            };
+        }]
+    );

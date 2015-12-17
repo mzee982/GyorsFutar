@@ -187,7 +187,36 @@ angular.module('ngAppGyorsFutar')
                     singleInstance: true
                 }
             });
+    }])
+    .config(['$httpProvider', function($httpProvider) {
+        $httpProvider.interceptors.push('ngServiceBkkFutarInterceptor');
+    }])
+    .config(['$provide', '$injector', 'EVENT', function($provide) {
+
+        $provide.decorator('$exceptionHandler', function($delegate, $injector, EVENT) {
+
+            return function (exception, cause) {
+
+                /*
+                 * Global exception handling
+                 */
+
+                var $rootScope = $injector.get('$rootScope');
+                $rootScope.$broadcast(EVENT.ERROR_MESSAGE, exception.toString());
+
+
+                /*
+                 * Delegate to default implementation
+                 */
+
+                $delegate(exception, cause);
+
+            };
+
+        });
+
     }]);
+
 /*
     .config(['uiGmapGoogleMapApiProvider', function(uiGmapGoogleMapApiProvider) {
         uiGmapGoogleMapApiProvider.configure({

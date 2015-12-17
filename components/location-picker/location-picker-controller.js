@@ -79,7 +79,7 @@ angular.module('ngModuleLocationPicker')
                             break;
 
                         default:
-                            $scope.$emit(EVENT.ERROR_MESSAGE, 'locationPicker: Invalid target state');
+                            $scope.$emit(EVENT.ERROR_MESSAGE, 'LocationPicker: Invalid target state');
 
                     }
 
@@ -87,7 +87,7 @@ angular.module('ngModuleLocationPicker')
 
                 // Error
                 function(error) {
-                    var msg = 'locationPicker: ' + error;
+                    var msg = 'LocationPicker ' + error;
                     $scope.$emit(EVENT.ERROR_MESSAGE, msg);
                 }
 

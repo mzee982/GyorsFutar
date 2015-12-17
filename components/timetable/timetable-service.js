@@ -907,7 +907,11 @@ angular.module('ngModuleTimetable')
 
                     // Error
                     function (status) {
-                        deferred.reject('getStopsForLocation: ' + status);
+                        status = 'getStopsForLocation: ' + status;
+
+                        deferred.reject(status);
+
+                        return $q.reject(status);
                     }
 
                 );
@@ -916,7 +920,7 @@ angular.module('ngModuleTimetable')
                  * Extend stops for parent stations
                  */
 
-                var promiseArrivalsAndDeparturesForStop = promiseCollectStopsForParentStations.then(
+                var promiseScheduleForStops = promiseCollectStopsForParentStations.then(
 
                     // Success
                     function(stopsAndRoutes) {
@@ -927,7 +931,11 @@ angular.module('ngModuleTimetable')
 
                     // Error
                     function(status) {
-                        deferred.reject('collectStopsForParentStations: ' + status);
+                        status = 'collectStopsForParentStations: ' + status;
+
+                        deferred.reject(status);
+
+                        return $q.reject(status);
                     }
 
                 );
@@ -936,7 +944,7 @@ angular.module('ngModuleTimetable')
                  * Arrivals and departures for stop
                  */
 
-                promiseArrivalsAndDeparturesForStop.then(
+                promiseScheduleForStops.then(
 
                     // Success
                     function (dataArray) {
@@ -954,7 +962,9 @@ angular.module('ngModuleTimetable')
 
                     // Error
                     function (status) {
-                        deferred.reject('getArrivalsAndDeparturesForStop: ' + status);
+                        status = 'getScheduleForStops: ' + status;
+
+                        deferred.reject(status);
                     }
 
                 );
