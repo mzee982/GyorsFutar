@@ -5,11 +5,12 @@ angular.module('ngAppGyorsFutar')
             '$state',
             '$window',
             '$mdToast',
+            '$log',
             'ngServiceContext',
             'STATE',
             'LOCATION_MODE',
             'EVENT',
-            function($rootScope, $scope, $state, $window, $mdToast, ngServiceContext, STATE, LOCATION_MODE, EVENT) {
+            function($rootScope, $scope, $state, $window, $mdToast, $log, ngServiceContext, STATE, LOCATION_MODE, EVENT) {
 
                 //
                 $scope.errorMessage = undefined;
@@ -121,6 +122,7 @@ angular.module('ngAppGyorsFutar')
                          * ANY -> ANY state
                          */
 
+                        $log.debug('stateChangeSuccess: ' + fromState.name + ' -> ' + toState.name);
 
 
                         /*
@@ -187,7 +189,7 @@ angular.module('ngAppGyorsFutar')
 
                 $rootScope.$on('$stateChangeError',
                     function(event, toState, toParams, fromState, fromParams, error){
-                        console.debug('State change error');
+                        $log.error('State change error');
                     });
 
             }

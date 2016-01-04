@@ -2,9 +2,10 @@ angular.module('ngModuleLocation')
     .factory('ngServiceLocation',
     [   '$q',
         '$localStorage',
+        '$log',
         'ngServiceUtils',
         'LOCATION',
-        function($q, $localStorage, ngServiceUtils, LOCATION) {
+        function($q, $localStorage, $log, ngServiceUtils, LOCATION) {
 
             /*
              * Interface
@@ -32,7 +33,7 @@ angular.module('ngModuleLocation')
                     // Success
                     function(location) {
 
-                        console.info(
+                        $log.debug(
                             'Location by GeoLocator ' +
                             'lat: ' + location.coords.latitude +
                             ' lon: ' + location.coords.longitude +

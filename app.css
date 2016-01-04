@@ -111,6 +111,24 @@ md-content.no-overflow {
     overflow-y: hidden;
 }
 
+md-progress-circular.md-color-inherit .md-inner .md-gap {
+    border-top-color: inherit;
+    border-bottom-color: inherit;
+}
+
+md-progress-circular.md-color-inherit .md-inner .md-left .md-half-circle {
+    border-left-color: inherit;
+}
+
+md-progress-circular.md-color-inherit .md-inner .md-right .md-half-circle {
+    border-right-color: inherit;
+}
+
+md-progress-circular.md-color-inherit .md-inner .md-left .md-half-circle, md-progress-circular.md-color-inherit .md-inner .md-right .md-half-circle {
+    border-top-color: inherit;
+}
+
+
 /*
 Material icons
 */
@@ -396,3 +414,31 @@ ui-view {
 }
 
 .collapsible.expanded {}
+
+
+/* Refresh progress */
+
+.refresh-progress-container {
+    width: 32px;
+    height: 32px;
+}
+
+md-progress-circular.refresh-progress {
+    top: -34px;
+    left: -34px;
+}
+
+
+/* Info section */
+
+.info-section {
+    height: 32px;
+}
+
+@media (max-width: 599px) {
+
+    .info-section {
+        height: 56px;
+    }
+
+}

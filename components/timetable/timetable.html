@@ -29,7 +29,7 @@
             <md-divider></md-divider>
 
             <gyf-collapsible>
-                <div class="md-body-1" layout="row" layout-align="start center" layout-wrap>
+                <div class="md-body-1 info-section" layout="row" layout-align="start center" layout-wrap>
 
                     <!-- Address -->
                     <div layout="row" layout-align="start center" flex-sm="100" flex-gt-sm="50">
@@ -75,11 +75,16 @@
                     <div flex></div>
 
                     <!-- Refresh -->
-                    <div>
+                    <div layout="row" layout-align="start center" data-ng-switch="isBuilding">
                         <span data-gyf-countdown data-source-time='timetablePresentation.buildTime'></span>
-                        <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTimetableRefreshClick()">
-                            <md-icon class="material-icons">refresh</md-icon>
-                        </md-button>
+                        <div data-ng-switch-when="false">
+                            <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onTimetableRefreshClick()">
+                                <md-icon class="material-icons">refresh</md-icon>
+                            </md-button>
+                        </div>
+                        <div class="refresh-progress-container" data-ng-switch-when="true">
+                            <md-progress-circular class="refresh-progress md-color-inherit" md-mode="indeterminate" md-diameter="18"></md-progress-circular>
+                        </div>
                     </div>
 
                 </div>

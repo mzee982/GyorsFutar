@@ -215,6 +215,10 @@ angular.module('ngAppGyorsFutar')
 
         });
 
+    }])
+    .config(['$logProvider', function($logProvider) {
+        //TODO Debug logging enabled
+        $logProvider.debugEnabled(true);
     }]);
 
 /*

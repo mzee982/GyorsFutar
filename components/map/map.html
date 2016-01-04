@@ -34,10 +34,17 @@
 
             <!-- Refresh bar -->
             <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center" hide-sm>
-                <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
-                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
-                    <md-icon class="material-icons">refresh</md-icon>
-                </md-button>
+                <div layout="row" layout-align="start center" data-ng-switch="isBuilding">
+                    <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+                    <div data-ng-switch-when="false">
+                        <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
+                            <md-icon class="material-icons">refresh</md-icon>
+                        </md-button>
+                    </div>
+                    <div class="refresh-progress-container" data-ng-switch-when="true">
+                        <md-progress-circular class="refresh-progress md-color-inherit" md-mode="indeterminate" md-diameter="18"></md-progress-circular>
+                    </div>
+                </div>
             </md-whiteframe>
 
         </div>
@@ -55,10 +62,17 @@
 
             <!-- Refresh bar -->
             <md-whiteframe class="md-whiteframe-1dp md-subhead" layout="row" layout-align="start center">
-                <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
-                <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
-                    <md-icon class="material-icons">refresh</md-icon>
-                </md-button>
+                <div layout="row" layout-align="start center" data-ng-switch="isBuilding">
+                    <span data-gyf-countdown data-source-time='mapPresentation.buildTime'></span>
+                    <div data-ng-switch-when="false">
+                        <md-button class="md-icon-button compact" aria-label="Refresh" data-ng-click="onMapRefreshClick()">
+                            <md-icon class="material-icons">refresh</md-icon>
+                        </md-button>
+                    </div>
+                    <div class="refresh-progress-container" data-ng-switch-when="true">
+                        <md-progress-circular class="refresh-progress md-color-inherit" md-mode="indeterminate" md-diameter="18"></md-progress-circular>
+                    </div>
+                </div>
             </md-whiteframe>
 
         </div>

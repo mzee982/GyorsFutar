@@ -3,8 +3,9 @@ angular.module('ngModuleBkkFutar')
     [   '$q',
         '$http',
         '$filter',
+        '$log',
         'BKK_FUTAR',
-        function($q, $http, $filter, BKK_FUTAR) {
+        function($q, $http, $filter, $log, BKK_FUTAR) {
 
             /*
              * Interface
@@ -56,7 +57,7 @@ angular.module('ngModuleBkkFutar')
                 // Timeout
                 config.timeout = BKK_FUTAR.HTTP_JSONP_REQUEST_TIMEOUT;
 
-                console.info(logLabel + ' URL: ' + concatRequestUrl(config, url));
+                $log.debug(logLabel + ' URL: ' + concatRequestUrl(config, url));
 
                 // JSONP request
                 $http.jsonp(url, config).then(
